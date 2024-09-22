@@ -152,4 +152,21 @@ struct ISMSG {
 static_assert(sizeof(ISMSG) == 0xC);
 
 class CInputSystem : public TSingleton<CInputSystem, 0x00C68C20> {
+public:
+    int IsKeyPressed(unsigned int nVK) {
+        return reinterpret_cast<int (__thiscall*)(CInputSystem*, unsigned int)>(0x0056F7A0)(this, nVK);
+    }
+};
+
+
+class CUserLocal : public TSingleton<CUserLocal, 0x00C68754> {
+public:
+    MEMBER_AT(int, 0x4808, m_bJumpKeyUp)
+
+    int GetJobCode() {
+        return reinterpret_cast<int (__thiscall*)(CUserLocal*)>(0x00908EB0)(this);
+    }
+    int DoActiveSkill(int nSkillID, unsigned int nScanCode, int* pnConsumeCheck) {
+        return reinterpret_cast<int (__thiscall*)(CUserLocal*, int, unsigned int, int*)>(0x009445B0)(this, nSkillID, nScanCode, pnConsumeCheck);
+    }
 };

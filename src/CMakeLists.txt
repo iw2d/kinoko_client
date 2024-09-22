@@ -5,6 +5,7 @@ add_library(injector SHARED
     hook.cpp
     system.cpp
     bypass.cpp
+    helper.cpp
 )
 
 target_precompile_headers(injector PRIVATE pch.h)

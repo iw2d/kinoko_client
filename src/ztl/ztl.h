@@ -19,8 +19,25 @@ static_assert(sizeof(ZRef<int>) == 0x8);
 
 template<typename T>
 class ZXString {
+private:
+    struct _ZXStringData {
+        volatile long nRef = 0;
+        int nCap = 0;
+        int nByteLen = 0;
+    };
+    static_assert(sizeof(_ZXStringData) == 0xC);
+
 public:
     T* _m_pStr = nullptr;
+
+    size_t GetLength() {
+        if (this->_m_pStr) {
+            auto pData = reinterpret_cast<ZXString<T>::_ZXStringData*>(this->_m_pStr) - 1;
+            return pData->nByteLen / sizeof(T);
+        } else {
+            return 0;
+        }
+    }
 };
 static_assert(sizeof(ZXString<char>) == 0x4);
 

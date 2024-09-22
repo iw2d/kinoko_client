@@ -15,9 +15,12 @@ void AttachSystemHooks();
 
 // called in system.cpp -> CreateMutexA_hook
 void AttachClientBypass();
+void AttachClientHelper();
 void AttachExceptionHandler();
+
 static void AttachClientHooks() {
     AttachClientBypass();
+    AttachClientHelper();
     AttachExceptionHandler();
 }
 
