@@ -115,6 +115,20 @@ public:
 };
 
 
+class CWvsContext : public TSingleton<CWvsContext, 0x00C64068> {
+public:
+    MEMBER_AT(int, 0x2C, m_tUpdateTime)
+    MEMBER_AT(int, 0x41B8, m_nScreenWidth)
+    MEMBER_AT(int, 0x41BC, m_nScreenHeight)
+    MEMBER_AT(int, 0x41C0, m_nAdjustCenterY)
+    MEMBER_AT(bool, 0x41C4, m_bIsLargeScreen)
+};
+
+
+class CWndMan : public TSingleton<CWndMan, 0x00C68AC4> {
+};
+
+
 struct CONFIG_SYSOPT {
     int nSysOpt_Video;
     int nSysOpt_BGMVol;
@@ -135,9 +149,7 @@ static_assert(sizeof(CONFIG_SYSOPT) == 0x38);
 
 class CConfig : public TSingleton<CConfig, 0x00C687AC> {
 public:
-    inline void ApplySysOpt(CONFIG_SYSOPT* pSysOpt, int bApplyVideo) {
-        reinterpret_cast<void (__thiscall*)(CConfig*, CONFIG_SYSOPT*, int)>(0x004B2300)(this, pSysOpt, bApplyVideo);
-    }
+    MEMBER_AT(CONFIG_SYSOPT, 0x6C, m_sysOpt)
 };
 
 

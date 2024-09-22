@@ -1,5 +1,6 @@
 #pragma once
 #include "zlock.h"
+#include "zalloc.h"
 #include "zcom.h"
 #include "tsingleton.h"
 

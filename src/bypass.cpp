@@ -176,7 +176,8 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     }
     // CWvsApp::CreateWndManager(this);
     reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C2060)(pThis);
-    CConfig::GetInstance()->ApplySysOpt(nullptr, 0);
+    // CConfig::ApplySysOpt(TSingleton<CConfig>::GetInstance(), nullptr, 0);
+    reinterpret_cast<void (__thiscall*)(CConfig*, CONFIG_SYSOPT*, int)>(0x004B2300)(CConfig::GetInstance(), nullptr, 0);
     // TSingleton<CActionMan>::CreateInstance()->Init();
     auto pActionMan = reinterpret_cast<void* (__cdecl*)()>(0x009C22A0)();
     reinterpret_cast<void (__thiscall*)(void*)>(0x0041BEB0)(pActionMan);
@@ -189,7 +190,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     reinterpret_cast<void* (__cdecl*)()>(0x009C2770)();
 
     // (CLogo*) operator new(0x48); -> (CLogin*) operator new(0x2C8);
-    void* pStage = reinterpret_cast<void* (__cdecl*)(unsigned int)>(0x004023F0)(0x2C8);
+    void* pStage = ZAllocEx<ZAllocAnonSelector>::s_Alloc(0x2C8);
     if (pStage) {
         // CLogo::CLogo(pStage); -> CLogin::Clogin(pStage);
         reinterpret_cast<void (__thiscall*)(void*)>(0x005DB440)(pStage);

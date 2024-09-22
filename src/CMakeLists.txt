@@ -7,6 +7,7 @@ add_library(injector SHARED
     resman.cpp
     bypass.cpp
     helper.cpp
+    resolution.cpp
 )
 
 target_precompile_headers(injector PRIVATE pch.h)

@@ -20,10 +20,12 @@ void __fastcall CInputSystem__DetectJoystick_hook(void* pThis, void* _EDX) {
 }
 
 
-typedef void (__thiscall* CVecCtrl__SetImpactNext_t)(void*, int, long double, long double);
+class CVecCtrl;
+
+typedef void (__thiscall* CVecCtrl__SetImpactNext_t)(CVecCtrl*, int, long double, long double);
 static auto CVecCtrl__SetImpactNext = reinterpret_cast<CVecCtrl__SetImpactNext_t>(0x00905CD0);
 
-void __fastcall CVecCtrl__SetImpactNext_hook(void* pThis, void* _EDX, int nAttr, long double vx, long double vy) {
+void __fastcall CVecCtrl__SetImpactNext_hook(CVecCtrl* pThis, void* _EDX, int nAttr, long double vx, long double vy) {
     if (nAttr == 0x14 && CInputSystem::GetInstance()->IsKeyPressed(38)) {
         // MPA_FLASHJUMP + ArrowUp
         vx = 0.0;
@@ -58,10 +60,12 @@ void __fastcall CUserLocal__Jump_hook(CUserLocal* pThis, void* _EDX, int bEnforc
 }
 
 
-typedef ZXString<char>* (__thiscall* CItemInfo__GetMapString_t)(void*, ZXString<char>*, unsigned int, const char*);
+class CItemInfo;
+
+typedef ZXString<char>* (__thiscall* CItemInfo__GetMapString_t)(CItemInfo*, ZXString<char>*, unsigned int, const char*);
 static auto CItemInfo__GetMapString = reinterpret_cast<CItemInfo__GetMapString_t>(0x005A9CA0);
 
-ZXString<char>* __fastcall CItemInfo__GetMapString_hook(void* pThis, void* _EDX,  ZXString<char>* result, unsigned int dwFieldID, const char* sKey) {
+ZXString<char>* __fastcall CItemInfo__GetMapString_hook(CItemInfo* pThis, void* _EDX,  ZXString<char>* result, unsigned int dwFieldID, const char* sKey) {
     CItemInfo__GetMapString(pThis, result, dwFieldID, sKey);
     if (!strcmp(sKey, "mapName")) {
         char sFieldID[20];
@@ -91,6 +95,8 @@ ZXString<char>* __fastcall CItemInfo__GetItemDesc_hook(void* pThis, void* _EDX, 
 }
 
 
+class CSkillInfo;
+
 struct SKILLENTRY {
     unsigned char padding[0x264];
 
@@ -99,10 +105,10 @@ struct SKILLENTRY {
     MEMBER_AT(ZXString<char>, 0x8, sDescription)
 };
 
-typedef ZRef<SKILLENTRY>* (__thiscall* CSkillInfo__LoadSkill_t)(void*, ZRef<SKILLENTRY>*, int, void*, void*);
+typedef ZRef<SKILLENTRY>* (__thiscall* CSkillInfo__LoadSkill_t)(CSkillInfo*, ZRef<SKILLENTRY>*, int, void*, void*);
 static auto CSkillInfo__LoadSkill = reinterpret_cast<CSkillInfo__LoadSkill_t>(0x0070C190);
 
-ZRef<SKILLENTRY>* __fastcall CSkillInfo__LoadSkill_hook(void* pThis, void* _EDX, ZRef<SKILLENTRY>* result, int nSkillID, void* pSkill, void* pStrSR) {
+ZRef<SKILLENTRY>* __fastcall CSkillInfo__LoadSkill_hook(CSkillInfo* pThis, void* _EDX, ZRef<SKILLENTRY>* result, int nSkillID, void* pSkill, void* pStrSR) {
     CSkillInfo__LoadSkill(pThis, result, nSkillID, pSkill, pStrSR);
     if (result->p->sDescription().GetLength() > 0) {
         char* sNewLine = "\r\n";
