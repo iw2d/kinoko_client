@@ -4,6 +4,7 @@ add_library(injector SHARED
     debug.cpp
     hook.cpp
     system.cpp
+    resman.cpp
     bypass.cpp
     helper.cpp
 )

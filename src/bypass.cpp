@@ -109,7 +109,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     // TSingleton<CBattleRecordMan>::CreateInstance();
     reinterpret_cast<void (__cdecl*)()>(0x009C2220)();
     // CWvsApp::InitializeResMan(this);
-    reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C9540)(pThis);
+    InitializeResMan(get_rm());
 
     DEBUG_MESSAGE("CWvsApp::SetUp - Graphic & Sound...");
     // CWvsApp::InitializeGr2D(this);
@@ -139,7 +139,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     // CQuestMan::LoadExclusive(pQuestMan);
     reinterpret_cast<int (__thiscall*)(void*)>(0x006B9670)(pQuestMan);
 
-    DebugMessage("CwvsApp::SetUp - Complete!");
+    DEBUG_MESSAGE("CwvsApp::SetUp - Complete!");
     // TSingleton<CMonsterBookMan>::CreateInstance()->LoadBook();
     auto pMonsterBookMan = reinterpret_cast<void* (__cdecl*)()>(0x009CA820)();
     if (!reinterpret_cast<int (__thiscall*)(void*)>(0x00664C10)(pMonsterBookMan)) {

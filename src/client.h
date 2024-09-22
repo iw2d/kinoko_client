@@ -16,9 +16,38 @@
     }
 
 
-static IWzGr2DPtr& get_gr() {
+static inline IWzGr2DPtr& get_gr() {
     return *reinterpret_cast<IWzGr2DPtr*>(0x00C6F430);
 }
+
+static inline IWzResManPtr& get_rm() {
+    return *reinterpret_cast<IWzResManPtr*>(0x00C6F434);
+}
+
+static inline IWzNameSpacePtr& get_root() {
+    return *reinterpret_cast<IWzNameSpacePtr*>(0x00C6F43C);
+}
+
+static inline IWzNameSpacePtr& get_sub(int nIdx) {
+    return *reinterpret_cast<IWzNameSpacePtr*>(0x00C6F440 + nIdx * 4);
+}
+
+static FARPROC* _g_apfnPCOMAPIs = reinterpret_cast<FARPROC*>(0x00C6DB54);
+
+template<typename T>
+static void __cdecl PcCreateObject(const wchar_t* sUOL, T* pObj, IUnknown* pUnkOuter) {
+    *pObj = nullptr;
+    if (!_g_apfnPCOMAPIs[0]) {
+        throw _com_error(CO_E_NOTINITIALIZED);
+    }
+    CHECK_HRESULT(reinterpret_cast<HRESULT (__cdecl*)(const wchar_t*, const GUID*, T*, void*)>(_g_apfnPCOMAPIs[0])(sUOL, &__uuidof(T), pObj, pUnkOuter));
+}
+
+static void __cdecl PcSetRootNameSpace(IUnknown* pNameSpace) {
+    CHECK_HRESULT(reinterpret_cast<HRESULT (__cdecl*)(IUnknown**, int)>(_g_apfnPCOMAPIs[4])(&pNameSpace, 1));
+}
+
+void InitializeResMan(const IWzResManPtr& rm); // resman.cpp
 
 
 class CWvsApp : public TSingleton<CWvsApp, 0x00C64314> {
@@ -54,6 +83,35 @@ public:
     MEMBER_AT(unsigned int, 0x80, m_dwBackupBufferSize)
     MEMBER_AT(unsigned int, 0x84, m_dwClearStackLog)
     MEMBER_AT(int, 0x88, m_bWindowActive)
+
+    static void Dir_BackSlashToSlash(char* sDir) {
+        size_t uLen = strlen(sDir);
+        for (size_t i = 0; i < uLen; ++i) {
+            if (sDir[i] == '\\') {
+                sDir[i] = '/';
+            }
+        }
+    }
+    static void Dir_upDir(char* sDir) {
+        size_t uLen = strlen(sDir);
+        if (uLen > 0 && sDir[uLen - 1] == '/') {
+            sDir[uLen - 1] = 0;
+        }
+        for (size_t i = strlen(sDir) - 1; i > 0; --i) {
+            if (sDir[i] == '/') {
+                sDir[i] = 0;
+                return;
+            }
+        }
+    }
+    static void Dir_SlashToBackSlash(char* sDir) {
+        size_t uLen = strlen(sDir);
+        for (size_t i = 0; i < uLen; ++i) {
+            if (sDir[i] == '/') {
+                sDir[i] = '\\';
+            }
+        }
+    }
 };
 
 
@@ -77,7 +135,7 @@ static_assert(sizeof(CONFIG_SYSOPT) == 0x38);
 
 class CConfig : public TSingleton<CConfig, 0x00C687AC> {
 public:
-    void ApplySysOpt(CONFIG_SYSOPT* pSysOpt, int bApplyVideo) {
+    inline void ApplySysOpt(CONFIG_SYSOPT* pSysOpt, int bApplyVideo) {
         reinterpret_cast<void (__thiscall*)(CConfig*, CONFIG_SYSOPT*, int)>(0x004B2300)(this, pSysOpt, bApplyVideo);
     }
 };
@@ -90,22 +148,22 @@ public:
     unsigned int m_uOffset;
     int m_bIsEncryptedByShanda;
 
-    COutPacket(int nType) {
+    inline COutPacket(int nType) {
         reinterpret_cast<void (__thiscall*)(COutPacket*, int)>(0x0068D090)(this, nType);
     }
-    void Encode1(unsigned char n) {
+    inline void Encode1(unsigned char n) {
         reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned char)>(0x00415360)(this, n);
     }
-    void Encode2(unsigned short n) {
+    inline void Encode2(unsigned short n) {
         reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned short)>(0x0042CA10)(this, n);
     }
-    void Encode4(unsigned int n) {
+    inline void Encode4(unsigned int n) {
         reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned int)>(0x004153B0)(this, n);
     }
-    void EncodeBuffer(unsigned char* p, unsigned int uSize) {
+    inline void EncodeBuffer(unsigned char* p, unsigned int uSize) {
         reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned char*, unsigned int)>(0x00482200)(this, p, uSize);
     }
-    void EncodeStr(char* s) {
+    inline void EncodeStr(char* s) {
         size_t uSize = strlen(s);
         this->Encode2(static_cast<unsigned short>(uSize));
         this->EncodeBuffer(reinterpret_cast<unsigned char*>(s), uSize);
@@ -153,7 +211,7 @@ static_assert(sizeof(ISMSG) == 0xC);
 
 class CInputSystem : public TSingleton<CInputSystem, 0x00C68C20> {
 public:
-    int IsKeyPressed(unsigned int nVK) {
+    inline int IsKeyPressed(unsigned int nVK) {
         return reinterpret_cast<int (__thiscall*)(CInputSystem*, unsigned int)>(0x0056F7A0)(this, nVK);
     }
 };
@@ -163,10 +221,10 @@ class CUserLocal : public TSingleton<CUserLocal, 0x00C68754> {
 public:
     MEMBER_AT(int, 0x4808, m_bJumpKeyUp)
 
-    int GetJobCode() {
+    inline int GetJobCode() {
         return reinterpret_cast<int (__thiscall*)(CUserLocal*)>(0x00908EB0)(this);
     }
-    int DoActiveSkill(int nSkillID, unsigned int nScanCode, int* pnConsumeCheck) {
+    inline int DoActiveSkill(int nSkillID, unsigned int nScanCode, int* pnConsumeCheck) {
         return reinterpret_cast<int (__thiscall*)(CUserLocal*, int, unsigned int, int*)>(0x009445B0)(this, nSkillID, nScanCode, pnConsumeCheck);
     }
 };
