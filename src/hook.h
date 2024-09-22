@@ -17,12 +17,14 @@ void AttachSystemHooks();
 void AttachClientBypass();
 void AttachClientHelper();
 void AttachResolutionMod();
+void AttachTemporaryStatMod();
 void AttachExceptionHandler();
 
 static void AttachClientHooks() {
     AttachClientBypass();
     AttachClientHelper();
     AttachResolutionMod();
+    AttachTemporaryStatMod();
     AttachExceptionHandler();
 }
 

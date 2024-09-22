@@ -10,11 +10,13 @@ public:
     ZAllocHelper(int nDummy) {}
 };
 
+
 template<typename T>
 class ZRef {
 public:
     unsigned char gap0[4];
     T* p = nullptr;
+    // manage refcount manually
 };
 static_assert(sizeof(ZRef<int>) == 0x8);
 
@@ -31,7 +33,7 @@ private:
 
 public:
     T* _m_pStr = nullptr;
-
+    // manage refcount manually
     size_t GetLength() {
         if (this->_m_pStr) {
             auto pData = reinterpret_cast<ZXString<T>::_ZXStringData*>(this->_m_pStr) - 1;

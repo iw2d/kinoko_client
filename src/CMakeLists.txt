@@ -8,6 +8,7 @@ add_library(injector SHARED
     bypass.cpp
     helper.cpp
     resolution.cpp
+    temporarystat.cpp
 )
 
 target_precompile_headers(injector PRIVATE pch.h)

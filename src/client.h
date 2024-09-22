@@ -16,6 +16,9 @@
     }
 
 
+void InitializeResMan(const IWzResManPtr& rm); // resman.cpp
+
+
 static inline IWzGr2DPtr& get_gr() {
     return *reinterpret_cast<IWzGr2DPtr*>(0x00C6F430);
 }
@@ -46,8 +49,6 @@ static void __cdecl PcCreateObject(const wchar_t* sUOL, T* pObj, IUnknown* pUnkO
 static void __cdecl PcSetRootNameSpace(IUnknown* pNameSpace) {
     CHECK_HRESULT(reinterpret_cast<HRESULT (__cdecl*)(IUnknown**, int)>(_g_apfnPCOMAPIs[4])(&pNameSpace, 1));
 }
-
-void InitializeResMan(const IWzResManPtr& rm); // resman.cpp
 
 
 class CWvsApp : public TSingleton<CWvsApp, 0x00C64314> {
