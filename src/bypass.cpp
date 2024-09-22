@@ -6,6 +6,36 @@
 #pragma warning(disable : 4996)
 
 
+static volatile bool g_bGameDataLoaded = false;
+static HANDLE g_hDataThread;
+static DWORD g_dwDataThreadID;
+static IWzResManPtr g_pDataThreadResMan;
+
+typedef HRESULT (__stdcall* IWzResMan__raw_GetObject_t)(IWzResMan*, wchar_t*, tagVARIANT, tagVARIANT, tagVARIANT*);
+static IWzResMan__raw_GetObject_t IWzResMan__raw_GetObject;
+
+HRESULT __stdcall IWzResMan__raw_GetObject_hook(IWzResMan* pThis, wchar_t* sUOL, tagVARIANT vParam, tagVARIANT vAux, tagVARIANT* result) {
+    if (GetCurrentThreadId() == g_dwDataThreadID) {
+        return IWzResMan__raw_GetObject(g_pDataThreadResMan, sUOL, vParam, vAux, result);
+    } else {
+        return IWzResMan__raw_GetObject(pThis, sUOL, vParam, vAux, result);
+    }
+}
+
+DWORD WINAPI DataThread(LPVOID lpParam) {
+    DEBUG_MESSAGE("DataThread - CWvsApp::InitializeResMan");
+    InitializeResMan(g_pDataThreadResMan);
+    IWzResMan__raw_GetObject = reinterpret_cast<IWzResMan__raw_GetObject_t>(VMTHook(get_rm(), IWzResMan__raw_GetObject_hook, 7));
+    DEBUG_MESSAGE("DataThread - CWvsApp::InitializeGameData");
+    // CWvsApp::InitializeGameData(TSingleton<CWvsApp>::GetInstance());
+    reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C8440)(CWvsApp::GetInstance());
+    g_bGameDataLoaded = true;
+    CloseHandle(g_hDataThread);
+    DEBUG_MESSAGE("DataThread - Complete!");
+    return 0;
+}
+
+
 typedef void (__thiscall* CWvsApp__ctor_t)(CWvsApp*, const char*);
 static auto CWvsApp__ctor = reinterpret_cast<CWvsApp__ctor_t>(0x009CA8A0);
 
@@ -127,8 +157,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009CA170)(pThis);
 
     DEBUG_MESSAGE("CWvsApp::SetUp - Loading Data...");
-    // CWvsApp::InitializeGameData(this);
-    reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C8440)(pThis);
+    // CWvsApp::InitializeGameData(this); // ----------------------------------------------------- moved to data thread
     // TSingleton<CQuestMan>::CreateInstance()->LoadDemand();
     auto pQuestMan = reinterpret_cast<void* (__cdecl*)()>(0x009C21A0)();
     if (!reinterpret_cast<int (__thiscall*)(void*)>(0x006C3D60)(pQuestMan)) {
@@ -167,6 +196,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     }
     // set_stage(pStage, nullptr);
     reinterpret_cast<void (__cdecl*)(void*, void*)>(0x00719C30)(pStage, nullptr);
+    g_hDataThread = CreateThread(nullptr, 0, DataThread, nullptr, 0, &g_dwDataThreadID); // -------- create data thread
 }
 
 
@@ -392,12 +422,29 @@ int __fastcall CLogin__SendCheckPasswordPacket_hook(CLogin* pThis, void* _EDX, c
 }
 
 
+typedef void (__thiscall* CLogin__SendSelectCharPacket_t)(CLogin*);
+static auto CLogin__SendSelectCharPacket = reinterpret_cast<CLogin__SendSelectCharPacket_t>(0x005DA2A0);
+
+void __fastcall CLogin__SendSelectCharPacket_hook(CLogin* pThis, void* _EDX) {
+    if (!g_bGameDataLoaded) {
+        ZXString<char> sMsg;
+        // ZXString<char>::ZXString<char>(&sMsg, message, -1);
+        reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(&sMsg, "Not all data has been loaded.", -1);
+        // CUtilDlg::Notice(sMsg, nullptr, nullptr, true, false);
+        reinterpret_cast<void (__cdecl*)(ZXString<char>, const wchar_t*, void*, int, int)>(0x00977220)(sMsg, nullptr, nullptr, true, false);
+        return;
+    }
+    CLogin__SendSelectCharPacket(pThis);
+}
+
+
 void AttachClientBypass() {
     ATTACH_HOOK(CWvsApp__ctor, CWvsApp__ctor_hook);
     ATTACH_HOOK(CWvsApp__SetUp, CWvsApp__SetUp_hook);
     ATTACH_HOOK(CWvsApp__Run, CWvsApp__Run_hook);
     ATTACH_HOOK(CClientSocket__Connect, CClientSocket__Connect_hook);
     ATTACH_HOOK(CLogin__SendCheckPasswordPacket, CLogin__SendCheckPasswordPacket_hook);
+    ATTACH_HOOK(CLogin__SendSelectCharPacket, CLogin__SendSelectCharPacket_hook);
 
     // CWvsContext::OnEnterField
     PatchJmp(0x009DBEEE, 0x009DC278);
