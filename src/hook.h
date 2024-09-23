@@ -17,6 +17,7 @@ void AttachSystemHooks();
 void AttachClientBypass();
 void AttachClientInlink();
 void AttachClientHelper();
+void AttachStringPoolMod();
 void AttachResolutionMod();
 void AttachTemporaryStatMod();
 void AttachExceptionHandler();
@@ -25,6 +26,7 @@ static void AttachClientHooks() {
     AttachClientBypass();
     AttachClientInlink();
     AttachClientHelper();
+    AttachStringPoolMod();
     AttachResolutionMod();
     AttachTemporaryStatMod();
     AttachExceptionHandler();

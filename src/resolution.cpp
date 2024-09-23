@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "client.h"
 #include "hook.h"
-#include "debug.h"
 
 
 typedef void (__thiscall* CConfig__LoadGlobal_t)(CConfig*);
@@ -76,7 +75,6 @@ typedef void (__thiscall* CUISysOpt__OnCreate_t)(CUISysOpt*, void*);
 static auto CUISysOpt__OnCreate = reinterpret_cast<CUISysOpt__OnCreate_t>(0x00978010);
 
 void __fastcall CUISysOpt__OnCreate_hook(CUISysOpt* pThis, void* _EDX, void* pData) {
-    DEBUG_MESSAGE("CUISysOpt::OnCreate");
     CUISysOpt__OnCreate(pThis, pData);
 
     CCtrlComboBox::CREATEPARAM paramComboBox;
@@ -117,7 +115,6 @@ typedef void (__thiscall* CUISysOpt__GetSysOptFromCtrl_t)(CUISysOpt*);
 static auto CUISysOpt__GetSysOptFromCtrl = reinterpret_cast<CUISysOpt__GetSysOptFromCtrl_t>(0x009692A0);
 
 void __fastcall CUISysOpt__GetSysOptFromCtrl_hook(CUISysOpt* pThis, void* _EDX) {
-    DEBUG_MESSAGE("CUISysOpt::GetSysOptFromCtrl");
     CUISysOpt__GetSysOptFromCtrl(pThis);
     pThis->m_sysOptCur().bSysOpt_LargeScreen = g_cbResolution.p->m_nSelect();
 }

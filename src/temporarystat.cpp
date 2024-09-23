@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "client.h"
 #include "hook.h"
-#include "debug.h"
 
 #define COOLTIME_OFFSET_HEIGHT 40
 

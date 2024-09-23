@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "client.h"
 #include "hook.h"
-#include "debug.h"
 
 
 typedef HRESULT (__stdcall* CWzCanvas__raw_Serialize_t)(IWzCanvas*, IWzArchive*);
