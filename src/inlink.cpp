@@ -103,9 +103,4 @@ void AttachClientInlink() {
     LoadLibrary("CANVAS.DLL");
     ATTACH_HOOK(CWzCanvas__raw_Serialize, CWzCanvas__raw_Serialize_hook);
     ATTACH_HOOK(get_unknown, get_unknown_hook);
-
-    // CWzFileSystem::OpenArchive - disable memory mapping
-    // LoadLibraryA("NAMESPACE.DLL");
-    // Patch1(0x5081E59D + 1, 0x2);
-    // Patch1(0x5081EFA3 + 1, 0x2);
 }

@@ -456,4 +456,9 @@ void AttachClientBypass() {
     PatchRetZero(0x009BF370); // CeTracer::Run
     PatchRetZero(0x009BF390); // ShowStartUpWndModal
     PatchRetZero(0x00429000); // ShowAdBalloon
+
+    // CWzFileSystem::OpenArchive - disable memory mapping
+    // LoadLibraryA("NAMESPACE.DLL");
+    // Patch1(0x5081E59D + 1, 0x2);
+    // Patch1(0x5081EFA3 + 1, 0x2);
 }

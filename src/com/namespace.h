@@ -45,7 +45,7 @@ DECLARE_INTERFACE_IID_(IWzNameSpace, IUnknown, "2aeeeb36-a4e1-4e2b-8f6f-2e7bdec5
 _COM_SMARTPTR_TYPEDEF(IWzNameSpace, __uuidof(IWzNameSpace));
 
 
-DECLARE_INTERFACE_(IWzWritableNameSpace, IUnknown) {
+DECLARE_INTERFACE_(IWzWritableNameSpace, IWzNameSpace) {
     BEGIN_INTERFACE;
 
     /*** IUnknown methods ***/

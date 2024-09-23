@@ -63,11 +63,8 @@ public:
     };
     static_assert(sizeof(CREATEPARAM) == 0x54);
 
-    unsigned char padding[0x110];
-
     MEMBER_AT(int, 0x68, m_nSelect)
 };
-static_assert(sizeof(CCtrlComboBox) == 0x110);
 
 static ZRef<CCtrlComboBox> g_cbResolution;
 

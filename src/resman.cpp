@@ -1,12 +1,17 @@
 #include "pch.h"
 #include "client.h"
 #include "hook.h"
+#include "config.h"
 #include "debug.h"
 
 
 void InitializeResMan(const IWzResManPtr& rm) {
-    DEBUG_MESSAGE("InitializeResMan");
     try {
+#ifdef CONFIG_IMAGE_LOADING
+        DEBUG_MESSAGE("InitializeResMan - Image Loader");
+#else
+        DEBUG_MESSAGE("InitializeResMan");
+#endif
         PcCreateObject<IWzResManPtr>(L"ResMan", const_cast<IWzResManPtr*>(&rm), nullptr);
         CHECK_HRESULT(rm->raw_SetResManParam(RESMAN_PARAM::RC_AUTO_REPARSE | RESMAN_PARAM::RC_AUTO_SERIALIZE, -1, -1));
 
@@ -15,6 +20,18 @@ void InitializeResMan(const IWzResManPtr& rm) {
         PcCreateObject<IWzNameSpacePtr>(L"NameSpace", const_cast<IWzNameSpacePtr*>(&root), nullptr);
         PcSetRootNameSpace(root);
 
+#ifdef CONFIG_IMAGE_LOADING
+        DEBUG_MESSAGE("InitializeResMan - Creating FileSystem");
+        const IWzFileSystemPtr fs;
+        PcCreateObject<IWzFileSystemPtr>(L"NameSpace#FileSystem", const_cast<IWzFileSystemPtr*>(&fs), nullptr);
+        char sStartPath[260];
+        GetModuleFileNameA(NULL, sStartPath, 260);
+        CWvsApp::Dir_BackSlashToSlash(sStartPath);
+        CWvsApp::Dir_upDir(sStartPath);
+        strcat_s(sStartPath, "/Data");
+        CHECK_HRESULT(fs->raw_Init(Ztl_bstr_t(sStartPath).m_Data->m_wstr));
+        CHECK_HRESULT(root->raw_Mount(L"/", fs, 0));
+#else
         DEBUG_MESSAGE("InitializeResMan - Creating FileSystem");
         const IWzFileSystemPtr fs;
         PcCreateObject<IWzFileSystemPtr>(L"NameSpace#FileSystem", const_cast<IWzFileSystemPtr*>(&fs), nullptr);
@@ -71,6 +88,7 @@ void InitializeResMan(const IWzResManPtr& rm) {
             CHECK_HRESULT(subNameSpace->raw_Mount(L"/", subPackage, 0));
             CHECK_HRESULT(get_sub(i)->raw_Mount(L"/", subNameSpace, 1));
         }
+#endif
     } catch (const _com_error& e) {
         HRESULT hr = e.Error();
         ZException exception(hr);
@@ -79,7 +97,7 @@ void InitializeResMan(const IWzResManPtr& rm) {
         } else if (hr == 0x80070057) {
             hr = 0x22000003; // EC_NOT_ENOUGH_MEMORY
         } else {
-            hr = 0x22000003; // EC_NO_DATA_PACAKGE
+            hr = 0x22000004; // EC_NO_DATA_PACAKGE
         }
         // CTerminateException::CTerminateException(&exception, hr);
         reinterpret_cast<void (__thiscall*)(void*, HRESULT)>(0x00401D50)(&exception, hr);
