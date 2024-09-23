@@ -136,8 +136,10 @@ void AttachClientHelper() {
     ATTACH_HOOK(CVecCtrl__SetImpactNext, CVecCtrl__SetImpactNext_hook); // vertical double jump
     ATTACH_HOOK(CUserLocal__Jump, CUserLocal__Jump_hook); // double jump with jump key
 
+#ifdef _DEBUG
     // Append ID to map name, item description, skill description
     ATTACH_HOOK(CItemInfo__GetMapString, CItemInfo__GetMapString_hook);
     ATTACH_HOOK(CItemInfo__GetItemDesc, CItemInfo__GetItemDesc_hook);
     ATTACH_HOOK(CSkillInfo__LoadSkill, CSkillInfo__LoadSkill_hook);
+#endif
 }
