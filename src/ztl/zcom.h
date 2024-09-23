@@ -32,10 +32,13 @@ public:
     inline Ztl_variant_t() {
         VariantInit(this);
     }
+    inline Ztl_variant_t(int lSrc, VARTYPE vtSrc) {
+        reinterpret_cast<void (__thiscall*)(Ztl_variant_t*, int, VARTYPE)>(0x00401A40)(this, lSrc, vtSrc);
+    }
     inline ~Ztl_variant_t() {
         reinterpret_cast<void (__thiscall*)(Ztl_variant_t*)>(0x00401B90)(this);
     }
-    inline IUnknown* GetUnknown(bool fAddRef = false, bool fTryChangeType = false) {
+    inline IUnknown* GetUnknown(bool fAddRef, bool fTryChangeType) {
         return reinterpret_cast<IUnknown* (__thiscall*)(Ztl_variant_t*, bool, bool)>(0x00401A60)(this, fAddRef, fTryChangeType);
     }
 };

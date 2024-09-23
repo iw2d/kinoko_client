@@ -29,7 +29,7 @@ void InitializeResMan(const IWzResManPtr& rm) {
         PcCreateObject<IWzPackagePtr>(L"Namespace#Package", const_cast<IWzPackagePtr*>(&package), nullptr);
         Ztl_variant_t vBaseWz;
         CHECK_HRESULT(fs->get_item(L"Base.wz", &vBaseWz));
-        const IWzSeekableArchivePtr archive(vBaseWz.GetUnknown());
+        const IWzSeekableArchivePtr archive(vBaseWz.GetUnknown(false, false));
         CHECK_HRESULT(package->raw_Init(L"95", L"", archive));
         CHECK_HRESULT(root->raw_Mount(L"/", package, 0));
 
@@ -60,10 +60,10 @@ void InitializeResMan(const IWzResManPtr& rm) {
             Ztl_variant_t vPackageWz;
             CHECK_HRESULT(fs->get_item(sPackageName, &vPackageWz));
 
-            const IWzSeekableArchivePtr subArchive(vPackageWz.GetUnknown());
+            const IWzSeekableArchivePtr subArchive(vPackageWz.GetUnknown(false, false));
             Ztl_variant_t vSub;
             CHECK_HRESULT(root->get_item(const_cast<wchar_t*>(asNameOrder[i]), &vSub));
-            get_sub(i) = vSub.GetUnknown();
+            get_sub(i) = vSub.GetUnknown(false, false);
             CHECK_HRESULT(subPackage->raw_Init(L"95", const_cast<wchar_t*>(asNameOrder[i]), subArchive));
 
             const IWzNameSpacePtr subNameSpace;

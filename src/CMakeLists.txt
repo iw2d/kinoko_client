@@ -7,6 +7,7 @@ add_library(injector SHARED
     resman.cpp
     bypass.cpp
     helper.cpp
+    inlink.cpp
     resolution.cpp
     temporarystat.cpp
 )
