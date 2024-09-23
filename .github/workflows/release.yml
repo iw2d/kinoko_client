@@ -1,0 +1,23 @@
+name: release
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: configure
+      run: cmake -S . -B build -A Win32
+    - name: build
+      run: cmake --build build --config Release
+    - name: release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "build/Release/*"
+        allowUpdates: true

@@ -351,41 +351,8 @@ static_assert(sizeof(CSystemInfo) == 0x24);
 
 class CLogin {
 public:
-    struct RANK {
-        int nWorldRank;
-        int nWorldRankGap;
-        int nJobRank;
-        int nJobRankGap;
-    };
-    static_assert(sizeof(RANK) == 0x10);
-
-    struct CHANNELITEM {
-        ZXString<char> sName;
-        int nUserNo;
-        int nWorldID;
-        int nChannelID;
-        int bAdultChannel;
-    };
-    static_assert(sizeof(CHANNELITEM) == 0x14);
-
-    struct WORLDITEM {
-        int nWorldID;
-        ZXString<char> sName;
-        int nWorldState;
-        ZXString<char> sWorldEventDesc;
-        int nWorldEventEXP_WSE;
-        int nWorldEventDrop_WSE;
-        int nBlockCharCreation;
-        ZArray<CHANNELITEM> ci;
-    };
-    static_assert(sizeof(WORLDITEM) == 0x20);
-
-    struct BALLOON {
-        int nX;
-        int nY;
-        ZXString<char> sMessage;
-    };
-    static_assert(sizeof(BALLOON) == 0xC);
+    struct WORLDITEM;
+    struct BALLOON;
 
     MEMBER_AT(int, 0x1AC, m_bRequestSent)
     MEMBER_AT(ZArray<WORLDITEM>, 0x1CC, m_WorldItem)
