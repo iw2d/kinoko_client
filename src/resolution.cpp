@@ -183,4 +183,8 @@ void AttachResolutionMod() {
     ATTACH_HOOK(CUISysOpt__GetSysOptFromCtrl, CUISysOpt__GetSysOptFromCtrl_hook);
 
     ATTACH_HOOK(CWvsContext__SetScreenResolution, CWvsContext__SetScreenResolution_hook);
+
+    // CWvsApp::CreateWndManager - patch cursor boundary
+    Patch4(0x009C20DF + 1, 1920);
+    Patch4(0x009C20DA + 1, 1080);
 }
