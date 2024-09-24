@@ -64,6 +64,18 @@ public:
 };
 static_assert(sizeof(ZList<int>) == 0x14);
 
+template<typename T, typename V, typename U>
+class ZMap {
+public:
+    unsigned char gap0[4];
+    void** _m_apTable;
+    size_t _m_uTableSize;
+    size_t _m_uCount;
+    size_t _m_uAutoGrowEvery128;
+    size_t _m_uAutoGrowLimit;
+};
+static_assert(sizeof(ZMap<long, long, long>) == 0x18);
+
 
 class ZException {
 public:

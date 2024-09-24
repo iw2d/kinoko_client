@@ -74,7 +74,7 @@ DECLARE_INTERFACE_IID_(IWzVector2D, IWzShape2D, "f28bd1ed-3deb-4f92-9eec-10ef5a1
     STDMETHOD(get_currentTime)(THIS_ int* pnTime) PURE;
     STDMETHOD(put_currentTime)(THIS_ int nTime) PURE;
     STDMETHOD(get_origin)(THIS_ tagVARIANT* ppOrigin) PURE;
-    STDMETHOD(put_origin)(THIS_ tagVARIANT* pOrigin) PURE;
+    STDMETHOD(put_origin)(THIS_ tagVARIANT pOrigin) PURE;
     STDMETHOD(get_rx)(THIS_ int* pnX) PURE;
     STDMETHOD(put_rx)(THIS_ int nX) PURE;
     STDMETHOD(get_ry)(THIS_ int* pnY) PURE;

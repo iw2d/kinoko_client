@@ -60,8 +60,6 @@ void __fastcall CUserLocal__Jump_hook(CUserLocal* pThis, void* _EDX, int bEnforc
 }
 
 
-class CItemInfo;
-
 typedef ZXString<char>* (__thiscall* CItemInfo__GetMapString_t)(CItemInfo*, ZXString<char>*, unsigned int, const char*);
 static auto CItemInfo__GetMapString = reinterpret_cast<CItemInfo__GetMapString_t>(0x005A9CA0);
 
@@ -77,10 +75,10 @@ ZXString<char>* __fastcall CItemInfo__GetMapString_hook(CItemInfo* pThis, void* 
 }
 
 
-typedef ZXString<char>* (__thiscall* CItemInfo__GetItemDesc_t)(void*, ZXString<char>*, int);
+typedef ZXString<char>* (__thiscall* CItemInfo__GetItemDesc_t)(CItemInfo*, ZXString<char>*, int);
 static auto CItemInfo__GetItemDesc = reinterpret_cast<CItemInfo__GetItemDesc_t>(0x005B16E0);
 
-ZXString<char>* __fastcall CItemInfo__GetItemDesc_hook(void* pThis, void* _EDX, ZXString<char>* result, int nItemID) {
+ZXString<char>* __fastcall CItemInfo__GetItemDesc_hook(CItemInfo* pThis, void* _EDX, ZXString<char>* result, int nItemID) {
     CItemInfo__GetItemDesc(pThis, result, nItemID);
     if (result->GetLength() > 0) {
         char* sNewLine = "\r\n";

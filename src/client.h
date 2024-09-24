@@ -241,3 +241,11 @@ public:
         return reinterpret_cast<int (__thiscall*)(CUserLocal*, int, unsigned int, int*)>(0x009445B0)(this, nSkillID, nScanCode, pnConsumeCheck);
     }
 };
+
+
+class CItemInfo : public TSingleton<CItemInfo, 0x00C63EA4> {
+public:
+    IWzPropertyPtr* GetItemInfo(IWzPropertyPtr* result, int nItemID) {
+        return reinterpret_cast<IWzPropertyPtr* (__thiscall*)(CItemInfo*, IWzPropertyPtr*, int)>(0x005A8F20)(this, result, nItemID);
+    }
+};
