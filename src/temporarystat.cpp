@@ -129,6 +129,16 @@ void __fastcall CWvsContext__RemoveSkillCooltimeReset_hook(CWvsContext* pThis, v
 }
 
 
+typedef void (__thiscall* CWvsContext__OnLeaveGame_t)(CWvsContext*);
+static auto CWvsContext__OnLeaveGame = reinterpret_cast<CWvsContext__OnLeaveGame_t>(0x009E7840);
+
+void __fastcall CWvsContext__OnLeaveGame_hook(CWvsContext* pThis, void* _EDX) {
+    CWvsContext__OnLeaveGame(pThis);
+    // CTemporaryStat::Clear(&g_tsvCooltime);
+    reinterpret_cast<void (__thiscall*)(CTemporaryStatView*)>(0x0075C330)(&g_tsvCooltime);
+}
+
+
 void AttachTemporaryStatMod() {
     ATTACH_HOOK(CTemporaryStatView__Show, CTemporaryStatView__Show_hook);
     ATTACH_HOOK(CTemporaryStatView__Hide, CTemporaryStatView__Hide_hook);
@@ -137,4 +147,5 @@ void AttachTemporaryStatMod() {
 
     ATTACH_HOOK(CWvsContext__SetSkillCooltimeOver, CWvsContext__SetSkillCooltimeOver_hook);
     ATTACH_HOOK(CWvsContext__RemoveSkillCooltimeReset, CWvsContext__RemoveSkillCooltimeReset_hook);
+    ATTACH_HOOK(CWvsContext__OnLeaveGame, CWvsContext__OnLeaveGame_hook);
 }
