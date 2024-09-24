@@ -175,6 +175,20 @@ void __fastcall CWvsContext__SetScreenResolution_hook(CWvsContext* pThis, void* 
 }
 
 
+typedef void (__thiscall* CDialog__CreateDlg_t)(void*, int, int, int, int, int, int, void*, int);
+static auto CDialog__CreateDlg = reinterpret_cast<CDialog__CreateDlg_t>(0x004FE6D0);
+
+void __fastcall CDialog__CreateDlg_hook(void* pThis, void* _EDX, int l, int t, int w, int h, int z, int bScreenCoord, void* pData, int origin) {
+    uintptr_t uReturnAddress = reinterpret_cast<uintptr_t>(_ReturnAddress()); // there is no good way of determining the type of dialog
+    if (uReturnAddress == 0x009BEA27) {
+        // CWorldMapDlg::CreateWorldMapDlg
+        l = (CWvsContext::GetInstance()->m_nScreenWidth() - w) / 2;
+        t = (CWvsContext::GetInstance()->m_nScreenHeight() - h) / 2 - 30;
+    }
+    CDialog__CreateDlg(pThis, l, t, w, h, z, bScreenCoord, pData, origin);
+}
+
+
 void AttachResolutionMod() {
     ATTACH_HOOK(CConfig__LoadGlobal, CConfig__LoadGlobal_hook);
     ATTACH_HOOK(CConfig__SaveGlobal, CConfig__SaveGlobal_hook);
@@ -183,6 +197,8 @@ void AttachResolutionMod() {
     ATTACH_HOOK(CUISysOpt__GetSysOptFromCtrl, CUISysOpt__GetSysOptFromCtrl_hook);
 
     ATTACH_HOOK(CWvsContext__SetScreenResolution, CWvsContext__SetScreenResolution_hook);
+
+    ATTACH_HOOK(CDialog__CreateDlg, CDialog__CreateDlg_hook);
 
     // CWvsApp::CreateWndManager - patch cursor boundary
     Patch4(0x009C20DF + 1, 1920);
