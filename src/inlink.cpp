@@ -46,10 +46,10 @@ typedef IUnknownPtr* (__cdecl* get_unknown_t)(IUnknownPtr*, Ztl_variant_t*);
 static auto get_unknown = reinterpret_cast<get_unknown_t>(0x004176E0);
 
 IUnknownPtr* __cdecl get_unknown_hook(IUnknownPtr* result, Ztl_variant_t* v) {
+    get_unknown(result, v);
     IWzCanvasPtr pCanvas;
-    IUnknownPtr pUnknown = v->GetUnknown(true, false);
-    HRESULT hr = pUnknown.QueryInterface(__uuidof(IWzCanvas), &pCanvas);
-    if (SUCCEEDED(hr)) {
+    IUnknownPtr pUnknown(*result);
+    if (SUCCEEDED(pUnknown.QueryInterface(__uuidof(IWzCanvas), &pCanvas))) {
         // Check for link property
         IWzPropertyPtr pProperty;
         CHECK_HRESULT(pCanvas->get_property(&pProperty));
@@ -72,6 +72,8 @@ IUnknownPtr* __cdecl get_unknown_hook(IUnknownPtr* result, Ztl_variant_t* v) {
                 CHECK_HRESULT(pSourceUnknown.QueryInterface(__uuidof(IWzCanvas), &pSourceCanvas));
                 int nWidth, nHeight, nFormat, nMagLevel;
                 CHECK_HRESULT(pSourceCanvas->raw_GetSnapshot(&nWidth, &nHeight, nullptr, nullptr, &nFormat, &nMagLevel));
+                IWzRawCanvasPtr pRawCanvas;
+                CHECK_HRESULT(pSourceCanvas->get_rawCanvas(0, 0, &pRawCanvas));
                 // Get origin
                 Ztl_variant_t vOrigin;
                 CHECK_HRESULT(pProperty->get_item(L"origin", &vOrigin));
@@ -84,18 +86,16 @@ IUnknownPtr* __cdecl get_unknown_hook(IUnknownPtr* result, Ztl_variant_t* v) {
                 // Create target canvas
                 Ztl_variant_t vMagLevel(nMagLevel, VT_I4);
                 Ztl_variant_t vFormat(nFormat, VT_I4);
-                Ztl_variant_t vAlpha(255, VT_I4);
                 CHECK_HRESULT(pCanvas->raw_Create(nWidth, nHeight, vMagLevel, vFormat));
-                CHECK_HRESULT(pCanvas->raw_Copy(0, 0, pSourceCanvas, vAlpha));
+                CHECK_HRESULT(pCanvas->raw_AddRawCanvas(0, 0, pRawCanvas));
                 // Set target origin
                 CHECK_HRESULT(pCanvas->put_cx(nOriginX));
                 CHECK_HRESULT(pCanvas->put_cy(nOriginY));
-                *result = pCanvas;
-                return result;
+                break;
             }
         }
     }
-    return get_unknown(result, v);
+    return result;
 }
 
 

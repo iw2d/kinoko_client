@@ -1,6 +1,7 @@
 #pragma once
 #include "archive.h"
 #include "serialize.h"
+#include "uol.h"
 #include "property.h"
 #include "namespace.h"
 #include "package.h"
