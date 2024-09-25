@@ -81,8 +81,8 @@ IUnknownPtr* __cdecl get_unknown_hook(IUnknownPtr* result, Ztl_variant_t* v) {
                 IUnknownPtr pOriginUnknown = vOrigin.GetUnknown(false, false);
                 CHECK_HRESULT(pOriginUnknown.QueryInterface(__uuidof(IWzVector2D), &pOrigin));
                 int nOriginX, nOriginY;
-                CHECK_HRESULT(pOrigin->get_rx(&nOriginX));
-                CHECK_HRESULT(pOrigin->get_ry(&nOriginY));
+                CHECK_HRESULT(pOrigin->get_x(&nOriginX));
+                CHECK_HRESULT(pOrigin->get_y(&nOriginY));
                 // Create target canvas
                 Ztl_variant_t vMagLevel(nMagLevel, VT_I4);
                 Ztl_variant_t vFormat(nFormat, VT_I4);
