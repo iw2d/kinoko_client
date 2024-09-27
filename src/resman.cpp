@@ -4,6 +4,7 @@
 #include "config.h"
 #include "debug.h"
 
+static IWzNameSpacePtr pMap2Sub;
 
 void InitializeResMan(const IWzResManPtr& rm) {
     try {
@@ -87,6 +88,25 @@ void InitializeResMan(const IWzResManPtr& rm) {
             PcCreateObject<IWzNameSpacePtr>(L"NameSpace#Package", const_cast<IWzNameSpacePtr*>(&subNameSpace), nullptr);
             CHECK_HRESULT(subNameSpace->raw_Mount(L"/", subPackage, 0));
             CHECK_HRESULT(get_sub(i)->raw_Mount(L"/", subNameSpace, 1));
+        }
+
+        // Mount Map2.wz
+        {
+            const IWzPackagePtr subPackage;
+            PcCreateObject<IWzPackagePtr>(L"NameSpace#Package", const_cast<IWzPackagePtr*>(&subPackage), nullptr);
+            Ztl_variant_t vPackageWz;
+            CHECK_HRESULT(fs->get_item(L"Map2.wz", &vPackageWz));
+
+            const IWzSeekableArchivePtr subArchive(vPackageWz.GetUnknown(false, false));
+            Ztl_variant_t vSub;
+            CHECK_HRESULT(root->get_item(L"Map", &vSub));
+            pMap2Sub = vSub.GetUnknown(false, false);
+            CHECK_HRESULT(subPackage->raw_Init(L"95", L"Map", subArchive));
+
+            const IWzNameSpacePtr subNameSpace;
+            PcCreateObject<IWzNameSpacePtr>(L"NameSpace#Package", const_cast<IWzNameSpacePtr*>(&subNameSpace), nullptr);
+            CHECK_HRESULT(subNameSpace->raw_Mount(L"/", subPackage, 0));
+            CHECK_HRESULT(pMap2Sub->raw_Mount(L"/", subNameSpace, 1));
         }
 #endif
     } catch (const _com_error& e) {
