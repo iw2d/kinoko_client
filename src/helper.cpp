@@ -38,8 +38,19 @@ void __fastcall CVecCtrl__SetImpactNext_hook(CVecCtrl* pThis, void* _EDX, int nA
 typedef void (__thiscall* CUserLocal__Jump_t)(CUserLocal*, int);
 static auto CUserLocal__Jump = reinterpret_cast<CUserLocal__Jump_t>(0x0090A1D0);
 
+class CVecCtrl {
+public:
+    MEMBER_AT(void*, 0x1A0, m_pfh)
+};
+
 void __fastcall CUserLocal__Jump_hook(CUserLocal* pThis, void* _EDX, int bEnforced) {
     CUserLocal__Jump(pThis, bEnforced);
+    // Check if on the ground (has foothold), or on ladder/rope (CVecCtrl::GetLadderOrRope)
+    CVecCtrl* pVecCtrl = reinterpret_cast<CVecCtrl*>(&static_cast<IWzVector2D*>(pThis->m_pvc())[-3]);
+    if (pVecCtrl->m_pfh() || reinterpret_cast<void* (__thiscall*)(CVecCtrl*)>(0x004BBE80)(pVecCtrl)) {
+        return;
+    }
+    // Trigger flash jump skill
     if (!bEnforced && pThis->m_bJumpKeyUp()) {
         int nJob = pThis->GetJobCode();
         int nSkillID = 0;

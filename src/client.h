@@ -232,6 +232,7 @@ public:
 
 class CUserLocal : public TSingleton<CUserLocal, 0x00C68754> {
 public:
+    MEMBER_AT(IWzVector2DPtr, 0x19E4, m_pvc)
     MEMBER_AT(unsigned int, 0x19E8, m_dwCharacterId)
     MEMBER_AT(ZXString<char>, 0x19EC, m_sCharacterName)
     MEMBER_AT(int, 0x4808, m_bJumpKeyUp)
