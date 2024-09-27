@@ -428,4 +428,8 @@ void AttachClientBypass() {
     // LoadLibraryA("NAMESPACE.DLL");
     // Patch1(0x5081E59D + 1, 0x2);
     // Patch1(0x5081EFA3 + 1, 0x2);
+
+    // CAESCipher::s_BasicKey - WZ encryption key
+    // LoadLibraryA("PCOM.DLL");
+    // PatchStr(0x50C2E000, "\00\00\00\00");
 }

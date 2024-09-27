@@ -232,6 +232,8 @@ public:
 
 class CUserLocal : public TSingleton<CUserLocal, 0x00C68754> {
 public:
+    MEMBER_AT(unsigned int, 0x19E8, m_dwCharacterId)
+    MEMBER_AT(ZXString<char>, 0x19EC, m_sCharacterName)
     MEMBER_AT(int, 0x4808, m_bJumpKeyUp)
 
     inline int GetJobCode() {
@@ -245,7 +247,7 @@ public:
 
 class CItemInfo : public TSingleton<CItemInfo, 0x00C63EA4> {
 public:
-    IWzPropertyPtr* GetItemInfo(IWzPropertyPtr* result, int nItemID) {
+    inline IWzPropertyPtr* GetItemInfo(IWzPropertyPtr* result, int nItemID) {
         return reinterpret_cast<IWzPropertyPtr* (__thiscall*)(CItemInfo*, IWzPropertyPtr*, int)>(0x005A8F20)(this, result, nItemID);
     }
 };

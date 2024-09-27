@@ -19,6 +19,7 @@ void AttachClientInlink();
 void AttachClientHelper();
 void AttachStringPoolMod();
 void AttachResolutionMod();
+void AttachChatBalloonMod();
 void AttachPortableChairMod();
 void AttachTemporaryStatMod();
 void AttachExceptionHandler();
@@ -29,6 +30,7 @@ static void AttachClientHooks() {
     AttachClientHelper();
     AttachStringPoolMod();
     AttachResolutionMod();
+    AttachChatBalloonMod();
     AttachPortableChairMod();
     AttachTemporaryStatMod();
     AttachExceptionHandler();
