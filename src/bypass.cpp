@@ -406,6 +406,24 @@ void __fastcall CLogin__SendSelectCharPacket_hook(CLogin* pThis, void* _EDX) {
 }
 
 
+static uintptr_t CWvsContext__OnEnterField_jmp = 0x009DBEEE;
+static uintptr_t CWvsContext__OnEnterField_ret = 0x009DC278;
+
+void __fastcall CWvsContext__OnEnterField_helper(CWvsContext* pThis, void* _EDX) {
+    // CTemporaryStatView::Show(&this->m_temporaryStatView);
+    reinterpret_cast<void (__thiscall*)(void*)>(0x0075C6A0)(reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(pThis) + 0x35D4));
+    // TODO - implement other skipped functions
+}
+
+void __declspec(naked) CWvsContext__OnEnterField_hook() {
+    __asm {
+        mov     ecx, [ ebp - 0x3C ] ; CWvsContext *
+        call    CWvsContext__OnEnterField_helper
+        jmp     [ CWvsContext__OnEnterField_ret ]
+    };
+}
+
+
 void AttachClientBypass() {
     ATTACH_HOOK(CWvsApp__ctor, CWvsApp__ctor_hook);
     ATTACH_HOOK(CWvsApp__SetUp, CWvsApp__SetUp_hook);
@@ -414,8 +432,7 @@ void AttachClientBypass() {
     ATTACH_HOOK(CLogin__SendCheckPasswordPacket, CLogin__SendCheckPasswordPacket_hook);
     ATTACH_HOOK(CLogin__SendSelectCharPacket, CLogin__SendSelectCharPacket_hook);
 
-    // CWvsContext::OnEnterField
-    PatchJmp(0x009DBEEE, 0x009DC278);
+    PatchJmp(CWvsContext__OnEnterField_jmp, reinterpret_cast<uintptr_t>(&CWvsContext__OnEnterField_hook));
 
     PatchRetZero(0x004AB900); // DR_check
     PatchRetZero(0x0045EBD0); // Hidedll
