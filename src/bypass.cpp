@@ -170,10 +170,10 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
 
     DEBUG_MESSAGE("CwvsApp::SetUp - Complete!");
     // TSingleton<CMonsterBookMan>::CreateInstance()->LoadBook();
-    // auto pMonsterBookMan = reinterpret_cast<void* (__cdecl*)()>(0x009CA820)();
-    // if (!reinterpret_cast<int (__thiscall*)(void*)>(0x00664C10)(pMonsterBookMan)) {
-    //     ErrorMessage("Failed to load monster book data.");
-    // }
+    auto pMonsterBookMan = reinterpret_cast<void* (__cdecl*)()>(0x009CA820)();
+    if (!reinterpret_cast<int (__thiscall*)(void*)>(0x00664C10)(pMonsterBookMan)) {
+        ErrorMessage("Failed to load monster book data.");
+    }
     // CWvsApp::CreateWndManager(this);
     reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C2060)(pThis);
     // CConfig::ApplySysOpt(TSingleton<CConfig>::GetInstance(), nullptr, 0);
