@@ -4,6 +4,21 @@
 #include "debug.h"
 
 
+static uintptr_t CDropPool__TryPickUpDropByPet_jmp = 0x00511AED;
+static uintptr_t CDropPool__TryPickUpDropByPet_ret = 0x00511AFC;
+
+void __declspec(naked) CDropPool__TryPickUpDropByPet_hook() {
+    __asm {
+        lea     edx, [ eax - 200 ]      ; x1
+        mov     [ ebp - 0x34 ], edx
+        lea     edx, [ ecx - 200 ]      ; y1
+        add     eax, 200                ; x2
+        add     ecx, 200                ; y2
+        jmp     [ CDropPool__TryPickUpDropByPet_ret ]
+    };
+}
+
+
 typedef void (__cdecl* CCurseProcess__ProcessString_t)(char*, int*, int);
 static auto CCurseProcess__ProcessString = reinterpret_cast<CCurseProcess__ProcessString_t>(0x007477F0);
 
@@ -139,6 +154,9 @@ void AttachClientHelper() {
 
     // CVecCtrl::IsFalling
     PatchRetZero(0x0093A140); // double jump while falling
+
+    // CDropPool::TryPickUpDropByPet
+    PatchJmp(CDropPool__TryPickUpDropByPet_jmp, reinterpret_cast<uintptr_t>(&CDropPool__TryPickUpDropByPet_hook)); // increase pet pickup range
 
     ATTACH_HOOK(CCurseProcess__ProcessString, CCurseProcess__ProcessString_hook); // disable profanity filter
     ATTACH_HOOK(CInputSystem__DetectJoystick, CInputSystem__DetectJoystick_hook); // fix stutter
