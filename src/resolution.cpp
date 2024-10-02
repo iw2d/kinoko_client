@@ -3,6 +3,9 @@
 #include "hook.h"
 
 
+int largeX = 1008;
+int largeY = 752;
+
 typedef void (__thiscall* CConfig__LoadGlobal_t)(CConfig*);
 static auto CConfig__LoadGlobal = reinterpret_cast<CConfig__LoadGlobal_t>(0x004B51B0);
 
@@ -151,6 +154,8 @@ void __fastcall CWvsContext__SetScreenResolution_hook(CWvsContext* pThis, void* 
         }
     }
     // Update resolution
+    largeX = nScreenWidth - 16;
+    largeY = nScreenHeight - 16;
     if (get_gr()->put_screenResolution(nScreenWidth, nScreenHeight) >= 0) {
         CHECK_HRESULT(get_gr()->raw_AdjustCenter(0, -nAdjustCenterY));
         pThis->m_nScreenWidth() = nScreenWidth;
@@ -188,6 +193,25 @@ void __fastcall CDialog__CreateDlg_hook(void* pThis, void* _EDX, int l, int t, i
     CDialog__CreateDlg(pThis, l, t, w, h, z, bScreenCoord, pData, origin);
 }
 
+DWORD pushLargeXRtn = 0x004B6EF7;
+void __declspec(naked) pushLargeX()
+{
+    __asm
+    {
+        push largeX
+        jmp pushLargeXRtn
+    }
+}
+
+DWORD pushLargeYRtn = 0x004B6F5D;
+void __declspec(naked) pushLargeY()
+{
+    __asm
+    {
+        push largeY
+        jmp pushLargeYRtn
+    }
+}
 
 void AttachResolutionMod() {
     ATTACH_HOOK(CConfig__LoadGlobal, CConfig__LoadGlobal_hook);
@@ -203,4 +227,7 @@ void AttachResolutionMod() {
     // CWvsApp::CreateWndManager - patch cursor boundary
     Patch4(0x009C20DF + 1, 1920);
     Patch4(0x009C20DA + 1, 1080);
+
+    PatchJmp(0x004B6EF2, reinterpret_cast<uintptr_t>(&pushLargeX));
+    PatchJmp(0x004B6F58, reinterpret_cast<uintptr_t>(&pushLargeY));
 }
