@@ -5,6 +5,7 @@
 
 int largeX = 1008;
 int largeY = 752;
+int curWidth = 1024;
 
 typedef void (__thiscall* CConfig__LoadGlobal_t)(CConfig*);
 static auto CConfig__LoadGlobal = reinterpret_cast<CConfig__LoadGlobal_t>(0x004B51B0);
@@ -156,6 +157,7 @@ void __fastcall CWvsContext__SetScreenResolution_hook(CWvsContext* pThis, void* 
     // Update resolution
     largeX = nScreenWidth - 16;
     largeY = nScreenHeight - 16;
+    curWidth = nScreenWidth;
     if (get_gr()->put_screenResolution(nScreenWidth, nScreenHeight) >= 0) {
         CHECK_HRESULT(get_gr()->raw_AdjustCenter(0, -nAdjustCenterY));
         pThis->m_nScreenWidth() = nScreenWidth;
@@ -213,6 +215,27 @@ void __declspec(naked) pushLargeY()
     }
 }
 
+DWORD CAvatarMegaphoneRtn = 0x0046DD27;
+void __declspec(naked) CAvatarMegaphonePushWidth()
+{
+    __asm
+    {
+        mov eax, curWidth
+        mov dword ptr[esi + 2A0h], eax
+        jmp CAvatarMegaphoneRtn
+    }
+}
+
+DWORD ByeCAvatarMegaphoneRtn = 0x0046D842;
+void __declspec(naked) ByeCAvatarMegaphonePushWidth()
+{
+    __asm
+    {
+        push curWidth
+        jmp  ByeCAvatarMegaphoneRtn
+    }
+}
+
 void AttachResolutionMod() {
     ATTACH_HOOK(CConfig__LoadGlobal, CConfig__LoadGlobal_hook);
     ATTACH_HOOK(CConfig__SaveGlobal, CConfig__SaveGlobal_hook);
@@ -230,4 +253,6 @@ void AttachResolutionMod() {
 
     PatchJmp(0x004B6EF2, reinterpret_cast<uintptr_t>(&pushLargeX));
     PatchJmp(0x004B6F58, reinterpret_cast<uintptr_t>(&pushLargeY));
+    PatchJmp(0x0046DD1D, reinterpret_cast<uintptr_t>(&CAvatarMegaphonePushWidth));
+    PatchJmp(0x0046D83D, reinterpret_cast<uintptr_t>(&ByeCAvatarMegaphonePushWidth));
 }
