@@ -104,7 +104,10 @@ static WSPPROC_TABLE g_ProcTable;
 int WINAPI WSPConnect_hook(SOCKET s, const struct sockaddr FAR* name, int namelen, LPWSABUF lpCallerData, LPWSABUF lpCalleeData, LPQOS lpSQOS, LPQOS lpGQOS, LPINT lpErrno) {
     const char* sName = inet_ntoa(((sockaddr_in*) name)->sin_addr);
     if (strstr(sName, CONFIG_NEXON_SEARCH)) {
-        InetPton(AF_INET, CONFIG_SERVER_ADDRESS, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
+        InetPton(AF_INET, g_sServerAddress ? g_sServerAddress : CONFIG_SERVER_ADDRESS, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
+        if (g_nServerPort) {
+            ((sockaddr_in*) name)->sin_port = htons(g_nServerPort);
+        }
     }
     return g_ProcTable.lpWSPConnect(s, name, namelen, lpCallerData, lpCalleeData, lpSQOS, lpGQOS, lpErrno);
 }

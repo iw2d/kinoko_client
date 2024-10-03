@@ -51,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
 
-    if (!DetourCreateProcessWithDllExA("MapleStory.exe", NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi, CONFIG_DLL_NAME, NULL)) {
+    if (!DetourCreateProcessWithDllExA("MapleStory.exe", lpCmdLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi, CONFIG_DLL_NAME, NULL)) {
         ErrorMessage("Could not start MapleStory.exe [%d]", GetLastError());
         return 1;
     }
