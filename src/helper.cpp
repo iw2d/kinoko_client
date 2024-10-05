@@ -111,10 +111,10 @@ ZXString<char>* __fastcall CItemInfo__GetItemDesc_hook(CItemInfo* pThis, void* _
         // ZXString<char>::_Cat(result, sNewLine, strlen(sNewLine));
         reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*, int)>(0x0042D020)(result, sNewLine, strlen(sNewLine));
     }
-    char sItemID[30];
-    snprintf(sItemID, 30, "#cItem ID: %d#", nItemID);
-    // ZXString<char>::_Cat(result, sItemID, strlen(sItemID));
-    reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*, int)>(0x0042D020)(result, sItemID, strlen(sItemID));
+    char sQuestID[30];
+    snprintf(sQuestID, 30, "#cItem ID : %d#", nItemID);
+    // ZXString<char>::_Cat(result, sQuestID, strlen(sQuestID));
+    reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*, int)>(0x0042D020)(result, sQuestID, strlen(sQuestID));
     return result;
 }
 
@@ -140,10 +140,35 @@ ZRef<SKILLENTRY>* __fastcall CSkillInfo__LoadSkill_hook(CSkillInfo* pThis, void*
         reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*, int)>(0x0042D020)(&result->p->sDescription(), sNewLine, strlen(sNewLine));
     }
     char sSkillID[30];
-    snprintf(sSkillID, 30, "#cSkill ID: %d#", nSkillID);
+    snprintf(sSkillID, 30, "#cSkill ID : %d#", nSkillID);
     // ZXString<char>::_Cat(&result->p->sDescription, sSkillID, strlen(sSkillID));
     reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*, int)>(0x0042D020)(&result->p->sDescription(), sSkillID, strlen(sSkillID));
     return result;
+}
+
+
+static uintptr_t CUIQuestInfoDetail__Draw_jmp = 0x00824A93;
+static uintptr_t CUIQuestInfoDetail__Draw_ret = 0x00824C04;
+
+void __stdcall CUIQuestInfoDetail__Draw_helper(IWzCanvas* pCanvas, IWzFont* pFont, unsigned short usQuestID) {
+    wchar_t sQuestID[30];
+    swprintf(sQuestID, 30, L"Quest ID : %d", usQuestID);
+    Ztl_variant_t vEmpty;
+    unsigned int result[4];
+    CHECK_HRESULT(pCanvas->raw_DrawText(35, 56, sQuestID, pFont, vEmpty, vEmpty, result));
+}
+
+void __declspec(naked) CUIQuestInfoDetail__Draw_hook() {
+    __asm {
+        mov     eax, [ ebp + 0x8C ]
+        movzx   edx, word ptr [ eax ]
+        push    edx ; this->m_pQI.p->usQuestID
+        mov     eax, [ ebp + 0xF0 ]
+        push    eax ; IWzFont*
+        push    esi ; IWzCanvas*
+        call    CUIQuestInfoDetail__Draw_helper
+        jmp     [ CUIQuestInfoDetail__Draw_ret ]
+    };
 }
 
 
@@ -164,9 +189,10 @@ void AttachClientHelper() {
     ATTACH_HOOK(CUserLocal__Jump, CUserLocal__Jump_hook); // double jump with jump key
 
 #ifdef _DEBUG
-    // Append ID to map name, item description, skill description
+    // Add ID to map name, item description, skill description, quest info
     ATTACH_HOOK(CItemInfo__GetMapString, CItemInfo__GetMapString_hook);
     ATTACH_HOOK(CItemInfo__GetItemDesc, CItemInfo__GetItemDesc_hook);
     ATTACH_HOOK(CSkillInfo__LoadSkill, CSkillInfo__LoadSkill_hook);
+    PatchJmp(CUIQuestInfoDetail__Draw_jmp, reinterpret_cast<uintptr_t>(&CUIQuestInfoDetail__Draw_hook)); // replace "Low Level Quest"
 #endif
 }
