@@ -15,9 +15,9 @@ jobs:
     - name: configure
       run: cmake -S . -B build -A Win32
     - name: build
-      run: cmake --build build --config Release
+      run: cmake --build build --config Debug
     - name: release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "build/Release/*"
+        artifacts: "build/Debug/*"
         allowUpdates: true
