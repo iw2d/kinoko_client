@@ -20,22 +20,22 @@ void InitializeResMan(const IWzResManPtr& rm); // resman.cpp
 
 
 static inline IWzGr2DPtr& get_gr() {
-    return *reinterpret_cast<IWzGr2DPtr*>(0x00C6F430);
+    return *reinterpret_cast<IWzGr2DPtr*>(0x00CAEDE8);
 }
 
 static inline IWzResManPtr& get_rm() {
-    return *reinterpret_cast<IWzResManPtr*>(0x00C6F434);
+    return *reinterpret_cast<IWzResManPtr*>(0x00CAEDEC);
 }
 
 static inline IWzNameSpacePtr& get_root() {
-    return *reinterpret_cast<IWzNameSpacePtr*>(0x00C6F43C);
+    return *reinterpret_cast<IWzNameSpacePtr*>(0x00CAEDF4);
 }
 
 static inline IWzNameSpacePtr& get_sub(int nIdx) {
-    return *reinterpret_cast<IWzNameSpacePtr*>(0x00C6F440 + nIdx * 4);
+    return *reinterpret_cast<IWzNameSpacePtr*>(0x00CAEDF8 + nIdx * 4);
 }
 
-static FARPROC* _g_apfnPCOMAPIs = reinterpret_cast<FARPROC*>(0x00C6DB54);
+static FARPROC* _g_apfnPCOMAPIs = reinterpret_cast<FARPROC*>(0x00CAD2BC);
 
 template<typename T>
 static void __cdecl PcCreateObject(const wchar_t* sUOL, T* pObj, IUnknown* pUnkOuter) {
@@ -51,7 +51,7 @@ static void __cdecl PcSetRootNameSpace(IUnknown* pNameSpace) {
 }
 
 
-class CWvsApp : public TSingleton<CWvsApp, 0x00C64314> {
+class CWvsApp : public TSingleton<CWvsApp, 0x00CA373C> {
 public:
     MEMBER_AT(HWND, 0x4, m_hWnd)
     MEMBER_AT(int, 0x8, m_bPCOMInitialized)
@@ -116,17 +116,16 @@ public:
 };
 
 
-class CWvsContext : public TSingleton<CWvsContext, 0x00C64068> {
+class CWvsContext : public TSingleton<CWvsContext, 0x00CA3490> {
 public:
-    MEMBER_AT(int, 0x2C, m_tUpdateTime)
-    MEMBER_AT(int, 0x41B8, m_nScreenWidth)
-    MEMBER_AT(int, 0x41BC, m_nScreenHeight)
-    MEMBER_AT(int, 0x41C0, m_nAdjustCenterY)
-    MEMBER_AT(bool, 0x41C4, m_bIsLargeScreen)
+    MEMBER_AT(int, 0x4280, m_nScreenWidth)
+    MEMBER_AT(int, 0x4284, m_nScreenHeight)
+    MEMBER_AT(int, 0x4288, m_nAdjustCenterY)
+    MEMBER_AT(bool, 0x428C, m_bIsLargeScreen)
 };
 
 
-class CWndMan : public TSingleton<CWndMan, 0x00C68AC4> {
+class CWndMan : public TSingleton<CWndMan, 0x00CA7EE4> {
 };
 
 
@@ -148,7 +147,7 @@ struct CONFIG_SYSOPT {
 };
 static_assert(sizeof(CONFIG_SYSOPT) == 0x38);
 
-class CConfig : public TSingleton<CConfig, 0x00C687AC> {
+class CConfig : public TSingleton<CConfig, 0x00CA7BD4> {
 public:
     MEMBER_AT(CONFIG_SYSOPT, 0x6C, m_sysOpt)
 };
@@ -162,19 +161,19 @@ public:
     int m_bIsEncryptedByShanda;
 
     inline COutPacket(int nType) {
-        reinterpret_cast<void (__thiscall*)(COutPacket*, int)>(0x0068D090)(this, nType);
+        reinterpret_cast<void (__thiscall*)(COutPacket*, int)>(0x00693170)(this, nType);
     }
     inline void Encode1(unsigned char n) {
-        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned char)>(0x00415360)(this, n);
+        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned char)>(0x00415230)(this, n);
     }
     inline void Encode2(unsigned short n) {
-        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned short)>(0x0042CA10)(this, n);
+        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned short)>(0x0042CA70)(this, n);
     }
     inline void Encode4(unsigned int n) {
-        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned int)>(0x004153B0)(this, n);
+        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned int)>(0x00415280)(this, n);
     }
     inline void EncodeBuffer(unsigned char* p, unsigned int uSize) {
-        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned char*, unsigned int)>(0x00482200)(this, p, uSize);
+        reinterpret_cast<void (__thiscall*)(COutPacket*, unsigned char*, unsigned int)>(0x00482FE0)(this, p, uSize);
     }
     inline void EncodeStr(char* s) {
         size_t uSize = strlen(s);
@@ -185,7 +184,7 @@ public:
 static_assert(sizeof(COutPacket) == 0x10);
 
 
-class CClientSocket : public TSingleton<CClientSocket, 0x00C64064> {
+class CClientSocket : public TSingleton<CClientSocket, 0x00CA348C> {
 public:
     struct CONNECTCONTEXT {
         ZList<ZInetAddr> lAddr;
@@ -204,12 +203,12 @@ public:
     __forceinline void SendPacket(COutPacket* oPacket) {
         ZSynchronizedHelper<ZFatalSection> sync(&this->m_lockSend());
         if (this->m_sock()._m_hSocket && this->m_sock()._m_hSocket != INVALID_SOCKET && !this->m_ctxConnect().lAddr._m_uCount) {
-            // COutPacket::MakeBufferList(oPacket, &this->m_lpSendBuff, 95, &this->m_uSeqSnd, 1, this->m_uSeqSnd);
-            reinterpret_cast<void (__thiscall*)(COutPacket*, ZList<ZRef<ZSocketBuffer>>*, unsigned short, unsigned int*, int, unsigned int)>(0x0068D100)(oPacket, &this->m_lpSendBuff(), 95, &this->m_uSeqSnd(), 1, this->m_uSeqSnd());
+            // COutPacket::MakeBufferList(oPacket, &this->m_lpSendBuff, 96, &this->m_uSeqSnd, 1, this->m_uSeqSnd);
+            reinterpret_cast<void (__thiscall*)(COutPacket*, ZList<ZRef<ZSocketBuffer>>*, unsigned short, unsigned int*, int, unsigned int)>(0x006931E0)(oPacket, &this->m_lpSendBuff(), 96, &this->m_uSeqSnd(), 1, this->m_uSeqSnd());
             // this->m_uSeqSnd = CIGCipher::innoHash((unsigned __int8 *)&this->m_uSeqSnd, 4, 0);
-            this->m_uSeqSnd() = reinterpret_cast<unsigned int (__cdecl*)(unsigned char*, int, unsigned int*)>(0x00A1BF30)(reinterpret_cast<unsigned char*>(&this->m_uSeqSnd()), 4, nullptr);
+            this->m_uSeqSnd() = reinterpret_cast<unsigned int (__cdecl*)(unsigned char*, int, unsigned int*)>(0x00A49120)(reinterpret_cast<unsigned char*>(&this->m_uSeqSnd()), 4, nullptr);
             // CClientSocket::Flush(this);
-            reinterpret_cast<void (__thiscall*)(CClientSocket*)>(0x004AF6A0)(this);
+            reinterpret_cast<void (__thiscall*)(CClientSocket*)>(0x004B0590)(this);
         }
     }
 };
@@ -222,33 +221,33 @@ struct ISMSG {
 };
 static_assert(sizeof(ISMSG) == 0xC);
 
-class CInputSystem : public TSingleton<CInputSystem, 0x00C68C20> {
+class CInputSystem : public TSingleton<CInputSystem, 0x00CA8048> {
 public:
     inline int IsKeyPressed(unsigned int nVK) {
-        return reinterpret_cast<int (__thiscall*)(CInputSystem*, unsigned int)>(0x0056F7A0)(this, nVK);
+        return reinterpret_cast<int (__thiscall*)(CInputSystem*, unsigned int)>(0x00571AD0)(this, nVK);
     }
 };
 
 
-class CUserLocal : public TSingleton<CUserLocal, 0x00C68754> {
+class CUserLocal : public TSingleton<CUserLocal, 0x00CA7B7C> {
 public:
-    MEMBER_AT(IWzVector2DPtr, 0x19E4, m_pvc)
-    MEMBER_AT(unsigned int, 0x19E8, m_dwCharacterId)
-    MEMBER_AT(ZXString<char>, 0x19EC, m_sCharacterName)
-    MEMBER_AT(int, 0x4808, m_bJumpKeyUp)
+    MEMBER_AT(IWzVector2DPtr, 0x19F8, m_pvc)
+    MEMBER_AT(unsigned int, 0x19FC, m_dwCharacterId)
+    MEMBER_AT(ZXString<char>, 0x1A00, m_sCharacterName)
+    MEMBER_AT(int, 0x487C, m_bJumpKeyUp)
 
     inline int GetJobCode() {
-        return reinterpret_cast<int (__thiscall*)(CUserLocal*)>(0x00908EB0)(this);
+        return reinterpret_cast<int (__thiscall*)(CUserLocal*)>(0x00927F10)(this);
     }
     inline int DoActiveSkill(int nSkillID, unsigned int nScanCode, int* pnConsumeCheck) {
-        return reinterpret_cast<int (__thiscall*)(CUserLocal*, int, unsigned int, int*)>(0x009445B0)(this, nSkillID, nScanCode, pnConsumeCheck);
+        return reinterpret_cast<int (__thiscall*)(CUserLocal*, int, unsigned int, int*)>(0x00964DC0)(this, nSkillID, nScanCode, pnConsumeCheck);
     }
 };
 
 
-class CItemInfo : public TSingleton<CItemInfo, 0x00C63EA4> {
+class CItemInfo : public TSingleton<CItemInfo, 0x00CA32C4> {
 public:
     inline IWzPropertyPtr* GetItemInfo(IWzPropertyPtr* result, int nItemID) {
-        return reinterpret_cast<IWzPropertyPtr* (__thiscall*)(CItemInfo*, IWzPropertyPtr*, int)>(0x005A8F20)(this, result, nItemID);
+        return reinterpret_cast<IWzPropertyPtr* (__thiscall*)(CItemInfo*, IWzPropertyPtr*, int)>(0x005AC8A0)(this, result, nItemID);
     }
 };

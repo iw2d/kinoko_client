@@ -4,8 +4,8 @@
 #include "debug.h"
 
 
-static uintptr_t CDropPool__TryPickUpDropByPet_jmp = 0x00511AED;
-static uintptr_t CDropPool__TryPickUpDropByPet_ret = 0x00511AFC;
+static uintptr_t CDropPool__TryPickUpDropByPet_jmp = 0x005133AD;
+static uintptr_t CDropPool__TryPickUpDropByPet_ret = 0x005133BC;
 
 void __declspec(naked) CDropPool__TryPickUpDropByPet_hook() {
     __asm {
@@ -19,16 +19,16 @@ void __declspec(naked) CDropPool__TryPickUpDropByPet_hook() {
 }
 
 
-typedef void (__cdecl* CCurseProcess__ProcessString_t)(char*, int*, int);
-static auto CCurseProcess__ProcessString = reinterpret_cast<CCurseProcess__ProcessString_t>(0x007477F0);
+typedef void (__thiscall* CCurseProcess__ProcessString_t)(void*, char*, int*, int);
+static auto CCurseProcess__ProcessString = reinterpret_cast<CCurseProcess__ProcessString_t>(0x00753C50);
 
-int __cdecl CCurseProcess__ProcessString_hook(char* sString, int* pbFiltered, int bIgnoreNewLine) {
+int __fastcall CCurseProcess__ProcessString_hook(void* pThis, void* _EDX, char* sString, int* pbFiltered, int bIgnoreNewLine) {
     return 1;
 }
 
 
 typedef void (__thiscall* CInputSystem__DetectJoystick_t)(CInputSystem*);
-static auto CInputSystem__DetectJoystick = reinterpret_cast<CInputSystem__DetectJoystick_t>(0x00571740);
+static auto CInputSystem__DetectJoystick = reinterpret_cast<CInputSystem__DetectJoystick_t>(0x00573A70);
 
 void __fastcall CInputSystem__DetectJoystick_hook(void* pThis, void* _EDX) {
     // noop
@@ -38,7 +38,7 @@ void __fastcall CInputSystem__DetectJoystick_hook(void* pThis, void* _EDX) {
 class CVecCtrl;
 
 typedef void (__thiscall* CVecCtrl__SetImpactNext_t)(CVecCtrl*, int, long double, long double);
-static auto CVecCtrl__SetImpactNext = reinterpret_cast<CVecCtrl__SetImpactNext_t>(0x00905CD0);
+static auto CVecCtrl__SetImpactNext = reinterpret_cast<CVecCtrl__SetImpactNext_t>(0x00924D20);
 
 void __fastcall CVecCtrl__SetImpactNext_hook(CVecCtrl* pThis, void* _EDX, int nAttr, long double vx, long double vy) {
     if (nAttr == 0x14 && CInputSystem::GetInstance()->IsKeyPressed(38)) {
@@ -51,7 +51,7 @@ void __fastcall CVecCtrl__SetImpactNext_hook(CVecCtrl* pThis, void* _EDX, int nA
 
 
 typedef void (__thiscall* CUserLocal__Jump_t)(CUserLocal*, int);
-static auto CUserLocal__Jump = reinterpret_cast<CUserLocal__Jump_t>(0x0090A1D0);
+static auto CUserLocal__Jump = reinterpret_cast<CUserLocal__Jump_t>(0x009293B0);
 
 class CVecCtrl {
 public:
@@ -62,7 +62,7 @@ void __fastcall CUserLocal__Jump_hook(CUserLocal* pThis, void* _EDX, int bEnforc
     CUserLocal__Jump(pThis, bEnforced);
     // Check if on the ground (has foothold), or on ladder/rope (CVecCtrl::GetLadderOrRope)
     CVecCtrl* pVecCtrl = reinterpret_cast<CVecCtrl*>(&static_cast<IWzVector2D*>(pThis->m_pvc())[-3]);
-    if (pVecCtrl->m_pfh() || reinterpret_cast<void* (__thiscall*)(CVecCtrl*)>(0x004BBE80)(pVecCtrl)) {
+    if (pVecCtrl->m_pfh() || reinterpret_cast<void* (__thiscall*)(CVecCtrl*)>(0x004BCC30)(pVecCtrl)) {
         return;
     }
     // Trigger flash jump skill
@@ -174,11 +174,11 @@ void __declspec(naked) CUIQuestInfoDetail__Draw_hook() {
 
 void AttachClientHelper() {
     // CChatHelper::TryChat
-    Patch1(0x004AA7EF, 0xEB); // bypass chat cooldown
-    Patch1(0x004AA74A, 0xEB); // bypass chat repeat
+    Patch1(0x004AB5A7, 0xEB); // bypass chat cooldown
+    Patch1(0x004AB502, 0xEB); // bypass chat repeat
 
     // CVecCtrl::IsFalling
-    PatchRetZero(0x0093A140); // double jump while falling
+    PatchRetZero(0x0095A6C0); // double jump while falling
 
     // CDropPool::TryPickUpDropByPet
     PatchJmp(CDropPool__TryPickUpDropByPet_jmp, reinterpret_cast<uintptr_t>(&CDropPool__TryPickUpDropByPet_hook)); // increase pet pickup range
@@ -189,10 +189,10 @@ void AttachClientHelper() {
     ATTACH_HOOK(CUserLocal__Jump, CUserLocal__Jump_hook); // double jump with jump key
 
 #ifdef _DEBUG
-    // Add ID to map name, item description, skill description, quest info
-    ATTACH_HOOK(CItemInfo__GetMapString, CItemInfo__GetMapString_hook);
-    ATTACH_HOOK(CItemInfo__GetItemDesc, CItemInfo__GetItemDesc_hook);
-    ATTACH_HOOK(CSkillInfo__LoadSkill, CSkillInfo__LoadSkill_hook);
-    PatchJmp(CUIQuestInfoDetail__Draw_jmp, reinterpret_cast<uintptr_t>(&CUIQuestInfoDetail__Draw_hook)); // replace "Low Level Quest"
+    // // Add ID to map name, item description, skill description, quest info
+    // ATTACH_HOOK(CItemInfo__GetMapString, CItemInfo__GetMapString_hook);
+    // ATTACH_HOOK(CItemInfo__GetItemDesc, CItemInfo__GetItemDesc_hook);
+    // ATTACH_HOOK(CSkillInfo__LoadSkill, CSkillInfo__LoadSkill_hook);
+    // PatchJmp(CUIQuestInfoDetail__Draw_jmp, reinterpret_cast<uintptr_t>(&CUIQuestInfoDetail__Draw_hook)); // replace "Low Level Quest"
 #endif
 }
