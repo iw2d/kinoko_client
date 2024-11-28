@@ -5,7 +5,7 @@
 extern "C" __declspec(dllexport) VOID DummyExport() {}
 
 
-char* g_sServerAddress = nullptr;
+char* g_sServerAddress = CONFIG_SERVER_ADDRESS;
 int g_nServerPort = 0;
 
 void ProcessCommandLine() {

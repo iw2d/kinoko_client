@@ -152,7 +152,9 @@ DECLARE_INTERFACE_IID_(IWzCanvas, IWzSerialize, "7600dc6c-9328-4bff-9624-5b0f5c0
     STDMETHOD(raw_DrawRectangle)(THIS_ int nLeft, int nTop, unsigned int uWidth, unsigned int uHeight, unsigned int uColor) PURE;
     STDMETHOD(raw_DrawLine)(THIS_ int x1, int y1, int x2, int y2, unsigned int uColor, tagVARIANT nWidth) PURE;
     STDMETHOD(raw_DrawPolygon)(THIS) PURE;
+    STDMETHOD(raw_DrawHexagon)(THIS_ unsigned int, int, int, int, int, int, int, int, int, int, int, int, int);
     STDMETHOD(raw_DrawText)(THIS_ int nLeft, int nTop, wchar_t* sText, IWzFont* pFont, tagVARIANT vAlpha, tagVARIANT vTabOrg, unsigned int*) PURE;
+    // unk
 
     END_INTERFACE;
 };

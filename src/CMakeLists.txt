@@ -32,8 +32,7 @@ set_target_properties(injector PROPERTIES
     OUTPUT_NAME "Kinoko"
 )
 
-add_custom_command(
-    TARGET injector POST_BUILD
+add_custom_command(TARGET injector POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:injector> ${CUSTOM_BINARY_DIR}
 )
 
@@ -58,7 +57,9 @@ set_target_properties(launcher PROPERTIES
     OUTPUT_NAME "Kinoko"
 )
 
-add_custom_command(
-    TARGET launcher POST_BUILD
+set(MANIFEST "${CMAKE_CURRENT_SOURCE_DIR}/launcher.manifest")
+
+add_custom_command(TARGET launcher POST_BUILD
+    COMMAND mt.exe -manifest ${MANIFEST} -outputresource:$<TARGET_FILE:launcher>
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:launcher> ${CUSTOM_BINARY_DIR}
 )

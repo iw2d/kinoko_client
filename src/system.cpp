@@ -6,22 +6,6 @@
 #pragma warning(disable : 4996)
 
 
-typedef decltype(&CreateMutexA) CreateMutexA_t;
-static CreateMutexA_t CreateMutexA_orig = reinterpret_cast<CreateMutexA_t>(GetAddress("KERNEL32", "CreateMutexA"));
-
-HANDLE WINAPI CreateMutexA_hook(LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwner, LPCSTR lpName) {
-    DEBUG_MESSAGE("CreateMutexA : %s", lpName);
-    if (lpName && !strcmp(lpName, "WvsClientMtx")) {
-        char sMutex[128];
-        sprintf_s(sMutex, 128, "%s-%d", lpName, GetCurrentProcessId());
-        lpName = sMutex;
-        AttachClientHooks();
-        return CreateMutexA_orig(lpMutexAttributes, bInitialOwner, sMutex);
-    }
-    return CreateMutexA_orig(lpMutexAttributes, bInitialOwner, lpName);
-}
-
-
 typedef decltype(&CreateWindowExA) CreateWindowExA_t;
 static CreateWindowExA_t CreateWindowExA_orig = reinterpret_cast<CreateWindowExA_t>(GetAddress("USER32", "CreateWindowExA"));
 static WNDPROC g_WndProc;
@@ -89,6 +73,19 @@ HWND WINAPI CreateWindowExA_hook(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR l
 }
 
 
+typedef decltype(&GetStartupInfoA) GetStartupInfoA_t;
+static GetStartupInfoA_t GetStartupInfoA_orig = reinterpret_cast<GetStartupInfoA_t>(GetAddress("KERNEL32", "GetStartupInfoA"));
+static bool bAttached = false;
+
+void WINAPI GetStartupInfoA_hook(LPSTARTUPINFOA lpStartupInfo) {
+    if (!bAttached && lpStartupInfo && reinterpret_cast<uintptr_t>(_ReturnAddress()) == 0x00B58455) {
+        AttachClientHooks();
+        bAttached = true;
+    }
+    GetStartupInfoA_orig(lpStartupInfo);
+}
+
+
 typedef decltype(&RegCreateKeyExA) RegCreateKeyExA_t;
 static RegCreateKeyExA_t RegCreateKeyExA_orig = reinterpret_cast<RegCreateKeyExA_t>(GetAddress("ADVAPI32", "RegCreateKeyExA"));
 
@@ -104,7 +101,7 @@ static WSPPROC_TABLE g_ProcTable;
 int WINAPI WSPConnect_hook(SOCKET s, const struct sockaddr FAR* name, int namelen, LPWSABUF lpCallerData, LPWSABUF lpCalleeData, LPQOS lpSQOS, LPQOS lpGQOS, LPINT lpErrno) {
     const char* sName = inet_ntoa(((sockaddr_in*) name)->sin_addr);
     if (strstr(sName, CONFIG_NEXON_SEARCH)) {
-        InetPton(AF_INET, g_sServerAddress ? g_sServerAddress : CONFIG_SERVER_ADDRESS, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
+        InetPton(AF_INET, g_sServerAddress, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
         if (g_nServerPort) {
             ((sockaddr_in*) name)->sin_port = htons(g_nServerPort);
         }
@@ -128,8 +125,8 @@ int WINAPI WSPStartup_hook(WORD wVersionRequested, LPWSPDATA lpWSPData, LPWSAPRO
 
 
 void AttachSystemHooks() {
-    ATTACH_HOOK(CreateMutexA_orig, CreateMutexA_hook);
     ATTACH_HOOK(CreateWindowExA_orig, CreateWindowExA_hook);
+    ATTACH_HOOK(GetStartupInfoA_orig, GetStartupInfoA_hook);
     ATTACH_HOOK(RegCreateKeyExA_orig, RegCreateKeyExA_hook);
     ATTACH_HOOK(WSPStartup_orig, WSPStartup_hook);
 }
