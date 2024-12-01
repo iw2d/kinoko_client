@@ -433,6 +433,7 @@ void AttachClientBypass() {
     ATTACH_HOOK(CLogin__SendSelectCharPacket, CLogin__SendSelectCharPacket_hook);
 
     PatchJmp(CWvsContext__OnEnterField_jmp, reinterpret_cast<uintptr_t>(&CWvsContext__OnEnterField_hook));
+    PatchJmp(0x004AFCF3, 0x004AFE30); // CClientSocket::OnAliveReq
 
     PatchRetZero(0x004AB900); // DR_check
     PatchRetZero(0x0045EBD0); // Hidedll
