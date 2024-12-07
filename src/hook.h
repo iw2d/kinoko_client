@@ -22,6 +22,7 @@ void AttachResolutionMod();
 void AttachChatBalloonMod();
 void AttachPortableChairMod();
 void AttachTemporaryStatMod();
+void AttachHyperTeleportMod();
 void AttachExceptionHandler();
 
 static void AttachClientHooks() {
@@ -33,6 +34,7 @@ static void AttachClientHooks() {
     AttachChatBalloonMod();
     AttachPortableChairMod();
     AttachTemporaryStatMod();
+    AttachHyperTeleportMod();
     AttachExceptionHandler();
 }
 

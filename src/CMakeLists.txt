@@ -13,6 +13,7 @@ add_library(injector SHARED
     chatballoon.cpp
     portablechair.cpp
     temporarystat.cpp
+    hyperteleport.cpp
 )
 
 target_precompile_headers(injector PRIVATE pch.h)
