@@ -58,13 +58,23 @@ void __fastcall CWorldMapDlg__OnMouseButton_hook(void* _ECX, void* _EDX, unsigne
             unsigned int dx = abs(pWMI->nX - (rx - 13));
             unsigned int dy = abs(pWMI->nY - (ry - 24));
             if (dx <= uWidth / 3 && dy <= uWidth / 3) {
+                // Create modal
+                ZXString<char> sText;
+                // ZXString<char>::Format(&sText, "Are you sure you want to move to %s?", pWMI->sMapName._m_pStr);
+                reinterpret_cast<ZXString<char>* (__cdecl*)(ZXString<char>*, const char*, ...)>(0x00443C70)(&sText, "Are you sure you want to move to %s?", pWMI->sMapName._m_pStr);
+                // if (CUtilDlg::YesNo(sText, nullptr, nullptr, true, true) != 6)
+                if (reinterpret_cast<int (__cdecl*)(ZXString<char>, void*, void*, int, int)>(0x009773B0)(sText, nullptr, nullptr, true, true) != 6) {
+                    return;
+                }
                 // Send transfer field request
                 unsigned int dwTargetField = pWMI->adwField.a[0];
                 // field = get_field();
                 void* field = reinterpret_cast<void* (__cdecl*)()>(0x00439320)();
                 if (field) {
-                    // CField::SendTransferFieldRequest(field, dwTargetField, "", false, 0, 0);
+                    // CField::SendTransferFieldRequest(field, dwTargetField, nullptr, false, 0, 0);
                     reinterpret_cast<int (__thiscall*)(void*, unsigned int, const char*, unsigned char, unsigned int, unsigned int)>(0x005345C0)(field, dwTargetField, nullptr, false, 0, 0);
+                    // CDialog::SetRet(pThis, 6);
+                    reinterpret_cast<void (__thiscall*)(void*, int)>(0x00429290)(pThis, 6);
                 }
             }
         }
