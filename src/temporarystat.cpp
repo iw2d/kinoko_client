@@ -33,7 +33,10 @@ public:
         MEMBER_AT(int, 0x20, nID)
         MEMBER_AT(IWzGr2DLayerPtr, 0x2C, pLayer)
         MEMBER_AT(IWzGr2DLayerPtr, 0x30, pLayerShadow)
+        MEMBER_AT(int, 0x34, nIndexShadow)
+        MEMBER_AT(int, 0x3C, bNoShadow)
         MEMBER_AT(int, 0x40, tLeft)
+        MEMBER_AT(int, 0x44, tLeftUnit)
     };
 
     ZList<ZRef<TEMPORARY_STAT>> m_lTemporaryStat;
@@ -91,6 +94,87 @@ void __fastcall CTemporaryStatView__AdjustPosition_hook(CTemporaryStatView* pThi
 }
 
 
+static IWzPropertyPtr g_pPropSecond;
+
+typedef void (__thiscall* CTemporaryStatView__TEMPORARY_STAT__UpdateShadowIndex_t)(CTemporaryStatView::TEMPORARY_STAT*);
+static auto CTemporaryStatView__TEMPORARY_STAT__UpdateShadowIndex = reinterpret_cast<CTemporaryStatView__TEMPORARY_STAT__UpdateShadowIndex_t>(0x0075D560);
+
+void __fastcall CTemporaryStatView__TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPORARY_STAT* pThis, void* _EDX) {
+    if (pThis->bNoShadow()) {
+        return;
+    }
+    int nSeconds = pThis->tLeft() / 1000;
+    if (nSeconds == pThis->nIndexShadow()) {
+        return;
+    }
+
+    // Hijack nIndexShadow to redraw every second
+    pThis->nIndexShadow() = nSeconds;
+    int nShadowIndex = 0;
+    if (pThis->tLeftUnit()) {
+        nShadowIndex = pThis->tLeft() / pThis->tLeftUnit();
+        if (nShadowIndex < 0) {
+            nShadowIndex = 0;
+        } else if (nShadowIndex > 15) {
+            nShadowIndex = 15;
+        }
+    }
+
+    // Remove old canvas
+    Ztl_variant_t vIndex(-2, VT_I4);
+    IWzCanvasPtr pOldCanvas;
+    CHECK_HRESULT(pThis->pLayerShadow()->raw_RemoveCanvas(vIndex, &pOldCanvas));
+
+    // Resolve shadow canvas
+    wchar_t sShadowProperty[1024];
+    swprintf(sShadowProperty, 1024, L"UI/UIWindow.img/Skill/CoolTime/%d", nShadowIndex);
+    Ztl_variant_t vEmpty;
+    Ztl_variant_t vShadowProperty;
+    CHECK_HRESULT(get_rm()->raw_GetObject(sShadowProperty, vEmpty, vEmpty, &vShadowProperty));
+    IUnknownPtr pShadowUnknown;
+    // get_unknown(std::addressof(pShadowUnknown), &vShadowProperty);
+    reinterpret_cast<IUnknownPtr* (__cdecl*)(IUnknownPtr*, Ztl_variant_t*)>(0x004176E0)(std::addressof(pShadowUnknown), &vShadowProperty);
+    IWzCanvasPtr pShadowCanvas(pShadowUnknown);
+
+    // Create new canvas, copy shadow
+    IWzCanvasPtr pNewCanvas;
+    PcCreateObject<IWzCanvasPtr>(L"Canvas", std::addressof(pNewCanvas), nullptr);
+    CHECK_HRESULT(pNewCanvas->raw_Create(32, 32, vEmpty, vEmpty));
+    Ztl_variant_t vAlpha(255, VT_I4);
+    CHECK_HRESULT(pNewCanvas->raw_Copy(0, 0, pShadowCanvas, vAlpha));
+
+    // Draw number on canvas
+    if (!g_pPropSecond) {
+        Ztl_variant_t vEmpty;
+        Ztl_variant_t result;
+        CHECK_HRESULT(get_rm()->raw_GetObject(L"UI/Basic.img/ItemNo", vEmpty, vEmpty, &result));
+        IUnknownPtr pUnknown;
+        // get_unknown(std::addressof(pUnknown), &result);
+        reinterpret_cast<IUnknownPtr* (__cdecl*)(IUnknownPtr*, Ztl_variant_t*)>(0x004176E0)(std::addressof(pUnknown), &result);
+        g_pPropSecond = IWzPropertyPtr(pUnknown);
+    }
+    int nOffset = 2;
+    if (nSeconds >= 60) {
+        nSeconds = nSeconds / 60; // display minutes
+    } else if (nSeconds >= 10) {
+        nOffset = 15;
+    } else {
+        nOffset = 22;
+    }
+    if (nSeconds > 999 || nSeconds <= 0) {
+        return;
+    }
+    // draw_number_by_image(pNewCanvas, 2, 18, nSeconds, g_pPropSecond, 0)
+    reinterpret_cast<int (__cdecl*)(IWzCanvasPtr, int, int, int, IWzPropertyPtr, int)>(0x00965780)(pNewCanvas, nOffset, 19, nSeconds, g_pPropSecond, 0);
+
+    // Insert canvas
+    Ztl_variant_t vDelay(500, VT_I4);
+    Ztl_variant_t vAlpha0(210, VT_I4);
+    Ztl_variant_t vAlpha1(64, VT_I4);
+    Ztl_variant_t vResult;
+    CHECK_HRESULT(pThis->pLayerShadow()->raw_InsertCanvas(pNewCanvas, vDelay, vAlpha0, vAlpha1, vEmpty, vEmpty, &vResult));
+}
+
 
 typedef void (__thiscall* CWvsContext__SetSkillCooltimeOver_t)(CWvsContext*, int, int);
 static auto CWvsContext__SetSkillCooltimeOver = reinterpret_cast<CWvsContext__SetSkillCooltimeOver_t>(0x009DB0D0);
@@ -144,6 +228,8 @@ void AttachTemporaryStatMod() {
     ATTACH_HOOK(CTemporaryStatView__Hide, CTemporaryStatView__Hide_hook);
     ATTACH_HOOK(CTemporaryStatView__Update, CTemporaryStatView__Update_hook);
     ATTACH_HOOK(CTemporaryStatView__AdjustPosition, CTemporaryStatView__AdjustPosition_hook);
+
+    ATTACH_HOOK(CTemporaryStatView__TEMPORARY_STAT__UpdateShadowIndex, CTemporaryStatView__TEMPORARY_STAT__UpdateShadowIndex_hook);
 
     ATTACH_HOOK(CWvsContext__SetSkillCooltimeOver, CWvsContext__SetSkillCooltimeOver_hook);
     ATTACH_HOOK(CWvsContext__RemoveSkillCooltimeReset, CWvsContext__RemoveSkillCooltimeReset_hook);

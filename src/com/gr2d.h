@@ -96,7 +96,7 @@ DECLARE_INTERFACE_IID_(IWzGr2DLayer, IWzShape2D, "6dc8c7ce-8e81-4420-b4f6-4b60b7
     STDMETHOD(put_blend)(THIS_ LAYER_BLENDTYPE) PURE;
     STDMETHOD(get_overlay)(THIS_ tagVARIANT*) PURE;
     STDMETHOD(put_overlay)(THIS_ tagVARIANT) PURE;
-    STDMETHOD(get_canvas)(THIS_ IWzCanvas**) PURE;
+    STDMETHOD(get_canvas)(THIS_ tagVARIANT, IWzCanvas**) PURE;
     STDMETHOD(raw_InsertCanvas)(THIS_ IWzCanvas* pCanvas, tagVARIANT vDelay, tagVARIANT vAlpha0, tagVARIANT vAlpha1, tagVARIANT vZoom0, tagVARIANT vZoom1, tagVARIANT*) PURE;
     STDMETHOD(raw_RemoveCanvas)(THIS_ tagVARIANT vIndex, IWzCanvas**) PURE;
     STDMETHOD(raw_ShiftCanvas)(THIS_ tagVARIANT vValue) PURE;
