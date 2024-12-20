@@ -29,6 +29,8 @@ DWORD WINAPI DataThread(LPVOID lpParam) {
     DEBUG_MESSAGE("DataThread - CWvsApp::InitializeGameData");
     // CWvsApp::InitializeGameData(TSingleton<CWvsApp>::GetInstance());
     reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C8440)(CWvsApp::GetInstance());
+    // extra resources
+    LoadDamageSkin();
     g_bGameDataLoaded = true;
     CloseHandle(g_hDataThread);
     DEBUG_MESSAGE("DataThread - Complete!");

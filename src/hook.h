@@ -19,11 +19,15 @@ void AttachClientInlink();
 void AttachClientHelper();
 void AttachStringPoolMod();
 void AttachResolutionMod();
+void AttachDamageSkinMod();
 void AttachChatBalloonMod();
 void AttachPortableChairMod();
 void AttachTemporaryStatMod();
 void AttachHyperTeleportMod();
 void AttachExceptionHandler();
+
+// extra resources
+void LoadDamageSkin();
 
 static void AttachClientHooks() {
     AttachClientBypass();
@@ -31,6 +35,7 @@ static void AttachClientHooks() {
     AttachClientHelper();
     AttachStringPoolMod();
     AttachResolutionMod();
+    AttachDamageSkinMod();
     AttachChatBalloonMod();
     AttachPortableChairMod();
     AttachTemporaryStatMod();

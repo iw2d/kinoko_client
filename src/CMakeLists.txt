@@ -10,6 +10,7 @@ add_library(injector SHARED
     inlink.cpp
     stringpool.cpp
     resolution.cpp
+    damageskin.cpp
     chatballoon.cpp
     portablechair.cpp
     temporarystat.cpp
