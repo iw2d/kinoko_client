@@ -50,6 +50,13 @@ template<typename T>
 class ZArray {
 public:
     T* a = nullptr;
+
+    size_t GetCount() {
+        if (this->a) {
+            return reinterpret_cast<size_t*>(this->a)[-1];
+        }
+        return 0;
+    }
 };
 static_assert(sizeof(ZArray<int>) == 0x4);
 
