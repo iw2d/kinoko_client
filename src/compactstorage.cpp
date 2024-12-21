@@ -46,8 +46,8 @@ void __fastcall CTrunkDlg__DrawGetItem_hook(CTrunkDlg* pThis, void* _EDX, IWzCan
     int nGetItemCount = pThis->m_aGetItem().GetCount();
     for (int i = 0; i < 25; ++i) {
         // resolve item and position
-        int nX = 12 + (i % 5) * 42;
-        int nY = 127 + (i / 5) * 42;
+        int nX = 10 + (i % 5) * 42;
+        int nY = 125 + (i / 5) * 42;
         int nItemIdx = i + (nGetCurPos * 5);
         if (nItemIdx >= nGetItemCount) {
             // color disabled slot
@@ -87,8 +87,8 @@ void __fastcall CTrunkDlg__DrawGetItem_hook(CTrunkDlg* pThis, void* _EDX, IWzCan
         int nInventoryType = item.nItemID / 1000000;
         if (nInventoryType == 2 || nInventoryType == 3 || nInventoryType == 4) {
             int nItemNumber = reinterpret_cast<int (__thiscall*)(void*)>(vtable[8])(pSlotBase);
-            // draw_number_by_image(pCanvas);
-            reinterpret_cast<int (__cdecl*)(IWzCanvasPtr, int, int, int, IWzPropertyPtr, int)>(0x00965780)(pCanvas, nX - 2, nY - 14, nItemNumber, pThis->m_pImgFontNumber(), 0);
+            // draw_number_by_image(pCanvas, nX, nY - 12, nItemNumber, pThis->m_pImgFontNumber(), 0);
+            reinterpret_cast<int (__cdecl*)(IWzCanvasPtr, int, int, int, IWzPropertyPtr, int)>(0x00965780)(pCanvas, nX, nY - 12, nItemNumber, pThis->m_pImgFontNumber(), 0);
         }
     }
 }
@@ -100,8 +100,8 @@ int __fastcall CTrunkDlg__GetItemIndexFromPoint_hook(CTrunkDlg* pThis, void* _ED
     int nGetCurPos = pThis->m_pSBGet().p->m_nCurPos();
     int nGetItemCount = pThis->m_aGetItem().GetCount();
     for (int i = 0; i < 25; ++i) {
-        int nX = 12 + (i % 5) * 42;
-        int nY = 93 + (i / 5) * 42;
+        int nX = 10 + (i % 5) * 42;
+        int nY = 91 + (i / 5) * 42;
         int nItemIdx = i + (nGetCurPos * 5);
         if (nItemIdx >= nGetItemCount) {
             break;
