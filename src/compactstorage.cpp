@@ -152,7 +152,7 @@ void __fastcall CTrunkDlg__SetScrollBar_hook(CTrunkDlg* pThis, void* _EDX) {
     } else {
         nPutItemRange = 0;
     }
-    pThis->m_pSBPut().p->SetScrollRange(nPutItemRange - 3);
+    pThis->m_pSBPut().p->SetScrollRange(nPutItemRange);
 }
 
 
