@@ -6,6 +6,7 @@ add_library(injector SHARED
     system.cpp
     resman.cpp
     bypass.cpp
+    custom.cpp
     helper.cpp
     inlink.cpp
     stringpool.cpp
