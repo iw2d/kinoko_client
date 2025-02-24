@@ -20,7 +20,7 @@ enum GR2D_ANITYPE {
 };
 
 
-DECLARE_INTERFACE_IID_(IWzGr2DLayer, IWzShape2D, "6dc8c7ce-8e81-4420-b4f6-4b60b7d5fcdf") {
+DECLARE_INTERFACE_IID_(IWzGr2DLayer, IWzVector2D, "6dc8c7ce-8e81-4420-b4f6-4b60b7d5fcdf") {
     BEGIN_INTERFACE;
 
     /*** IUnknown methods ***/
@@ -55,14 +55,14 @@ DECLARE_INTERFACE_IID_(IWzGr2DLayer, IWzShape2D, "6dc8c7ce-8e81-4420-b4f6-4b60b7
     STDMETHOD(get_currentTime)(THIS_ int* pnTime) PURE;
     STDMETHOD(put_currentTime)(THIS_ int nTime) PURE;
     STDMETHOD(get_origin)(THIS_ tagVARIANT* ppOrigin) PURE;
-    STDMETHOD(put_origin)(THIS_ tagVARIANT* pOrigin) PURE;
+    STDMETHOD(put_origin)(THIS_ tagVARIANT pOrigin) PURE;
     STDMETHOD(get_rx)(THIS_ int* pnX) PURE;
     STDMETHOD(put_rx)(THIS_ int nX) PURE;
     STDMETHOD(get_ry)(THIS_ int* pnY) PURE;
     STDMETHOD(put_ry)(THIS_ int nY) PURE;
     STDMETHOD(get_a)(THIS_ long double* pa) PURE;
     STDMETHOD(get_ra)(THIS_ long double* pra) PURE;
-    STDMETHOD(put_rx)(THIS_ long double ra) PURE;
+    STDMETHOD(put_ra)(THIS_ long double ra) PURE;
     STDMETHOD(get_flipX)(THIS_ int* pnFlipX) PURE;
     STDMETHOD(put_flipX)(THIS_ int nFlipX) PURE;
     STDMETHOD(raw__GetSnapshot)(THIS_ int* px, int* py, int* prx, int* pry, int* pxOrg, int* pyOrg, long double* pa, long double *paOrg, tagVARIANT vTime) PURE;

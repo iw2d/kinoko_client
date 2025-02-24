@@ -43,7 +43,7 @@ void InitializeResMan(const IWzResManPtr& rm) {
 
         DEBUG_MESSAGE("InitializeResMan - Base.wz");
         const IWzPackagePtr package;
-        PcCreateObject<IWzPackagePtr>(L"Namespace#Package", const_cast<IWzPackagePtr*>(&package), nullptr);
+        PcCreateObject<IWzPackagePtr>(L"NameSpace#Package", const_cast<IWzPackagePtr*>(&package), nullptr);
         Ztl_variant_t vBaseWz;
         CHECK_HRESULT(fs->get_item(L"Base.wz", &vBaseWz));
         const IWzSeekableArchivePtr archive(vBaseWz.GetUnknown(false, false));
@@ -84,7 +84,7 @@ void InitializeResMan(const IWzResManPtr& rm) {
             CHECK_HRESULT(subPackage->raw_Init(L"95", const_cast<wchar_t*>(asNameOrder[i]), subArchive));
 
             const IWzNameSpacePtr subNameSpace;
-            PcCreateObject<IWzNameSpacePtr>(L"NameSpace#Package", const_cast<IWzNameSpacePtr*>(&subNameSpace), nullptr);
+            PcCreateObject<IWzNameSpacePtr>(L"NameSpace", const_cast<IWzNameSpacePtr*>(&subNameSpace), nullptr);
             CHECK_HRESULT(subNameSpace->raw_Mount(L"/", subPackage, 0));
             CHECK_HRESULT(get_sub(i)->raw_Mount(L"/", subNameSpace, 1));
         }

@@ -11,7 +11,7 @@ DECLARE_INTERFACE_IID_(IWzNameSpaceProperty, IUnknown, "a0b5164f-f89b-41b8-8264-
     STDMETHOD_(ULONG, Release)(THIS) PURE;
 
     /*** IWzNameSpaceProperty methods ***/
-    STDMETHOD(get_item)(THIS_ wchar_t*, tagVARIANT*) PURE;
+    STDMETHOD(get_item)(THIS_ tagVARIANT, tagVARIANT*) PURE;
     STDMETHOD(get_name)(THIS_ wchar_t**) PURE;
     STDMETHOD(get_path)(THIS_ wchar_t**) PURE;
     STDMETHOD(get_size)(THIS_ tagVARIANT*) PURE;
