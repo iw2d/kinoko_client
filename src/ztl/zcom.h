@@ -20,6 +20,12 @@ public:
     inline Ztl_bstr_t(const char* s) {
         reinterpret_cast<void (__thiscall*)(Ztl_bstr_t*, const char*)>(0x00404890)(this, s);
     }
+    inline Ztl_bstr_t(const wchar_t* s) {
+        reinterpret_cast<void (__thiscall*)(Ztl_bstr_t*, const wchar_t*)>(0x004048B0)(this, s);
+    }
+    inline Ztl_bstr_t(const Ztl_bstr_t& that) {
+        reinterpret_cast<void (__thiscall*)(Ztl_bstr_t*, const Ztl_bstr_t&)>(0x00404B90)(this, that);
+    }
     inline ~Ztl_bstr_t() {
         reinterpret_cast<void (__thiscall*)(Ztl_bstr_t*)>(0x004048D0)(this);
     }

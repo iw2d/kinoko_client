@@ -8,6 +8,7 @@ add_library(injector SHARED
     bypass.cpp
     helper.cpp
     inlink.cpp
+    itemeff.cpp
     stringpool.cpp
     resolution.cpp
     chatballoon.cpp

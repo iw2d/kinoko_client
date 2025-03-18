@@ -17,6 +17,7 @@ void AttachSystemHooks();
 void AttachClientBypass();
 void AttachClientInlink();
 void AttachClientHelper();
+void AttachItemEffectMod();
 void AttachStringPoolMod();
 void AttachResolutionMod();
 void AttachChatBalloonMod();
@@ -29,6 +30,7 @@ static void AttachClientHooks() {
     AttachClientBypass();
     AttachClientInlink();
     AttachClientHelper();
+    AttachItemEffectMod();
     AttachStringPoolMod();
     AttachResolutionMod();
     AttachChatBalloonMod();
