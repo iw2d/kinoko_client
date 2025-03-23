@@ -186,7 +186,7 @@ void AttachClientHelper() {
     ATTACH_HOOK(CCurseProcess__ProcessString, CCurseProcess__ProcessString_hook); // disable profanity filter
     ATTACH_HOOK(CInputSystem__DetectJoystick, CInputSystem__DetectJoystick_hook); // fix stutter
     ATTACH_HOOK(CVecCtrl__SetImpactNext, CVecCtrl__SetImpactNext_hook); // vertical double jump
-    ATTACH_HOOK(CUserLocal__Jump, CUserLocal__Jump_hook); // double jump with jump key
+    // ATTACH_HOOK(CUserLocal__Jump, CUserLocal__Jump_hook); // double jump with jump key
 
 #ifdef _DEBUG
     // Add ID to map name, item description, skill description, quest info
