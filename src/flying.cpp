@@ -29,9 +29,7 @@ void __stdcall HandleFlyingDash(CVecCtrlUser* pVecCtrl) {
     int nInputX = pVecCtrl->m_nInputX().Fuse();
     int nInputY = pVecCtrl->m_nInputY().Fuse();
     double dModifier = sqrt(nInputX * nInputX + nInputY * nInputY);
-    if (dModifier == 0) {
-        pVecCtrl->m_apvy().Tear(-dJumpVelocity); // jump up if no input
-    } else {
+    if (dModifier != 0) {
         pVecCtrl->m_apvx().Tear(dJumpVelocity * (nInputX / dModifier));
         pVecCtrl->m_apvy().Tear(dJumpVelocity * (nInputY / dModifier));
     }
@@ -55,7 +53,7 @@ void __fastcall CUserLocal__Jump_hook(void* _ECX, void* _EDX, int bEnforced) {
     if (pVecCtrl->m_pfh() || reinterpret_cast<void* (__thiscall*)(CVecCtrlUser*)>(0x004BBE80)(pVecCtrl)) {
         return;
     }
-    if (!bEnforced && (pVecCtrl->m_nInputX().Fuse() || pVecCtrl->m_nInputY().Fuse() < 0)) {
+    if (!bEnforced) {
         pVecCtrl->m_bUserFlyingSkill() = 1;
     }
 }
