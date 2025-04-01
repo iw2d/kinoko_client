@@ -1,23 +1,32 @@
-#include <new>
-
 #include "pch.h"
 #include "client.h"
 #include "hook.h"
 #include "debug.h"
 
-#define SAVE_VTABLES(this) \
-    void** vtable1 = *reinterpret_cast<void***>(this); \
-    void** vtable2 = *reinterpret_cast<void***>(static_cast<IUIMsgHandler*>(this)); \
-    void** vtable3 = *reinterpret_cast<void***>(static_cast<ZRefCounted*>(this));
+#define SAVE_VTABLES(TARGET) \
+    void** vtable1 = *reinterpret_cast<void***>(TARGET); \
+    void** vtable2 = *reinterpret_cast<void***>(static_cast<IUIMsgHandler*>(TARGET)); \
+    void** vtable3 = *reinterpret_cast<void***>(static_cast<ZRefCounted*>(TARGET));
 
-#define RESTORE_VTABLES(this) \
-    *reinterpret_cast<void***>(this) = vtable1; \
-    *reinterpret_cast<void***>(static_cast<IUIMsgHandler*>(this)) = vtable2; \
-    *reinterpret_cast<void***>(static_cast<ZRefCounted*>(this)) = vtable3;
+#define RESTORE_VTABLES(TARGET) \
+    *reinterpret_cast<void***>(TARGET) = vtable1; \
+    *reinterpret_cast<void***>(static_cast<IUIMsgHandler*>(TARGET)) = vtable2; \
+    *reinterpret_cast<void***>(static_cast<ZRefCounted*>(TARGET)) = vtable3;
 
 
 struct CRTTI {
     const CRTTI* m_pPrev;
+
+    int IsKindOf(const CRTTI* pRTTI) const {
+        CRTTI result = { this };
+        while (result.m_pPrev != pRTTI) {
+            result.m_pPrev = result.m_pPrev->m_pPrev;
+            if (!result.m_pPrev) {
+                return 0;
+            }
+        }
+        return 1;
+    }
 };
 
 class IGObj {
@@ -50,17 +59,32 @@ public:
 };
 static_assert(sizeof(IUIMsgHandler) == 0x4);
 
-class ZRefCounted {
-public:
-    union {
-        volatile long m_nRef;
-        ZRefCounted* m_pNext;
-    };
-    ZRefCounted* m_pPrev;
 
-    virtual ~ZRefCounted() = default;
+class CUIToolTip;
+
+class CCtrlWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
+public:
+    unsigned char gap0[0x34 - sizeof(IGObj) - sizeof(IUIMsgHandler) - sizeof(ZRefCounted)];
 };
-static_assert(sizeof(ZRefCounted) == 0xC);
+static_assert(sizeof(CCtrlWnd) == 0x34);
+
+class CCtrlTab : public CCtrlWnd {
+public:
+    struct CREATEPARAM {
+        int bDrawBaseImage;
+        int nTabSpace;
+    };
+    static_assert(sizeof(CREATEPARAM) == 0x8);
+
+    unsigned char gap0[0x70 - sizeof(CCtrlWnd)];
+};
+static_assert(sizeof(CCtrlTab) == 0x70);
+
+class CCtrlButton : public CCtrlWnd {
+public:
+    unsigned char gap0[0xADC - sizeof(CCtrlWnd)];
+};
+static_assert(sizeof(CCtrlButton) == 0xADC);
 
 
 class CWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
@@ -96,6 +120,11 @@ public:
     virtual void OnMouseEnter(int bEnter) override { reinterpret_cast<void (__thiscall*)(IUIMsgHandler*, int)>(0x009AD370)(this, bEnter); }
     virtual int GetAbsLeft() override { return reinterpret_cast<int (__thiscall*)(IUIMsgHandler*)>(0x009AD480)(this); }
     virtual int GetAbsTop() override { return reinterpret_cast<int (__thiscall*)(IUIMsgHandler*)>(0x009AD570)(this); }
+
+    /*** ZRefCounted methods ***/
+    virtual ~CWnd() override {
+        reinterpret_cast<void (__thiscall*)(CWnd*)>(0x009AEBC0)(this);
+    }
 };
 static_assert(sizeof(CWnd) == 0x80);
 
@@ -103,7 +132,12 @@ static_assert(sizeof(CWnd) == 0x80);
 class CUIWnd : public CWnd {
 public:
     static inline const CRTTI* ms_pRTTI_CUIWnd = reinterpret_cast<const CRTTI*>(0x00C618E8);
-    unsigned char padding[0xB08 - sizeof(CWnd)];
+    unsigned char gap0[0xB08 - sizeof(CWnd)];
+
+    MEMBER_AT(ZRef<CCtrlButton>, 0x80, m_pBtClose)
+    MEMBER_AT(CUIToolTip, 0x88, m_uiToolTip)
+    MEMBER_AT(ZArray<unsigned char>, 0xB00, m_abOption)
+    MEMBER_AT(ZXString<wchar_t>, 0xB04, m_sBackgrndUOL)
 
     /*** CWnd methods ***/
     virtual void OnCreate(void* pData) override { reinterpret_cast<void (__thiscall*)(CUIWnd*, void*)>(0x008DDA90)(this, pData); }
@@ -120,6 +154,15 @@ public:
     virtual int OnSetFocus(int bFocus) override { return 0; }
     virtual void OnMouseEnter(int bEnter) override { reinterpret_cast<void (__thiscall*)(IUIMsgHandler*, int)>(0x008DD2A0)(this, bEnter); }
     virtual void ClearToolTip() override { reinterpret_cast<void (__thiscall*)(IUIMsgHandler*)>(0x004ABE20)(this); }
+
+    /*** ZRefCounted methods ***/
+    virtual ~CUIWnd() override {
+        // implement CUIWnd destructor so we dont call CWnd destructor twice
+        reinterpret_cast<void (__thiscall*)(ZXString<wchar_t>*)>(0x00403920)(&this->m_sBackgrndUOL());  // ZXString<wchar_t>::~ZXString<wchar_t>(&this->m_sBackgrndUOL());
+        reinterpret_cast<void (__thiscall*)(ZArray<unsigned char>*)>(0x0042AAE0)(&this->m_abOption());  // ZArray<unsigned char>::RemoveAll(&this->m_abOption());
+        reinterpret_cast<void (__thiscall*)(CUIToolTip*)>(0x00882F30)(&this->m_uiToolTip());            // CUIToolTip::~CUIToolTip(&this->m_uiToolTip());
+        this->m_pBtClose() = nullptr;
+    }
 };
 static_assert(sizeof(CUIWnd) == 0xB08);
 
@@ -127,6 +170,7 @@ static_assert(sizeof(CUIWnd) == 0xB08);
 class CUIItemBT : public CUIWnd {
 public:
     static inline const CRTTI ms_RTTI_CUIItemBT = { CUIWnd::ms_pRTTI_CUIWnd };
+    ZRef<CCtrlTab> m_pTab;
 
     virtual void OnCreate(void* pData) override {
         ZXString<wchar_t> sBackgroundUOL;
@@ -134,23 +178,30 @@ public:
         reinterpret_cast<void (__thiscall*)(ZXString<wchar_t>*, const wchar_t*, int)>(0x00416D00)(&sBackgroundUOL, L"UI/UIWindowBT.img/CharacterUI/Item/FullBackgrnd", -1);
         // CUIWnd::OnCreate(this, pData, sBackgroundUOL, 1);
         reinterpret_cast<void (__thiscall*)(CUIWnd*, void*, ZXString<wchar_t>, int)>(0x008DDB30)(this, pData, sBackgroundUOL, 1);
+
+        CCtrlTab::CREATEPARAM paramTab;
+        paramTab.bDrawBaseImage = 0;
+        paramTab.nTabSpace = 1;
+        auto pTab = reinterpret_cast<CCtrlTab*>(ZAllocEx<ZAllocAnonSelector>::s_Alloc(sizeof(CCtrlTab)));
+        // CCtrlTab::CCtrlTab(this->m_pTab);
+        reinterpret_cast<void (__thiscall*)(CCtrlTab*)>(0x004EE590)(pTab);
+        this->m_pTab = pTab;
+        // CCtrlTab::CreateCtrl(this->m_pTab, this, 2000, 8, 9, 26, 306, 19, &paramTab);
+        reinterpret_cast<void (__thiscall*)(CCtrlTab*, CWnd*, unsigned int, int, int, int, int, int, void*)>(0x004EE240)(this->m_pTab.p, this, 2000, 8, 9, 26, 306, 19, &paramTab);
     }
     virtual const CRTTI* GetRTTI() override {
         return &ms_RTTI_CUIItemBT;
     }
     virtual int IsKindOf(const CRTTI* pRTTI) override {
-        CRTTI result = { &ms_RTTI_CUIItemBT };
-        while (result.m_pPrev != pRTTI) {
-            result.m_pPrev = result.m_pPrev->m_pPrev;
-            if (!result.m_pPrev) {
-                return 0;
-            }
-        }
-        return 1;
+        return ms_RTTI_CUIItemBT.IsKindOf(pRTTI);
     }
-    virtual ~CUIItemBT() override {
-        // CUIWnd::~CUIWnd(this);
-        reinterpret_cast<void (__thiscall*)(CUIWnd*)>(0x008DD780)(this);
+    virtual ~CUIItemBT() override = default;
+
+    void* operator new(size_t size) {
+        return ZAllocEx<ZAllocAnonSelector>::s_Alloc(size);
+    }
+    void operator delete(void* ptr) {
+        ZAllocEx<ZAllocAnonSelector>::s_Free(ptr);
     }
 
     CUIItemBT() {
@@ -170,13 +221,9 @@ void __fastcall CWvsContext__UI_Open_hook(void* _ECX, void* _EDX, unsigned int n
     if (nUIType == 0) {
         ZRef<CUIItemBT>* pUIItem = reinterpret_cast<ZRef<CUIItemBT>*>(reinterpret_cast<uintptr_t>(_ECX) + 0x3E30);
         if (!pUIItem->p) {
-            CUIItemBT* p = reinterpret_cast<CUIItemBT*>(ZAllocEx<ZAllocAnonSelector>::s_Alloc(sizeof(CUIItemBT)));
-            if (p) {
-                new (p) CUIItemBT();
-            }
-            pUIItem->p = p;
-            InterlockedIncrement(&pUIItem->p->m_nRef);
+            *pUIItem = new CUIItemBT();
         }
+        return;
     }
     CWvsContext__UI_Open(_ECX, nUIType, nDefaultTab);
 }
@@ -189,14 +236,9 @@ void __fastcall CWvsContext__UI_Close_hook(void* _ECX, void* _EDX, unsigned int 
         if (pUIItem->p) {
             // CWnd::Destroy(pUIItem->p);
             reinterpret_cast<void (__thiscall*)(void*)>(0x009B0E50)(pUIItem->p);
-            // ZRef<>::operator=(&pUIItem, nullptr);
-            if (!InterlockedDecrement(&pUIItem->p->m_nRef)) {
-                InterlockedIncrement(&pUIItem->p->m_nRef);
-                pUIItem->p->~CUIItemBT();
-                ZAllocEx<ZAllocAnonSelector>::s_Free(pUIItem->p);
-            }
-            pUIItem->p = nullptr;
+            *pUIItem = nullptr;
         }
+        return;
     }
     CWvsContext__UI_Close(_ECX, nUIType);
 }

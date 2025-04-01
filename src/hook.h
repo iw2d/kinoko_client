@@ -17,13 +17,8 @@ void AttachSystemHooks();
 void AttachClientBypass();
 void AttachClientInlink();
 void AttachClientHelper();
-void AttachItemEffectMod();
 void AttachStringPoolMod();
 void AttachResolutionMod();
-void AttachChatBalloonMod();
-void AttachPortableChairMod();
-void AttachTemporaryStatMod();
-void AttachHyperTeleportMod();
 void AttachCustomUIWindowMod();
 void AttachExceptionHandler();
 
@@ -31,13 +26,7 @@ static void AttachClientHooks() {
     AttachClientBypass();
     AttachClientInlink();
     AttachClientHelper();
-    AttachItemEffectMod();
     AttachStringPoolMod();
-    AttachResolutionMod();
-    AttachChatBalloonMod();
-    AttachPortableChairMod();
-    AttachTemporaryStatMod();
-    AttachHyperTeleportMod();
     AttachCustomUIWindowMod();
     AttachExceptionHandler();
 }

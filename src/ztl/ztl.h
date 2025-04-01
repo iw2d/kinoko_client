@@ -10,13 +10,110 @@ public:
     ZAllocHelper(int nDummy) {}
 };
 
+class ZRefCounted {
+public:
+    union {
+        volatile long m_nRef;
+        ZRefCounted* m_pNext;
+    };
+    ZRefCounted* m_pPrev;
+
+    virtual ~ZRefCounted() = default;
+};
+static_assert(sizeof(ZRefCounted) == 0xC);
 
 template<typename T>
 class ZRef {
 public:
     unsigned char gap0[4];
-    T* p = nullptr;
-    // manage refcount manually
+    T* p;
+
+    ZRef() {
+        this->p = nullptr;
+    }
+    ZRef(T* pT, bool bAddRef) {
+        ZRefCounted* pRaw = ZRef<T>::_GetRaw(pT);
+        if (!pT || !pRaw) {
+            this->p = nullptr;
+        } else {
+            this->p = pT;
+        }
+        if (bAddRef) {
+            if (pRaw) {
+                InterlockedIncrement(&pRaw->m_nRef);
+            }
+        }
+    }
+    ZRef(const ZRef<T>& r) {
+        this->p = r.p;
+        if (r.p) {
+            ZRefCounted* pRaw = ZRef<T>::_GetRaw(r.p);
+            InterlockedIncrement(&pRaw->m_nRef);
+        }
+    }
+    ~ZRef() {
+        if (this->p) {
+            this->_ReleaseRaw(nullptr);
+            this->p = nullptr;
+        }
+    }
+    operator bool() {
+        return this->p != nullptr;
+    }
+    bool operator!() {
+        return this->p == nullptr;
+    }
+    T* operator*() {
+        return this->p;
+    }
+    T* operator->() {
+        return this->p;
+    }
+    ZRef<T>& operator=(T* pT) {
+        ZRefCounted* pRaw = ZRef<T>::_GetRaw(pT);
+        T* p;
+        if (!pT || !pRaw) {
+            p = nullptr;
+        } else {
+            p = pT;
+            InterlockedIncrement(&pRaw->m_nRef);
+        }
+        if (this->p) {
+            this->_ReleaseRaw(nullptr);
+        }
+        this->p = p;
+        return *this;
+    }
+    ZRef<T>& operator=(const ZRef<T>& r) {
+        T* p = r.p;
+        if (p) {
+            ZRefCounted* pRaw = ZRef<T>::_GetRaw(p);
+            InterlockedIncrement(&pRaw->m_nRef);
+        }
+        if (this->p) {
+            this->_ReleaseRaw(nullptr);
+        }
+        this->p = p;
+        return *this;
+    }
+private:
+    void _ReleaseRaw(ZRefCounted* __formal) {
+        if (!this->p) {
+            return;
+        }
+        ZRefCounted* pRaw = ZRef<T>::_GetRaw(this->p);
+        if (!InterlockedDecrement(&pRaw->m_nRef)) {
+            InterlockedIncrement(&pRaw->m_nRef);
+            delete pRaw;
+        }
+    }
+    inline static ZRefCounted* _GetRaw(T* pT) {
+        if (std::is_base_of<ZRefCounted, T>::value) {
+            return static_cast<ZRefCounted*>(pT);
+        } else {
+            return reinterpret_cast<ZRefCounted*>(pT) - 1;
+        }
+    }
 };
 static_assert(sizeof(ZRef<int>) == 0x8);
 
