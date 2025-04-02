@@ -63,6 +63,9 @@ public:
     bool operator!() {
         return this->p == nullptr;
     }
+    operator T*() {
+        return this->p;
+    }
     T* operator*() {
         return this->p;
     }

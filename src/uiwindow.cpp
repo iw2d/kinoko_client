@@ -22,6 +22,13 @@ struct CRTTI {
 class IGObj {
 public:
     virtual void Update() = 0;
+
+    static void* operator new(size_t size) {
+        return ZAllocEx<ZAllocAnonSelector>::s_Alloc(size);
+    }
+    static void operator delete(void* ptr) {
+        ZAllocEx<ZAllocAnonSelector>::s_Free(ptr);
+    }
 };
 static_assert(sizeof(IGObj) == 0x4);
 
@@ -49,14 +56,44 @@ public:
 };
 static_assert(sizeof(IUIMsgHandler) == 0x4);
 
-
+class CWnd;
 class CUIToolTip;
 
 class CCtrlWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
 public:
     unsigned char gap0[0x34 - sizeof(IGObj) - sizeof(IUIMsgHandler) - sizeof(ZRefCounted)];
+
+    /*** IGObj methods ***/
+    virtual void Update() override {}
+
+    /*** CCtrlWnd methods ***/
+    virtual int OnDragDrop(int nState, void* ctx, int rx, int ry) { return 0; }
+    virtual void CreateCtrl(CWnd*, unsigned int nId, int l, int t, int w, int h, void* pData) {}
+    virtual void Destroy() {}
+    virtual void OnCreate(void* pData) {}
+    virtual void OnDestroy() {}
+    virtual int HitTest(int rx, int ry) { return 0; }
+    virtual tagRECT* GetRect(tagRECT* result) { return result; }
+    virtual void SetAbove(CCtrlWnd* pCtrl) {}
+    virtual void Draw(int rx, int ry, const tagRECT* pRect) {}
+
+    /*** IUIMsgHandler methods ***/
+    virtual const CRTTI* GetRTTI() { return 0; }
+    virtual int IsKindOf(const CRTTI* pRTTI) { return 0; }
 };
 static_assert(sizeof(CCtrlWnd) == 0x34);
+
+class CCtrlScrollBar : public CCtrlWnd {
+public:
+    unsigned char gap0[0x74 - sizeof(CCtrlWnd)];
+
+    virtual void CreateCtrl(CWnd* pParent, unsigned int nId, int hv, int type, int l, int t, int length, void* pData) {}
+
+    CCtrlScrollBar() {
+        reinterpret_cast<void (__thiscall*)(CCtrlScrollBar*)>(0x004E9FC0)(this);
+    }
+};
+static_assert(sizeof(CCtrlScrollBar) == 0x74);
 
 class CCtrlTab : public CCtrlWnd {
 public:
@@ -67,6 +104,12 @@ public:
     static_assert(sizeof(CREATEPARAM) == 0x8);
 
     unsigned char gap0[0x70 - sizeof(CCtrlWnd)];
+
+    virtual void CreateCtrl(CWnd* pParent, unsigned int nId, int nType, int l, int t, int w, int h, void* pData) {}
+
+    CCtrlTab() {
+        reinterpret_cast<void (__thiscall*)(CCtrlTab*)>(0x004EE590)(this);
+    }
 };
 static_assert(sizeof(CCtrlTab) == 0x70);
 
@@ -118,6 +161,10 @@ public:
 
     CWnd() { reinterpret_cast<void (__thiscall*)(CWnd*)>(0x009AED30)(this); }
     CWnd(int nDummy) { /* dummy constructor to avoid calling CWnd constructor twice in CUIWnd constructor */ }
+
+    void InvalidateRect(const tagRECT* pRect) {
+        reinterpret_cast<void (__thiscall*)(CWnd*, const tagRECT*)>(0x009AD3F0)(this, pRect);
+    }
 };
 static_assert(sizeof(CWnd) == 0x80);
 
@@ -131,6 +178,7 @@ public:
     MEMBER_AT(CUIToolTip, 0x88, m_uiToolTip)
     MEMBER_AT(ZArray<unsigned char>, 0xB00, m_abOption)
     MEMBER_AT(ZXString<wchar_t>, 0xB04, m_sBackgrndUOL)
+    MEMBER_AT(int, 0xAFC, m_nOption)
 
     /*** CWnd methods ***/
     virtual void OnCreate(void* pData) override { reinterpret_cast<void (__thiscall*)(CUIWnd*, void*)>(0x008DDA90)(this, pData); }
@@ -172,6 +220,7 @@ class CUIItemBT : public CUIWnd {
 public:
     static inline const CRTTI ms_RTTI_CUIItemBT = { CUIWnd::ms_pRTTI_CUIWnd };
     ZRef<CCtrlTab> m_pTab;
+    ZRef<CCtrlScrollBar> m_pSBItem;
 
     virtual void OnCreate(void* pData) override {
         // CUIWnd::OnCreate(this, pData, sBackgroundUOL, 1);
@@ -180,12 +229,38 @@ public:
         CCtrlTab::CREATEPARAM paramTab;
         paramTab.bDrawBaseImage = 0;
         paramTab.nTabSpace = 1;
-        auto pTab = reinterpret_cast<CCtrlTab*>(ZAllocEx<ZAllocAnonSelector>::s_Alloc(sizeof(CCtrlTab)));
-        // CCtrlTab::CCtrlTab(this->m_pTab);
-        reinterpret_cast<void (__thiscall*)(CCtrlTab*)>(0x004EE590)(pTab);
-        this->m_pTab = pTab;
-        // CCtrlTab::CreateCtrl(this->m_pTab, this, 2000, 8, 9, 26, 306, 19, &paramTab);
-        reinterpret_cast<void (__thiscall*)(CCtrlTab*, CWnd*, unsigned int, int, int, int, int, int, void*)>(0x004EE240)(this->m_pTab.p, this, 2000, 8, 9, 26, 306, 19, &paramTab);
+        this->m_pTab = new CCtrlTab();
+        this->m_pTab->CreateCtrl(this, 2000, 8, 13, 28, 214, 22, &paramTab);
+        Ztl_variant_t vEmpty;
+        Ztl_variant_t vTabEnabled;
+        Ztl_variant_t vTabDisabled;
+        CHECK_HRESULT(get_rm()->raw_GetObject(L"UI/UIWindowBT.img/CharacterUI/Item/Tab/enabled", vEmpty, vEmpty, &vTabEnabled));
+        CHECK_HRESULT(get_rm()->raw_GetObject(L"UI/UIWindowBT.img/CharacterUI/Item/Tab/disabled", vEmpty, vEmpty, &vTabDisabled));
+        IWzPropertyPtr pTabEnabled = IWzPropertyPtr(vTabEnabled.GetUnknown(false, false));
+        IWzPropertyPtr pTabDisabled = IWzPropertyPtr(vTabDisabled.GetUnknown(false, false));
+        for (int i = 0; i < 5; i++) {
+            wchar_t sIndex[10];
+            swprintf_s(sIndex, 10, L"%d", i);
+            Ztl_variant_t vCanvasEnabled;
+            Ztl_variant_t vCanvasDisabled;
+            CHECK_HRESULT(pTabEnabled->get_item(sIndex, &vCanvasEnabled));
+            CHECK_HRESULT(pTabDisabled->get_item(sIndex, &vCanvasDisabled));
+            IUnknownPtr pCanvasEnabledUnknown;
+            IUnknownPtr pCanvasDisabledUnknown;
+            // get_unknown(std::addressof(pCanvasEnabledUnknown), &vCanvasEnabled);
+            reinterpret_cast<IUnknownPtr* (__cdecl*)(IUnknownPtr*, Ztl_variant_t*)>(0x004176E0)(std::addressof(pCanvasEnabledUnknown), &vCanvasEnabled);
+            reinterpret_cast<IUnknownPtr* (__cdecl*)(IUnknownPtr*, Ztl_variant_t*)>(0x004176E0)(std::addressof(pCanvasDisabledUnknown), &vCanvasDisabled);
+            IWzCanvasPtr pCanvasEnabled(pCanvasEnabledUnknown);
+            IWzCanvasPtr pCanvasDisabled(pCanvasDisabledUnknown);
+            // CCtrlTab::AddItem_Canvas(this->m_pTab, pCanvasDisabled, pCanvasEnabled, 0);
+            reinterpret_cast<void (__thiscall*)(CCtrlTab*, IWzCanvasPtr, IWzCanvasPtr, int)>(0x004EFC40)(this->m_pTab, pCanvasDisabled, pCanvasEnabled, 0);
+        }
+
+        this->m_pSBItem = new CCtrlScrollBar();
+        this->m_pSBItem->CreateCtrl(this, 2001, 1, 8, 301, 51, 138, nullptr);
+
+        // CCtrlTab::SetTab(this->m_pTab, this->m_nOption());
+        reinterpret_cast<void (__thiscall*)(CCtrlTab*, int)>(0x004EDE60)(this->m_pTab, this->m_nOption());
     }
     virtual const CRTTI* GetRTTI() override {
         return &ms_RTTI_CUIItemBT;
@@ -194,13 +269,6 @@ public:
         return ms_RTTI_CUIItemBT.IsKindOf(pRTTI);
     }
     virtual ~CUIItemBT() override = default;
-
-    void* operator new(size_t size) {
-        return ZAllocEx<ZAllocAnonSelector>::s_Alloc(size);
-    }
-    void operator delete(void* ptr) {
-        ZAllocEx<ZAllocAnonSelector>::s_Free(ptr);
-    }
 
     CUIItemBT() : CUIWnd(0, 5, 299, 6, L"UI/UIWindowBT.img/CharacterUI/Item/FullBackgrnd", 0, 0, 1) {
         // CUIWnd::CreateUIWndPosSaved(this, 321, 249, 10);
