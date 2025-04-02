@@ -3,16 +3,6 @@
 #include "hook.h"
 #include "debug.h"
 
-#define SAVE_VTABLES(TARGET) \
-    void** vtable1 = *reinterpret_cast<void***>(TARGET); \
-    void** vtable2 = *reinterpret_cast<void***>(static_cast<IUIMsgHandler*>(TARGET)); \
-    void** vtable3 = *reinterpret_cast<void***>(static_cast<ZRefCounted*>(TARGET));
-
-#define RESTORE_VTABLES(TARGET) \
-    *reinterpret_cast<void***>(TARGET) = vtable1; \
-    *reinterpret_cast<void***>(static_cast<IUIMsgHandler*>(TARGET)) = vtable2; \
-    *reinterpret_cast<void***>(static_cast<ZRefCounted*>(TARGET)) = vtable3;
-
 
 struct CRTTI {
     const CRTTI* m_pPrev;
@@ -125,6 +115,9 @@ public:
     virtual ~CWnd() override {
         reinterpret_cast<void (__thiscall*)(CWnd*)>(0x009AEBC0)(this);
     }
+
+    CWnd() { reinterpret_cast<void (__thiscall*)(CWnd*)>(0x009AED30)(this); }
+    CWnd(int nDummy) { /* dummy constructor to avoid calling CWnd constructor twice in CUIWnd constructor */ }
 };
 static_assert(sizeof(CWnd) == 0x80);
 
@@ -163,6 +156,14 @@ public:
         reinterpret_cast<void (__thiscall*)(CUIToolTip*)>(0x00882F30)(&this->m_uiToolTip());            // CUIToolTip::~CUIToolTip(&this->m_uiToolTip());
         this->m_pBtClose() = nullptr;
     }
+
+    CUIWnd() = delete;
+    CUIWnd(int nUIType, int closeType, int closeX, int closeY, int bBackgrnd, int nBackgrndX, int nBackgrndY) : CWnd(0) {
+        reinterpret_cast<void (__thiscall*)(CUIWnd*, int, int, int, int, int, int, int)>(0x008DD680)(this, nUIType, closeType, closeX, closeY, bBackgrnd, nBackgrndX, nBackgrndY);
+    }
+    CUIWnd(int nUIType, int closeType, int closeX, int closeY, const wchar_t* sBackgrndUOL, int nBackgrndX, int nBackgrndY, int bMultiBg) : CWnd(0) {
+        reinterpret_cast<void (__thiscall*)(CUIWnd*, int, int, int, int, const wchar_t*, int, int, int)>(0x008DD980)(this, nUIType, closeType, closeX, closeY, sBackgrndUOL, nBackgrndX, nBackgrndY, bMultiBg);
+    }
 };
 static_assert(sizeof(CUIWnd) == 0xB08);
 
@@ -173,11 +174,8 @@ public:
     ZRef<CCtrlTab> m_pTab;
 
     virtual void OnCreate(void* pData) override {
-        ZXString<wchar_t> sBackgroundUOL;
-        // ZXString<wchar_t>::ZXString<wchar_t>(&sBackgroundUOL, L"", -1);
-        reinterpret_cast<void (__thiscall*)(ZXString<wchar_t>*, const wchar_t*, int)>(0x00416D00)(&sBackgroundUOL, L"UI/UIWindowBT.img/CharacterUI/Item/FullBackgrnd", -1);
         // CUIWnd::OnCreate(this, pData, sBackgroundUOL, 1);
-        reinterpret_cast<void (__thiscall*)(CUIWnd*, void*, ZXString<wchar_t>, int)>(0x008DDB30)(this, pData, sBackgroundUOL, 1);
+        reinterpret_cast<void (__thiscall*)(CUIWnd*, void*, ZXString<wchar_t>, int)>(0x008DDB30)(this, pData, ZXString<wchar_t>(), 1);
 
         CCtrlTab::CREATEPARAM paramTab;
         paramTab.bDrawBaseImage = 0;
@@ -204,12 +202,7 @@ public:
         ZAllocEx<ZAllocAnonSelector>::s_Free(ptr);
     }
 
-    CUIItemBT() {
-        SAVE_VTABLES(this);
-        // CUIWnd::CUIWnd(this, 0, 5, 299, 6, 1, 0, 0);
-        reinterpret_cast<void (__thiscall*)(CUIWnd*, int, int, int, int, int, int, int)>(0x008DD680)(this, 0, 5, 299, 6, 1, 0, 0);
-        RESTORE_VTABLES(this);
-
+    CUIItemBT() : CUIWnd(0, 5, 299, 6, L"UI/UIWindowBT.img/CharacterUI/Item/FullBackgrnd", 0, 0, 1) {
         // CUIWnd::CreateUIWndPosSaved(this, 321, 249, 10);
         reinterpret_cast<void (__thiscall*)(CUIWnd*, int, int, int)>(0x008DD300)(this, 321, 249, 10);
     }
