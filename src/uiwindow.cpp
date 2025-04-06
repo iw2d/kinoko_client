@@ -56,8 +56,9 @@ public:
 };
 static_assert(sizeof(IUIMsgHandler) == 0x4);
 
+
 class CWnd;
-class CUIToolTip;
+
 
 class CCtrlWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
 public:
@@ -115,9 +116,55 @@ static_assert(sizeof(CCtrlTab) == 0x70);
 
 class CCtrlButton : public CCtrlWnd {
 public:
+    struct CREATEPARAM {
+        int bAcceptFocus;
+        int bDrawBack;
+        int bAnimateOnce;
+        ZXString<wchar_t> sUOL;
+    };
+    static_assert(sizeof(CREATEPARAM) == 0x10);
+
     unsigned char gap0[0xADC - sizeof(CCtrlWnd)];
+
+    virtual void CreateCtrl(CWnd* pParent, unsigned int nId, int l, int t, int decClickArea, void* pData) {}
+
+    CCtrlButton() { reinterpret_cast<void (__thiscall*)(CCtrlButton*)>(0x00471740)(this); }
+    CCtrlButton(int nDummy) {}
 };
 static_assert(sizeof(CCtrlButton) == 0xADC);
+
+class CCtrlOriginButton : public CCtrlButton {
+public:
+
+};
+
+
+class CLayoutMan {
+public:
+    CWnd* m_pWnd;
+    int m_nOffsetX;
+    int m_nOffsetY;
+    ZArray<IWzGr2DLayerPtr> m_aLayer;
+    ZArray<ZRef<CCtrlOriginButton>> m_aButton;
+
+    void Init(CWnd* pWnd, int nOffsetX, int nOffsetY) {
+        this->m_pWnd = pWnd;
+        this->m_nOffsetX = nOffsetX;
+        this->m_nOffsetY = nOffsetY;
+    }
+
+    ZRef<CCtrlOriginButton>& AddButton(ZRef<CCtrlOriginButton>& result, const wchar_t* sButtonUOL, unsigned int nID, int nOffsetX, int nOffsetY, CCtrlButton::CREATEPARAM* pParam) {
+        return reinterpret_cast<ZRef<CCtrlOriginButton>& (__thiscall*)(CLayoutMan*, ZRef<CCtrlOriginButton>&, const wchar_t*, unsigned int, int, int, CCtrlButton::CREATEPARAM*)>(0x005CF210)(this, result, sButtonUOL, nID, nOffsetX, nOffsetY, pParam);
+    }
+};
+
+
+class CUIToolTip {
+public:
+    unsigned char gap0[0xA48];
+
+    virtual ~CUIToolTip() = default;
+};
 
 
 class CWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
@@ -162,6 +209,9 @@ public:
     CWnd() { reinterpret_cast<void (__thiscall*)(CWnd*)>(0x009AED30)(this); }
     CWnd(int nDummy) { /* dummy constructor to avoid calling CWnd constructor twice in CUIWnd constructor */ }
 
+    IWzCanvasPtr& GetCanvas(IWzCanvasPtr& result) {
+        return reinterpret_cast<IWzCanvasPtr& (__thiscall*)(CWnd*, IWzCanvasPtr&)>(0x0042B170)(this, result);
+    }
     void InvalidateRect(const tagRECT* pRect) {
         reinterpret_cast<void (__thiscall*)(CWnd*, const tagRECT*)>(0x009AD3F0)(this, pRect);
     }
@@ -201,7 +251,7 @@ public:
         // implement CUIWnd destructor so we dont call CWnd destructor twice
         reinterpret_cast<void (__thiscall*)(ZXString<wchar_t>*)>(0x00403920)(&this->m_sBackgrndUOL());  // ZXString<wchar_t>::~ZXString<wchar_t>(&this->m_sBackgrndUOL());
         reinterpret_cast<void (__thiscall*)(ZArray<unsigned char>*)>(0x0042AAE0)(&this->m_abOption());  // ZArray<unsigned char>::RemoveAll(&this->m_abOption());
-        reinterpret_cast<void (__thiscall*)(CUIToolTip*)>(0x00882F30)(&this->m_uiToolTip());            // CUIToolTip::~CUIToolTip(&this->m_uiToolTip());
+        this->m_uiToolTip().~CUIToolTip();
         this->m_pBtClose() = nullptr;
     }
 
@@ -221,10 +271,16 @@ public:
     static inline const CRTTI ms_RTTI_CUIItemBT = { CUIWnd::ms_pRTTI_CUIWnd };
     ZRef<CCtrlTab> m_pTab;
     ZRef<CCtrlScrollBar> m_pSBItem;
+    ZRef<CCtrlButton> m_pBtCoin;
+    int m_nFirstPositon;
+    int m_nItemTI;
+    CLayoutMan m_lm;
 
     virtual void OnCreate(void* pData) override {
         // CUIWnd::OnCreate(this, pData, sBackgroundUOL, 1);
         reinterpret_cast<void (__thiscall*)(CUIWnd*, void*, ZXString<wchar_t>, int)>(0x008DDB30)(this, pData, ZXString<wchar_t>(), 1);
+
+        this->m_lm.Init(this, 0, 0);
 
         CCtrlTab::CREATEPARAM paramTab;
         paramTab.bDrawBaseImage = 0;
@@ -252,15 +308,78 @@ public:
             reinterpret_cast<IUnknownPtr* (__cdecl*)(IUnknownPtr*, Ztl_variant_t*)>(0x004176E0)(std::addressof(pCanvasDisabledUnknown), &vCanvasDisabled);
             IWzCanvasPtr pCanvasEnabled(pCanvasEnabledUnknown);
             IWzCanvasPtr pCanvasDisabled(pCanvasDisabledUnknown);
-            // CCtrlTab::AddItem_Canvas(this->m_pTab, pCanvasDisabled, pCanvasEnabled, 0);
-            reinterpret_cast<void (__thiscall*)(CCtrlTab*, IWzCanvasPtr, IWzCanvasPtr, int)>(0x004EFC40)(this->m_pTab, pCanvasDisabled, pCanvasEnabled, 0);
+            // CCtrlTab::AddItem_Canvas(this->m_pTab, pCanvasDisabled, pCanvasEnabled, 1);
+            reinterpret_cast<void (__thiscall*)(CCtrlTab*, IWzCanvasPtr, IWzCanvasPtr, int)>(0x004EFC40)(this->m_pTab, pCanvasDisabled, pCanvasEnabled, 1);
         }
 
         this->m_pSBItem = new CCtrlScrollBar();
         this->m_pSBItem->CreateCtrl(this, 2001, 1, 8, 301, 51, 138, nullptr);
 
+        this->m_lm.AddButton(ZRef<CCtrlOriginButton>(), L"UI/UIWindowBT.img/CharacterUI/Item/BtCoin", 2002, 0, 0, nullptr);
+        this->m_lm.AddButton(ZRef<CCtrlOriginButton>(), L"UI/UIWindowBT.img/CharacterUI/Item/BtPoint0", 2003, 0, 0, nullptr);
+
+
         // CCtrlTab::SetTab(this->m_pTab, this->m_nOption());
         reinterpret_cast<void (__thiscall*)(CCtrlTab*, int)>(0x004EDE60)(this->m_pTab, this->m_nOption());
+    }
+    virtual void OnChildNotify(unsigned int nId, unsigned int param1, unsigned int param2) override {
+        DEBUG_MESSAGE("OnChildNotify %d %d %d", nId, param1, param2);
+        if (nId == 2000) {
+            if (param1 == 500) {
+                this->m_nOption() = param2;
+                if (param2 == 3) {
+                    this->m_nItemTI = 4;
+                } else if (param2 == 4) {
+                    this->m_nItemTI = 3;
+                } else {
+                    this->m_nItemTI = param2;
+                }
+                this->m_nFirstPositon = 1; // TODO: static array ms-anItemScrollPos to save scroll position
+                this->InvalidateRect(nullptr);
+            }
+        }
+        if (param1 == 100) {
+            this->OnButtonClicked(nId);
+        }
+    }
+    virtual void Draw(const tagRECT* pRect) override {
+        CWnd::Draw(pRect);
+        IWzCanvasPtr pCanvas;
+        this->GetCanvas(pCanvas);
+
+        IWzFontPtr pMoneyFont;
+        // get_basic_font(pMoneyFont, FONT_NO_BLACK_SMALL);
+        reinterpret_cast<IWzFontPtr& (__cdecl*)(IWzFontPtr&, int)>(0x0095F9D0)(pMoneyFont, 0x39);
+        int nMoney = CWvsContext::GetInstance()->m_pCharacterData()->characterStat().nMoney().Fuse();
+        ZXString<char> sMoney;
+        // format_integer(&sMoney, nMoney, 1);
+        reinterpret_cast<void (__cdecl*)(ZXString<char>*, int, int)>(0x009658D0)(&sMoney, nMoney, 1);
+        Ztl_bstr_t lsMoney(sMoney._m_pStr);
+        Ztl_variant_t vEmpty;
+        unsigned int uTextWidth;
+        CHECK_HRESULT(pMoneyFont->raw_CalcTextWidth(lsMoney.m_Data->m_wstr, vEmpty, &uTextWidth));
+        unsigned int result[4];
+        CHECK_HRESULT(pCanvas->raw_DrawText(103 - uTextWidth, 199, lsMoney.m_Data->m_wstr, pMoneyFont, vEmpty, vEmpty, result));
+
+        ZArray<ZRef<GW_ItemSlotBase>>& aItemSlot = (&CWvsContext::GetInstance()->m_pCharacterData()->aaItemSlot())[this->m_nItemTI];
+        int nItemSlot = reinterpret_cast<int*>(aItemSlot.a)[-1];
+        for (int i = 0; i < 32; ++i) {
+            int nPos = this->m_nFirstPositon + i;
+            if (nPos >= nItemSlot) {
+                break;
+            }
+            ZRef<GW_ItemSlotBase> pItem = aItemSlot.a[nPos];
+            if (!pItem) {
+                continue;
+            }
+
+            int x = 11 + (i % 8) * 36;
+            int y = 85 + (i / 8) * 35;
+
+            // TSecType<long>::GetData(&pItem->nItemID());
+            int nItemID = reinterpret_cast<int (__thiscall*)(TSecType<long>*)>(0x0042B750)(&pItem->nItemID());
+            CItemInfo::GetInstance()->DrawItemIconForSlot(pCanvas, nItemID, x, y, 0, 0, 0, 0, 0, 0, 0);
+        }
     }
     virtual const CRTTI* GetRTTI() override {
         return &ms_RTTI_CUIItemBT;

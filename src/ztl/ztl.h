@@ -13,10 +13,10 @@ public:
 class ZRefCounted {
 public:
     union {
-        volatile long m_nRef;
-        ZRefCounted* m_pNext;
+        volatile long _m_nRef;
+        ZRefCounted* _m_pNext;
     };
-    ZRefCounted* m_pPrev;
+    ZRefCounted* _m_pPrev;
 
     virtual ~ZRefCounted() = default;
 };
@@ -40,7 +40,7 @@ public:
         }
         if (bAddRef) {
             if (pRaw) {
-                InterlockedIncrement(&pRaw->m_nRef);
+                InterlockedIncrement(&pRaw->_m_nRef);
             }
         }
     }
@@ -48,7 +48,7 @@ public:
         this->p = r.p;
         if (r.p) {
             ZRefCounted* pRaw = ZRef<T>::_GetRaw(r.p);
-            InterlockedIncrement(&pRaw->m_nRef);
+            InterlockedIncrement(&pRaw->_m_nRef);
         }
     }
     ~ZRef() {
@@ -79,7 +79,7 @@ public:
             p = nullptr;
         } else {
             p = pT;
-            InterlockedIncrement(&pRaw->m_nRef);
+            InterlockedIncrement(&pRaw->_m_nRef);
         }
         if (this->p) {
             this->_ReleaseRaw(nullptr);
@@ -91,7 +91,7 @@ public:
         T* p = r.p;
         if (p) {
             ZRefCounted* pRaw = ZRef<T>::_GetRaw(p);
-            InterlockedIncrement(&pRaw->m_nRef);
+            InterlockedIncrement(&pRaw->_m_nRef);
         }
         if (this->p) {
             this->_ReleaseRaw(nullptr);
@@ -105,8 +105,8 @@ private:
             return;
         }
         ZRefCounted* pRaw = ZRef<T>::_GetRaw(this->p);
-        if (!InterlockedDecrement(&pRaw->m_nRef)) {
-            InterlockedIncrement(&pRaw->m_nRef);
+        if (!InterlockedDecrement(&pRaw->_m_nRef)) {
+            InterlockedIncrement(&pRaw->_m_nRef);
             delete pRaw;
         }
     }

@@ -116,12 +116,15 @@ public:
 };
 
 
+struct CharacterData;
+
 class CWvsContext : public TSingleton<CWvsContext, 0x00C64068> {
 public:
     MEMBER_AT(int, 0x2C, m_tUpdateTime)
     MEMBER_AT(ZXString<char>, 0x2050, m_sEMailAccount)
     MEMBER_AT(int, 0x2060, m_nChannelID)
     MEMBER_AT(unsigned int, 0x20B4, m_dwCharacterId)
+    MEMBER_AT(ZRef<CharacterData>, 0x20C8, m_pCharacterData)
     MEMBER_AT(int, 0x41B8, m_nScreenWidth)
     MEMBER_AT(int, 0x41BC, m_nScreenHeight)
     MEMBER_AT(int, 0x41C0, m_nAdjustCenterY)
@@ -290,4 +293,25 @@ public:
     inline IWzPropertyPtr* GetItemInfo(IWzPropertyPtr* result, int nItemID) {
         return reinterpret_cast<IWzPropertyPtr* (__thiscall*)(CItemInfo*, IWzPropertyPtr*, int)>(0x005A8F20)(this, result, nItemID);
     }
+    inline void DrawItemIconForSlot(IWzCanvasPtr pCanvas, int nItemID, int x, int y, int bProtectedItem, int bMag2, int bPetDead, int bHideCashIcon, int nEquipItemQuality, int bHideQualityIcon, int nMagSize) {
+        reinterpret_cast<void (__thiscall*)(CItemInfo*, IWzCanvasPtr, int, int, int, int, int, int, int, int, int, int)>(0x005C0A40)(this, pCanvas, nItemID, x, y, bProtectedItem, bMag2, bPetDead, bHideCashIcon, nEquipItemQuality, bHideCashIcon, nMagSize);
+    }
+};
+
+
+template<typename T>
+struct TSecType;
+
+struct __declspec(align(1)) GW_CharacterStat {
+    MEMBER_AT(unsigned int, 0x0, dwCharacterID)
+    MEMBER_AT(ZtlSecure<int>, 0xB5, nMoney)
+};
+
+struct GW_ItemSlotBase : ZRefCounted {
+    MEMBER_AT(TSecType<long>, 0xC, nItemID);
+};
+
+struct _declspec(align(1)) CharacterData {
+    MEMBER_AT(GW_CharacterStat, 0x0, characterStat)
+    MEMBER_AT(ZArray<ZRef<GW_ItemSlotBase>>, 0x501, aaItemSlot)
 };
