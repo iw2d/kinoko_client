@@ -6,36 +6,6 @@
 #pragma warning(disable : 4996)
 
 
-static volatile bool g_bGameDataLoaded = false;
-static HANDLE g_hDataThread;
-static DWORD g_dwDataThreadID;
-static IWzResManPtr g_pDataThreadResMan;
-
-typedef HRESULT (__stdcall* IWzResMan__raw_GetObject_t)(IWzResMan*, wchar_t*, tagVARIANT, tagVARIANT, tagVARIANT*);
-static IWzResMan__raw_GetObject_t IWzResMan__raw_GetObject;
-
-HRESULT __stdcall IWzResMan__raw_GetObject_hook(IWzResMan* pThis, wchar_t* sUOL, tagVARIANT vParam, tagVARIANT vAux, tagVARIANT* result) {
-    if (GetCurrentThreadId() == g_dwDataThreadID) {
-        return IWzResMan__raw_GetObject(g_pDataThreadResMan, sUOL, vParam, vAux, result);
-    } else {
-        return IWzResMan__raw_GetObject(pThis, sUOL, vParam, vAux, result);
-    }
-}
-
-DWORD WINAPI DataThread(LPVOID lpParam) {
-    DEBUG_MESSAGE("DataThread - CWvsApp::InitializeResMan");
-    InitializeResMan(g_pDataThreadResMan);
-    IWzResMan__raw_GetObject = reinterpret_cast<IWzResMan__raw_GetObject_t>(VMTHook(get_rm(), IWzResMan__raw_GetObject_hook, 7));
-    DEBUG_MESSAGE("DataThread - CWvsApp::InitializeGameData");
-    // CWvsApp::InitializeGameData(TSingleton<CWvsApp>::GetInstance());
-    reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C8440)(CWvsApp::GetInstance());
-    g_bGameDataLoaded = true;
-    CloseHandle(g_hDataThread);
-    DEBUG_MESSAGE("DataThread - Complete!");
-    return 0;
-}
-
-
 typedef void (__thiscall* CWvsApp__ctor_t)(CWvsApp*, const char*);
 static auto CWvsApp__ctor = reinterpret_cast<CWvsApp__ctor_t>(0x009CA8A0);
 
@@ -157,7 +127,8 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009CA170)(pThis);
 
     DEBUG_MESSAGE("CWvsApp::SetUp - Loading Data...");
-    // CWvsApp::InitializeGameData(this); // ----------------------------------------------------- moved to data thread
+    // CWvsApp::InitializeGameData(this);
+    reinterpret_cast<void (__thiscall*)(CWvsApp*)>(0x009C8440)(pThis);
     // TSingleton<CQuestMan>::CreateInstance()->LoadDemand();
     auto pQuestMan = reinterpret_cast<void* (__cdecl*)()>(0x009C21A0)();
     if (!reinterpret_cast<int (__thiscall*)(void*)>(0x006C3D60)(pQuestMan)) {
@@ -189,15 +160,72 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     // TSingleton<CRadioManager>::CreateInstance();
     reinterpret_cast<void* (__cdecl*)()>(0x009C2770)();
 
-    // (CLogo*) operator new(0x48); -> (CLogin*) operator new(0x2C8);
-    void* pStage = ZAllocEx<ZAllocAnonSelector>::s_Alloc(0x2C8);
+    // (CLogo*) operator new(0x48); -> (CInterStage*) operator new(0x18);
+    void* pStage = ZAllocEx<ZAllocAnonSelector>::s_Alloc(0x18);
     if (pStage) {
-        // CLogo::CLogo(pStage); -> CLogin::Clogin(pStage);
-        reinterpret_cast<void (__thiscall*)(void*)>(0x005DB440)(pStage);
+        // CLogo::CLogo(pStage); -> CInterStage::CInterStage(pStage);
+        reinterpret_cast<void (__thiscall*)(void*)>(0x00571D90)(pStage);
     }
     // set_stage(pStage, nullptr);
     reinterpret_cast<void (__cdecl*)(void*, void*)>(0x00719C30)(pStage, nullptr);
-    g_hDataThread = CreateThread(nullptr, 0, DataThread, nullptr, 0, &g_dwDataThreadID); // -------- create data thread
+
+    // Initialize CWvsContext
+    ZXString<char> sNexonClubID, sGuestIDRegistrationURL;
+    // ZXString<char>::ZXString<char>(&sNexonClubID, "test", -1);
+    reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(&sNexonClubID, "test", -1);
+    // // ZXString<char>::operator=<char>(&CWvsContext::GetInstance()->m_sEMailAccount(), sNexonClubID);
+    // reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*)>(0x0042C990)(&CWvsContext::GetInstance()->m_sEMailAccount(), "test");
+    // ZXString<char>::ZXString<char>(&sGuestIDRegistrationURL, "test", -1);
+    reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(&sGuestIDRegistrationURL, "", -1);
+    SYSTEMTIME dtChatUnblockDate = {}, dtRegisterDate = {};
+    CWvsContext::GetInstance()->SetAccountInfo(
+        1, // dwAccountId
+        0, // nGender,
+        0, // nGradeCode,
+        0, // nCountryID
+        sNexonClubID,
+        0, // nPurchaseExp
+        0, // nChatBlockReason
+        dtChatUnblockDate,
+        0, // nSubGradeCode,
+        0, // bTesterAccount
+        dtRegisterDate,
+        0, // nNumOfCharacter,
+        sGuestIDRegistrationURL
+    ); // frees sNextonClubID, sGuestIDRegistrationURL
+
+    CWvsContext::GetInstance()->m_dwCharacterId() = 1;
+
+    ZAllocHelper alloc(0);
+    ZArray<ZXString<char>> aChannelName;
+    // ZArray<ZXString<char>>::_Alloc(&aChannelName, 5, &alloc);
+    reinterpret_cast<ZXString<char>* (__thiscall*)(ZArray<ZXString<char>>*, unsigned int, const ZAllocHelper*)>(0x0049E7B0)(&aChannelName, 5, &alloc);
+    ZArray<int> aAdultChannel;
+    // ZArray<int>::_Alloc(&aAdultChannel, 5, &alloc);
+    reinterpret_cast<int* (__thiscall*)(ZArray<int>*, unsigned int, const ZAllocHelper*)>(0x005D2A00)(&aAdultChannel, 5, &alloc);
+    for (size_t i = 0; i < 5; ++i) {
+        // ZXString<char>::operator=<char>(&aChannelName.a[i], "test");
+        reinterpret_cast<ZXString<char>* (__thiscall*)(ZXString<char>*, char*)>(0x0042C990)(&aChannelName.a[i], "test");
+        aAdultChannel.a[i] = 0;
+    }
+    CWvsContext::GetInstance()->SetWorldInfo(
+        0, // nWorldID
+        0, // nChannelID
+        &aChannelName,
+        &aAdultChannel
+    ); // frees aChannelName, aAdultChannel
+
+    CSystemInfo si;
+    // CSystemInfo::Init(&si);
+    reinterpret_cast<void (__thiscall*)(CSystemInfo*)>(0x00A1F1B0)(&si);
+
+    // Send Custom RegisterMigration packet
+    COutPacket oPacket(1000);
+    oPacket.Encode4(1); // account ID
+    oPacket.Encode4(1); // character ID
+    oPacket.Encode4(0); // channel ID
+    oPacket.EncodeBuffer(si.MachineId, 16);
+    CClientSocket::GetInstance()->SendPacket(&oPacket);
 }
 
 
@@ -340,15 +368,6 @@ void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CC
 }
 
 
-class CSystemInfo {
-public:
-    unsigned char SupportId[16];
-    unsigned char MachineId[16];
-
-    virtual ~CSystemInfo() = default;
-};
-static_assert(sizeof(CSystemInfo) == 0x24);
-
 class CLogin {
 public:
     struct WORLDITEM;
@@ -394,14 +413,14 @@ typedef void (__thiscall* CLogin__SendSelectCharPacket_t)(CLogin*);
 static auto CLogin__SendSelectCharPacket = reinterpret_cast<CLogin__SendSelectCharPacket_t>(0x005DA2A0);
 
 void __fastcall CLogin__SendSelectCharPacket_hook(CLogin* pThis, void* _EDX) {
-    if (!g_bGameDataLoaded) {
-        ZXString<char> sMsg;
-        // ZXString<char>::ZXString<char>(&sMsg, message, -1);
-        reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(&sMsg, "Not all data has been loaded.", -1);
-        // CUtilDlg::Notice(sMsg, nullptr, nullptr, true, false);
-        reinterpret_cast<void (__cdecl*)(ZXString<char>, const wchar_t*, void*, int, int)>(0x00977220)(sMsg, nullptr, nullptr, true, false);
-        return;
-    }
+    // if (!g_bGameDataLoaded) {
+    //     ZXString<char> sMsg;
+    //     // ZXString<char>::ZXString<char>(&sMsg, message, -1);
+    //     reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(&sMsg, "Not all data has been loaded.", -1);
+    //     // CUtilDlg::Notice(sMsg, nullptr, nullptr, true, false);
+    //     reinterpret_cast<void (__cdecl*)(ZXString<char>, const wchar_t*, void*, int, int)>(0x00977220)(sMsg, nullptr, nullptr, true, false);
+    //     return;
+    // }
     CLogin__SendSelectCharPacket(pThis);
 }
 

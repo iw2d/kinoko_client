@@ -119,10 +119,20 @@ public:
 class CWvsContext : public TSingleton<CWvsContext, 0x00C64068> {
 public:
     MEMBER_AT(int, 0x2C, m_tUpdateTime)
+    MEMBER_AT(ZXString<char>, 0x2050, m_sEMailAccount)
+    MEMBER_AT(int, 0x2060, m_nChannelID)
+    MEMBER_AT(unsigned int, 0x20B4, m_dwCharacterId)
     MEMBER_AT(int, 0x41B8, m_nScreenWidth)
     MEMBER_AT(int, 0x41BC, m_nScreenHeight)
     MEMBER_AT(int, 0x41C0, m_nAdjustCenterY)
     MEMBER_AT(bool, 0x41C4, m_bIsLargeScreen)
+
+    void SetAccountInfo(unsigned int dwAccountId, int nGender, unsigned char nGradeCode, unsigned char nCountryID, ZXString<char> sNexonClubID, unsigned char nPurchaseExp, unsigned char nChatBlockReason, SYSTEMTIME dtChatUnblockDate, unsigned char nSubGradeCode, int bTesterAccount, SYSTEMTIME dtRegisterDate, int nNumOfCharacter, ZXString<char> sGuestIDRegistrationURL) {
+        reinterpret_cast<void (__thiscall*)(CWvsContext*, unsigned int, int, unsigned char, unsigned char, ZXString<char>, unsigned char, unsigned char, SYSTEMTIME, unsigned char, int, SYSTEMTIME, int, ZXString<char>)>(0x005D51F0)(this, dwAccountId, nGender, nGradeCode, nCountryID, sNexonClubID, nPurchaseExp, nChatBlockReason, dtChatUnblockDate, nSubGradeCode, bTesterAccount, dtRegisterDate, nNumOfCharacter, sGuestIDRegistrationURL);
+    }
+    void SetWorldInfo(int nWorldID, int nChannelID, ZArray<ZXString<char>>* aChannelName, ZArray<int>* aAdultChannel) {
+        reinterpret_cast<void (__thiscall*)(CWvsContext*, int, int, ZArray<ZXString<char>>*, ZArray<int>*)>(0x009E02A0)(this, nWorldID, nChannelID, aChannelName, aAdultChannel);
+    }
 };
 
 
@@ -151,6 +161,35 @@ static_assert(sizeof(CONFIG_SYSOPT) == 0x38);
 class CConfig : public TSingleton<CConfig, 0x00C687AC> {
 public:
     MEMBER_AT(CONFIG_SYSOPT, 0x6C, m_sysOpt)
+};
+
+
+class CSystemInfo {
+public:
+    unsigned char SupportId[16];
+    unsigned char MachineId[16];
+
+    virtual ~CSystemInfo() = default;
+};
+static_assert(sizeof(CSystemInfo) == 0x24);
+
+
+class CInPacket {
+public:
+    MEMBER_AT(unsigned int, 0x14, m_uOffset)
+
+    inline unsigned char Decode1() {
+        return reinterpret_cast<unsigned char (__thiscall*)(CInPacket*)>(0x004097D0)(this);
+    }
+    inline unsigned short Decode2() {
+        return reinterpret_cast<unsigned short (__thiscall*)(CInPacket*)>(0x0042A2A0)(this);
+    }
+    inline unsigned int Decode4() {
+        return reinterpret_cast<unsigned int (__thiscall*)(CInPacket*)>(0x00409870)(this);
+    }
+    inline void DecodeBuffer(void* p, size_t uSize) {
+        reinterpret_cast<void (__thiscall*)(CInPacket*, void*, size_t)>(0x004336A0)(this, p, uSize);
+    }
 };
 
 
