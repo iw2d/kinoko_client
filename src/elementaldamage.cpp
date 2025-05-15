@@ -99,12 +99,18 @@ void __fastcall CUIToolTip__SetToolTip_Equip_Basic_hook(CUIToolTip* pThis, void*
     PrintElementDamage(pThis, "LIGHTNING DAMAGE :", pEquipItem->nirLight());    // incRMAL
     PrintElementDamage(pThis, "HOLY DAMAGE :", pEquipItem->nirHoly());          // incRMAH
 
-    // Skip printing nRUC with Patch1(0x008A13DB, 0xEB);
+    // Skip printing nRUC in original code with Patch1(0x008A13DB, 0xEB);
     unsigned char nRUC = pEquipItem->nRUC().Fuse();
     if (nRUC && (pEquipItem->nEnchantCategory() & 2) == 0) {
-         ZXString<char> sRUC;
+        ZXString<char> sRUC;
         // ZXString<char>::ZXString<char>(&sRUC, "NUMBER OF UPGRADES AVAILABLE :", -1);
         reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(&sRUC, "NUMBER OF UPGRADES AVAILABLE :", -1);
+
+        // Remaining upgrade count - we can't cast to ZtlSecure<unsigned char>* here because GW_ItemSlotBase is packed to 1 byte alignment
+        nRUC = ZtlSecureFuse<unsigned char>(
+            reinterpret_cast<unsigned char*>(reinterpret_cast<uintptr_t>(pe) + 0x49),
+            *reinterpret_cast<unsigned int*>(reinterpret_cast<uintptr_t>(pe) + 0x4B)
+        );
         CUIToolTip__PrintValue(pThis, 1, nRUC, sRUC, 1);
     }
 }
