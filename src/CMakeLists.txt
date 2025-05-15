@@ -15,6 +15,7 @@ add_library(injector SHARED
     portablechair.cpp
     temporarystat.cpp
     hyperteleport.cpp
+    elementaldamage.cpp
 )
 
 target_precompile_headers(injector PRIVATE pch.h)
