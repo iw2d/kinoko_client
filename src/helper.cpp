@@ -86,6 +86,67 @@ void __fastcall CUserLocal__Jump_hook(CUserLocal* pThis, void* _EDX, int bEnforc
 }
 
 
+typedef ZXString<char>* (__cdecl* get_weapon_attack_speed_t)(ZXString<char>* result, int nItemID);
+static auto get_weapon_attack_speed = reinterpret_cast<get_weapon_attack_speed_t>(0x005A66B0);
+
+const char* get_attack_speed_string(int nAttackSpeed) {
+    switch (nAttackSpeed) {
+        case 0:
+        case 1:
+            return " FASTEST";
+        case 2:
+        case 3:
+            return " FASTER";
+        case 4:
+        case 5:
+            return " FAST";
+        case 6:
+            return " NORMAL";
+        case 7:
+        case 8:
+            return " SLOW";
+        case 9:
+        case 10:
+            return " SLOWER";
+        case 11:
+        case 12:
+            return " SLOWEST";
+        default:
+            return "";
+    }
+}
+
+ZXString<char>* __cdecl get_weapon_attack_speed_hook(ZXString<char>* result, int nItemID) {
+    result->_m_pStr = nullptr;
+    // get_weapon_type(nItemID)
+    if (reinterpret_cast<int (__cdecl*)(int)>(0x0046F660)(nItemID)) {
+        ZXString<wchar_t> sUOL;
+        // get_equip_data_path(&sUOL, nItemID)
+        reinterpret_cast<ZXString<wchar_t*> (__cdecl*)(ZXString<wchar_t>*, int)>(0x005A6060)(&sUOL, nItemID);
+        if (sUOL._m_pStr && *sUOL._m_pStr) {
+            Ztl_variant_t vEmpty;
+            Ztl_variant_t vEquip;
+            CHECK_HRESULT(get_rm()->raw_GetObject(sUOL._m_pStr, vEmpty, vEmpty, &vEquip));
+            IWzPropertyPtr pEquip = IWzPropertyPtr(vEquip.GetUnknown(false, false));
+            Ztl_variant_t vInfo;
+            CHECK_HRESULT(pEquip->get_item(L"info", &vInfo));
+            IWzPropertyPtr pInfo = IWzPropertyPtr(vInfo.GetUnknown(false, false));
+            Ztl_variant_t vAttackSpeed;
+            CHECK_HRESULT(pInfo->get_item(L"attackSpeed", &vAttackSpeed));
+
+            // get_int32(&vAttackSpeed, 6);
+            unsigned int nAttackSpeed = reinterpret_cast<unsigned int (__cdecl*)(Ztl_variant_t*, unsigned int)>(0x00406830)(&vAttackSpeed, 6);
+            char sAttackSpeed[20];
+            sprintf_s(sAttackSpeed, 20, "%s (%d)", get_attack_speed_string(nAttackSpeed), nAttackSpeed);
+
+            // ZXString<char>::ZXString<char>(result, sAttackSpeed);
+            reinterpret_cast<void (__thiscall*)(ZXString<char>*, const char*, int)>(0x0042D230)(result, sAttackSpeed, -1);
+        }
+    }
+    return result;
+}
+
+
 typedef ZXString<char>* (__thiscall* CItemInfo__GetMapString_t)(CItemInfo*, ZXString<char>*, unsigned int, const char*);
 static auto CItemInfo__GetMapString = reinterpret_cast<CItemInfo__GetMapString_t>(0x005A9CA0);
 
@@ -187,6 +248,7 @@ void AttachClientHelper() {
     ATTACH_HOOK(CInputSystem__DetectJoystick, CInputSystem__DetectJoystick_hook); // fix stutter
     ATTACH_HOOK(CVecCtrl__SetImpactNext, CVecCtrl__SetImpactNext_hook); // vertical double jump
     ATTACH_HOOK(CUserLocal__Jump, CUserLocal__Jump_hook); // double jump with jump key
+    ATTACH_HOOK(get_weapon_attack_speed, get_weapon_attack_speed_hook); // append attack speed value to weapon speed string
 
 #ifdef _DEBUG
     // Add ID to map name, item description, skill description, quest info
