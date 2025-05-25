@@ -127,9 +127,49 @@ int WINAPI WSPStartup_hook(WORD wVersionRequested, LPWSPDATA lpWSPData, LPWSAPRO
 }
 
 
+typedef decltype(&MultiByteToWideChar) MultiByteToWideChar_t;
+static MultiByteToWideChar_t MultiByteToWideChar_orig = reinterpret_cast<MultiByteToWideChar_t>(GetAddress("KERNEL32", "MultiByteToWideChar"));
+
+int WINAPI MultiByteToWideChar_hook(UINT CodePage, DWORD dwFlags, LPCCH lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar) {
+    return MultiByteToWideChar_orig(CP_UTF8, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
+}
+
+typedef decltype(&WideCharToMultiByte) WideCharToMultiByte_t;
+static WideCharToMultiByte_t WideCharToMultiByte_orig = reinterpret_cast<WideCharToMultiByte_t>(GetAddress("KERNEL32", "WideCharToMultiByte"));
+
+int WINAPI WideCharToMultiByte_hook(UINT CodePage, DWORD dwFlags, LPCWCH lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCCH lpDefaultChar, LPBOOL lpUsedDefaultChar) {
+    return WideCharToMultiByte_orig(CP_UTF8, dwFlags, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, lpDefaultChar, lpUsedDefaultChar);
+}
+
+typedef decltype(&GetTextExtentPoint32A) GetTextExtentPoint32A_t;
+static GetTextExtentPoint32A_t GetTextExtentPoint32A_orig = reinterpret_cast<GetTextExtentPoint32A_t>(GetAddress("GDI32", "GetTextExtentPoint32A"));
+
+BOOL WINAPI GetTextExtentPoint32A_hook(HDC hdc, LPCSTR lpString, int c, LPSIZE psizl) {
+    wchar_t* lpWideString = reinterpret_cast<wchar_t*>(alloca(c * 2 + 2));
+    int wc = MultiByteToWideChar(CP_UTF8, 0, lpString, c, lpWideString, c);
+    lpWideString[wc] = '\0';
+    return GetTextExtentPoint32W(hdc, lpWideString, wc, psizl);
+}
+
+typedef decltype(&TextOutA) TextOutA_t;
+static TextOutA_t TextOutA_orig = reinterpret_cast<TextOutA_t>(GetAddress("GDI32", "TextOutA"));
+
+BOOL WINAPI TextOutA_hook(HDC hdc, int x, int y, LPCSTR lpString, int c) {
+    wchar_t* lpWideString = reinterpret_cast<wchar_t*>(alloca(c * 2 + 2));
+    int wc = MultiByteToWideChar(CP_UTF8, 0, lpString, c, lpWideString, c);
+    lpWideString[wc] = '\0';
+    return TextOutW(hdc, x, y, lpWideString, wc);
+}
+
+
 void AttachSystemHooks() {
     ATTACH_HOOK(CreateMutexA_orig, CreateMutexA_hook);
     ATTACH_HOOK(CreateWindowExA_orig, CreateWindowExA_hook);
     ATTACH_HOOK(RegCreateKeyExA_orig, RegCreateKeyExA_hook);
     ATTACH_HOOK(WSPStartup_orig, WSPStartup_hook);
+
+    ATTACH_HOOK(MultiByteToWideChar_orig, MultiByteToWideChar_hook);
+    ATTACH_HOOK(WideCharToMultiByte_orig, WideCharToMultiByte_hook);
+    ATTACH_HOOK(GetTextExtentPoint32A_orig, GetTextExtentPoint32A_hook);
+    ATTACH_HOOK(TextOutA_orig, TextOutA_hook);
 }

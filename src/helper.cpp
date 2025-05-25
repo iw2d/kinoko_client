@@ -212,8 +212,9 @@ static uintptr_t CUIQuestInfoDetail__Draw_jmp = 0x00824A93;
 static uintptr_t CUIQuestInfoDetail__Draw_ret = 0x00824C04;
 
 void __stdcall CUIQuestInfoDetail__Draw_helper(IWzCanvas* pCanvas, IWzFont* pFont, unsigned short usQuestID) {
-    wchar_t sQuestID[30];
-    swprintf(sQuestID, 30, L"Quest ID : %d", usQuestID);
+    wchar_t sQuestID[256];
+    swprintf(sQuestID, 256, L"\ud018\uc2a4\ud2b8 ID : %d", usQuestID);
+    OutputDebugStringW(sQuestID);
     Ztl_variant_t vEmpty;
     unsigned int result[4];
     CHECK_HRESULT(pCanvas->raw_DrawText(35, 56, sQuestID, pFont, vEmpty, vEmpty, result));

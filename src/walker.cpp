@@ -81,7 +81,7 @@ LONG WINAPI VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     DWORD dwExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
     DWORD dwExceptionAddress = reinterpret_cast<DWORD>(pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
-    if (dwExceptionCode != STATUS_PRIVILEGED_INSTRUCTION && dwExceptionCode != DBG_PRINTEXCEPTION_C) {
+    if (dwExceptionCode != STATUS_PRIVILEGED_INSTRUCTION && dwExceptionCode != DBG_PRINTEXCEPTION_C && dwExceptionCode != DBG_PRINTEXCEPTION_WIDE_C) {
         if (dwExceptionCode == STATUS_ACCESS_VIOLATION) {
             DebugMessage("Status Access Violation : 0x%08X - 0x%08X", dwExceptionAddress, pExceptionInfo->ExceptionRecord->ExceptionFlags);
             LogException(pExceptionInfo->ContextRecord);
