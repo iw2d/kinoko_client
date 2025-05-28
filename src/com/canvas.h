@@ -99,7 +99,7 @@ DECLARE_INTERFACE_IID_(IWzFont, IUnknown, "2bef046d-ccd6-445a-88c4-929fc35d30ac"
     STDMETHOD(raw_CalcLongestTextForGlobal)(THIS_ wchar_t* sText, int nWidth, tagVARIANT vTabOrg, int*) PURE;
     STDMETHOD(raw_CalcLongestTextForGlobalEx)(THIS_ wchar_t* sText, int nWidth, int* pnPosAdj, tagVARIANT vTabOrg, int*) PURE;
     STDMETHOD(raw_CalcLineCountForGlobal)(THIS_ wchar_t* sText, int nWidth, tagVARIANT vTabOrg, int*) PURE;
-    STDMETHOD(raw_DrawText)(THIS_ int nLeft, int nTop, wchar_t* sText, IWzCanvas* pCanvas, tagVARIANT vAlpha, tagVARIANT vTabOrg) PURE;
+    STDMETHOD(raw_DrawText)(THIS_ int nLeft, int nTop, wchar_t* sText, IWzCanvas* pCanvas, tagVARIANT vAlpha, tagVARIANT vTabOrg, unsigned int* puHeight) PURE;
 
     END_INTERFACE;
 };
