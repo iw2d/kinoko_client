@@ -14,4 +14,4 @@
 
 #include <comdef.h>
 
-#include <detours/detours.h>
+#include <detours.h>

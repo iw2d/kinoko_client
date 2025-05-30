@@ -12,5 +12,15 @@ if(NOT CUSTOM_BINARY_DIR)
     )
 endif()
 
+add_library(detours STATIC
+    ${PROJECT_SOURCE_DIR}/external/detours/src/detours.cpp
+    ${PROJECT_SOURCE_DIR}/external/detours/src/disasm.cpp
+    ${PROJECT_SOURCE_DIR}/external/detours/src/modules.cpp
+)
+target_include_directories(detours PUBLIC
+    ${PROJECT_SOURCE_DIR}/external/detours/src
+)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/external/StackWalker)
 
 add_subdirectory(src)

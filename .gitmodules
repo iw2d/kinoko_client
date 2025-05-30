@@ -1,0 +1,6 @@
+[submodule "external/Detours"]
+	path = external/Detours
+	url = https://github.com/microsoft/Detours
+[submodule "external/StackWalker"]
+	path = external/StackWalker
+	url = https://github.com/JochenKalmbach/StackWalker

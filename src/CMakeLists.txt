@@ -20,15 +20,11 @@ add_library(injector SHARED
 
 target_precompile_headers(injector PRIVATE pch.h)
 
-target_include_directories(injector PRIVATE
-    ../external
-)
-
 target_link_libraries(injector PRIVATE
     winmm.lib
     ws2_32.lib
-    ${PROJECT_SOURCE_DIR}/external/detours/detours.lib
-    ${PROJECT_SOURCE_DIR}/external/StackWalker/StackWalker.lib
+    detours
+    StackWalker
 )
 
 set_target_properties(injector PROPERTIES
@@ -49,12 +45,8 @@ add_executable(launcher WIN32
 
 target_precompile_headers(launcher PRIVATE pch.h)
 
-target_include_directories(launcher PRIVATE
-    ../external
-)
-
 target_link_libraries(launcher PRIVATE
-    ${PROJECT_SOURCE_DIR}/external/detours/detours.lib
+    detours
 )
 
 set_target_properties(launcher PROPERTIES

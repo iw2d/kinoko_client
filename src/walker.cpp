@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <time.h>
-#include <StackWalker/StackWalker.h>
+#include <StackWalker.h>
 
 #include "hook.h"
 #include "config.h"
@@ -102,5 +102,7 @@ LONG WINAPI VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
 
 
 void AttachExceptionHandler() {
+#ifdef _DEBUG
     AddVectoredExceptionHandler(1, VectoredExceptionHandler);
+#endif
 }
