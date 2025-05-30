@@ -13,14 +13,15 @@ if(NOT CUSTOM_BINARY_DIR)
 endif()
 
 add_library(detours STATIC
-    ${PROJECT_SOURCE_DIR}/external/detours/src/detours.cpp
-    ${PROJECT_SOURCE_DIR}/external/detours/src/disasm.cpp
-    ${PROJECT_SOURCE_DIR}/external/detours/src/modules.cpp
+    external/detours/src/detours.cpp
+    external/detours/src/disasm.cpp
+    external/detours/src/modules.cpp
 )
 target_include_directories(detours PUBLIC
-    ${PROJECT_SOURCE_DIR}/external/detours/src
+    external/detours/src
 )
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/external/StackWalker)
+set(StackWalker_DISABLE_TESTS ON CACHE BOOL "Disable StackWalker tests")
+add_subdirectory(external/StackWalker)
 
 add_subdirectory(src)

@@ -11,11 +11,14 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
     - name: configure
-      run: cmake -S . -B build -A Win32
+      run: cmake --preset release-win32
     - name: build
-      run: cmake --build build --config Debug
+      run: cmake --build --preset release-win32
     - name: release
       uses: ncipollo/release-action@v1
       with:
