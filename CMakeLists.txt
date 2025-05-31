@@ -12,16 +12,29 @@ if(NOT CUSTOM_BINARY_DIR)
     )
 endif()
 
+# Build Detours
 add_library(detours STATIC
-    external/detours/src/detours.cpp
-    external/detours/src/disasm.cpp
-    external/detours/src/modules.cpp
+	external/Detours/src/creatwth.cpp
+	external/Detours/src/disolarm.cpp
+	external/Detours/src/disolx64.cpp
+	external/Detours/src/modules.cpp
+	external/Detours/src/detours.cpp
+	external/Detours/src/disolarm64.cpp
+	external/Detours/src/disolx86.cpp
+	external/Detours/src/disasm.cpp
+	external/Detours/src/disolia64.cpp
+	external/Detours/src/image.cpp
 )
-target_include_directories(detours PUBLIC
-    external/detours/src
+include_directories(
+    external/Detours/src
 )
 
+# Build StackWalker
 set(StackWalker_DISABLE_TESTS ON CACHE BOOL "Disable StackWalker tests")
 add_subdirectory(external/StackWalker)
+include_directories(
+    external/StackWalker/Main/StackWalker
+)
 
+# Build Injector and Launcher
 add_subdirectory(src)
