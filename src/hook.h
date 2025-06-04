@@ -69,4 +69,6 @@ void PatchJmp(uintptr_t pAddress, uintptr_t pDestination);
 
 void PatchNop(uintptr_t pAddress, uintptr_t pDestination);
 
+void PatchCall(uintptr_t pAddress, uintptr_t pDestination);
+
 void PatchRetZero(uintptr_t pAddress);

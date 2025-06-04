@@ -82,6 +82,11 @@ void PatchNop(uintptr_t pAddress, uintptr_t pDestination) {
     VirtualProtect(reinterpret_cast<LPVOID>(pAddress), uSize, flOldProtect, &flOldProtect);
 }
 
+void PatchCall(uintptr_t pAddress, uintptr_t pDestination) {
+    Patch1(pAddress, 0xE8);
+    Patch4(pAddress + 1, pDestination - pAddress - 5);
+}
+
 void PatchRetZero(uintptr_t pAddress) {
     PatchStr(pAddress, "\x33\xC0\xC3");
 }

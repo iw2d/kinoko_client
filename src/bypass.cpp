@@ -424,6 +424,15 @@ void __declspec(naked) CWvsContext__OnEnterField_hook() {
 }
 
 
+static auto CCtrlComboBox__AddItem = reinterpret_cast<void (__thiscall*)(void*, char*, unsigned int)>(0x004DE640);
+
+void __fastcall CCtrlComboBox__AddItem_hook(void* pThis, void* _EDX, char* sItemName, unsigned int dwParam) {
+    CCtrlComboBox__AddItem(pThis, "To Spouse", 0x6); // ID_CHAT_TARGET_COUPLE
+    CCtrlComboBox__AddItem(pThis, "Whisper", 0x7); // ID_CHAT_TARGET_WHISPER
+    CCtrlComboBox__AddItem(pThis, sItemName, dwParam); // overwritten call for ID_CHAT_TARGET_ALL
+}
+
+
 void AttachClientBypass() {
     ATTACH_HOOK(CWvsApp__ctor, CWvsApp__ctor_hook);
     ATTACH_HOOK(CWvsApp__SetUp, CWvsApp__SetUp_hook);
@@ -433,6 +442,7 @@ void AttachClientBypass() {
     ATTACH_HOOK(CLogin__SendSelectCharPacket, CLogin__SendSelectCharPacket_hook);
 
     PatchJmp(CWvsContext__OnEnterField_jmp, reinterpret_cast<uintptr_t>(&CWvsContext__OnEnterField_hook));
+    PatchCall(0x00870E82, reinterpret_cast<uintptr_t>(&CCtrlComboBox__AddItem_hook)); // CUIStatusBar::MakeCtrlEdit - fix bug when chatlog is minimized
     PatchJmp(0x004AFCF3, 0x004AFE30); // CClientSocket::OnAliveReq
 
     PatchRetZero(0x004AB900); // DR_check
