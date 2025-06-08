@@ -503,18 +503,27 @@ void AttachClientHelper() {
         return;
     }
 
-    static auto s_zapiloader = reinterpret_cast<void*>(0x00C6E0D0);
-    static auto ZAPILoader__DecodePackage = reinterpret_cast<unsigned int (__thiscall*)(void*, char*, unsigned int*, char*)>(0x00742B30);
-    static auto s_aAPIInfo = reinterpret_cast<char*>(0x00C59890);
+    static auto s_zapiloader = reinterpret_cast<void*>(0x00670D58);
+    static auto ZAPILoader__DecodePackage = reinterpret_cast<unsigned int (__thiscall*)(void*, char*, unsigned int*, char*)>(0x00516F8F);
+    static auto s_aAPIInfo = reinterpret_cast<char*>(0x006685A0);
 
     // ZAPILoader::InitDecoderInfo
-    reinterpret_cast<void (__thiscall*)(void*)>(0x00741720)(s_zapiloader);
+    *reinterpret_cast<unsigned __int64*>(reinterpret_cast<uintptr_t>(s_zapiloader) + 0xA0) = 0;
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<uintptr_t>(s_zapiloader) + 0xB0) = 0;
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<uintptr_t>(s_zapiloader) + 0xB4) = 1;
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<uintptr_t>(s_zapiloader) + 0xB8) = 1;
+
     unsigned int uPibot = 0;
     char sBuffer[256];
-    while (uPibot < 0xF9B) {
+    while (uPibot < 0xE7D) {
         memset(sBuffer, 0, sizeof(sBuffer));
         unsigned int nIdx = ZAPILoader__DecodePackage(s_zapiloader, s_aAPIInfo, &uPibot, sBuffer);
-        outFile << "  " << sZAPI[std::string(sBuffer)] << "\n";
+        DEBUG_MESSAGE("%s", sBuffer);
+        if (auto search = sZAPI.find(std::string(sBuffer)); search != sZAPI.end()) {
+            outFile << "  " << search->second << "\n";
+        } else {
+            outFile << "  " << sBuffer << "\n";
+        }
     }
     outFile << "};";
     outFile.close();

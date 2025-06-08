@@ -28,8 +28,7 @@ void AttachElementalDamageMod();
 void AttachExceptionHandler();
 
 static void AttachClientHooks() {
-    AttachClientBypass();
-    AttachClientInlink();
+
     AttachClientHelper();
     AttachItemEffectMod();
     AttachStringPoolMod();
