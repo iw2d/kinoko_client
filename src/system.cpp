@@ -3,8 +3,6 @@
 #include "debug.h"
 #include "hook.h"
 
-#pragma warning(disable : 4996)
-
 
 typedef decltype(&CreateMutexA) CreateMutexA_t;
 static CreateMutexA_t CreateMutexA_orig = reinterpret_cast<CreateMutexA_t>(GetAddress("KERNEL32", "CreateMutexA"));
@@ -100,11 +98,14 @@ LSTATUS WINAPI RegCreateKeyExA_hook(HKEY hKey, LPCSTR lpSubKey, DWORD Reserved, 
 typedef decltype(&WSPStartup) WSPStartup_t;
 static WSPStartup_t WSPStartup_orig = reinterpret_cast<WSPStartup_t>(GetAddress("MSWSOCK", "WSPStartup"));
 static WSPPROC_TABLE g_ProcTable;
+static ULONG g_uNexonAddress;
 
 int WINAPI WSPConnect_hook(SOCKET s, const struct sockaddr FAR* name, int namelen, LPWSABUF lpCallerData, LPWSABUF lpCalleeData, LPQOS lpSQOS, LPQOS lpGQOS, LPINT lpErrno) {
-    const char* sName = inet_ntoa(((sockaddr_in*) name)->sin_addr);
+    char sName[INET_ADDRSTRLEN];
+    InetNtopA(AF_INET, &((sockaddr_in*) name)->sin_addr, sName, INET_ADDRSTRLEN);
     if (strstr(sName, CONFIG_NEXON_SEARCH)) {
-        InetPton(AF_INET, g_sServerAddress ? g_sServerAddress : CONFIG_SERVER_ADDRESS, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
+        g_uNexonAddress = ((sockaddr_in*) name)->sin_addr.S_un.S_addr;
+        InetPtonA(AF_INET, g_sServerAddress ? g_sServerAddress : CONFIG_SERVER_ADDRESS, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
         if (g_nServerPort) {
             ((sockaddr_in*) name)->sin_port = htons(g_nServerPort);
         }
@@ -114,7 +115,7 @@ int WINAPI WSPConnect_hook(SOCKET s, const struct sockaddr FAR* name, int namele
 
 int WINAPI WSPGetPeerName_hook(SOCKET s, struct sockaddr* name, LPINT namelen, LPINT lpErrNo) {
     int result = g_ProcTable.lpWSPGetPeerName(s, name, namelen, lpErrNo);
-    InetPton(AF_INET, CONFIG_NEXON_ADDRESS, &((sockaddr_in*) name)->sin_addr.S_un.S_addr);
+    ((sockaddr_in*) name)->sin_addr.S_un.S_addr = g_uNexonAddress;
     return result;
 }
 

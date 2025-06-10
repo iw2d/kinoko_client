@@ -23,7 +23,6 @@ target_precompile_headers(injector PRIVATE pch.h)
 target_link_libraries(injector PRIVATE
     winmm.lib
     ws2_32.lib
-    detours
     StackWalker
 )
 
@@ -44,10 +43,6 @@ add_executable(launcher WIN32
 )
 
 target_precompile_headers(launcher PRIVATE pch.h)
-
-target_link_libraries(launcher PRIVATE
-    detours
-)
 
 set_target_properties(launcher PROPERTIES
     OUTPUT_NAME "Kinoko"

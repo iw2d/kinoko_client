@@ -15,14 +15,10 @@ endif()
 # Build Detours
 add_library(detours STATIC
 	external/Detours/src/creatwth.cpp
-	external/Detours/src/disolarm.cpp
-	external/Detours/src/disolx64.cpp
 	external/Detours/src/modules.cpp
 	external/Detours/src/detours.cpp
-	external/Detours/src/disolarm64.cpp
 	external/Detours/src/disolx86.cpp
 	external/Detours/src/disasm.cpp
-	external/Detours/src/disolia64.cpp
 	external/Detours/src/image.cpp
 )
 include_directories(
