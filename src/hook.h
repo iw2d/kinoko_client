@@ -25,6 +25,7 @@ void AttachPortableChairMod();
 void AttachTemporaryStatMod();
 void AttachHyperTeleportMod();
 void AttachElementalDamageMod();
+void AttachDropItemAuraMod();
 void AttachExceptionHandler();
 
 static void AttachClientHooks() {
@@ -39,6 +40,7 @@ static void AttachClientHooks() {
     AttachTemporaryStatMod();
     AttachHyperTeleportMod();
     AttachElementalDamageMod();
+    AttachDropItemAuraMod();
     AttachExceptionHandler();
 }
 

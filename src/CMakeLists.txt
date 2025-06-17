@@ -16,6 +16,7 @@ add_library(injector SHARED
     temporarystat.cpp
     hyperteleport.cpp
     elementaldamage.cpp
+    dropitemaura.cpp
 )
 
 target_precompile_headers(injector PRIVATE pch.h)

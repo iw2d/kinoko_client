@@ -154,6 +154,25 @@ public:
 };
 
 
+class CInPacket {
+public:
+    MEMBER_AT(unsigned int, 0x14, m_uOffset)
+
+    inline unsigned char Decode1() {
+        return reinterpret_cast<unsigned char (__thiscall*)(CInPacket*)>(0x004097D0)(this);
+    }
+    inline unsigned short Decode2() {
+        return reinterpret_cast<unsigned short (__thiscall*)(CInPacket*)>(0x0042A2A0)(this);
+    }
+    inline unsigned int Decode4() {
+        return reinterpret_cast<unsigned int (__thiscall*)(CInPacket*)>(0x00409870)(this);
+    }
+    inline void DecodeBuffer(void* p, size_t uSize) {
+        reinterpret_cast<void (__thiscall*)(CInPacket*, void*, size_t)>(0x004336A0)(this, p, uSize);
+    }
+};
+
+
 class COutPacket {
 public:
     int m_bLoopback;
