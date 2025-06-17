@@ -1,13 +1,16 @@
 #pragma once
 
 
-template<typename T, uintptr_t pInstance>
+template<typename T, uintptr_t ADDRESS>
 class TSingleton {
+protected:
+    inline static T*& ms_pInstance = *reinterpret_cast<T**>(ADDRESS);
+
 public:
-    static inline T* GetInstance() {
-        return *reinterpret_cast<T**>(pInstance);
+    static T* GetInstance() {
+        return ms_pInstance;
     }
-    static inline bool IsInstantiated() {
-        return *reinterpret_cast<T**>(pInstance) != nullptr;
+    static bool IsInstantiated() {
+        return ms_pInstance != nullptr;
     }
 };
