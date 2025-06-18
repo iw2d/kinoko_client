@@ -4,13 +4,26 @@
 #include "debug.h"
 
 
-enum DropState {
-    DropState_WaitingForCreation = 0x0,
-    DropState_ParabolicMotion = 0x1,
-    DropState_UniformVelocityMotionForYAxis = 0x2,
-    DropState_Dropped = 0x3,
-    DropState_Explosion = 0x4,
+class CAnimationDisplayer : public TSingleton<CAnimationDisplayer, 0x00C68750> {
+public:
+    void RegisterOneTimeAnimation(IWzGr2DLayerPtr pLayer, int tDelayBeforeStart, IWzGr2DLayerPtr pFlipOrigin) {
+        reinterpret_cast<void (__thiscall*)(CAnimationDisplayer*, IWzGr2DLayerPtr, int, IWzGr2DLayerPtr)>(0x00444410)(this, pLayer, tDelayBeforeStart, pFlipOrigin);
+    }
+
+    inline static auto LoadLayer = reinterpret_cast<void (__cdecl*)(
+        IWzGr2DLayerPtr* result,
+        IWzPropertyPtr pProp,
+        int bFlip,
+        IWzVector2DPtr pOrigin,
+        int rx,
+        int ry,
+        IWzGr2DLayerPtr pOverlay,
+        int z,
+        int alpha,
+        int magLevel
+    )>(0x0044A8F0);
 };
+
 
 struct DROP {
     MEMBER_AT(IWzGr2DLayerPtr, 0x38, pLayer)
@@ -41,6 +54,7 @@ static const wchar_t* g_asAuraType[4] = {
     L"Unique",
     L"Legendary"
 };
+static IWzPropertyPtr g_pEffect = nullptr;
 static IWzPropertyPtr g_pFront[4] = {};
 static IWzPropertyPtr g_pBack[4] = {};
 static bool g_bDropItemAuraLoaded = false;
@@ -50,6 +64,11 @@ void LoadDropItemAura() {
         return;
     }
     g_bDropItemAuraLoaded = true;
+
+    Ztl_variant_t vEffectProperty;
+    CHECK_HRESULT(get_rm()->raw_GetObject(L"Effect/BasicEff.img/dropItemEffect", Ztl_variant_t(), Ztl_variant_t(), &vEffectProperty));
+    g_pEffect = vEffectProperty.GetUnknown(false, false);
+
     for (size_t i = 0; i < 4; ++i) {
         wchar_t sUOL[256];
         swprintf_s(sUOL, 256, L"Effect/BasicEff.img/dropItemAura/%ls", g_asAuraType[i]);
@@ -62,27 +81,14 @@ void LoadDropItemAura() {
         Ztl_variant_t vBackProperty;
         CHECK_HRESULT(pAuraProperty->get_item(L"front", &vFrontProperty));
         CHECK_HRESULT(pAuraProperty->get_item(L"back", &vBackProperty));
-        g_pFront[i] = IWzPropertyPtr(vFrontProperty.GetUnknown(false, false));
-        g_pBack[i] = IWzPropertyPtr(vBackProperty.GetUnknown(false, false));
+        g_pFront[i] = vFrontProperty.GetUnknown(false, false);
+        g_pBack[i] = vBackProperty.GetUnknown(false, false);
     }
 }
 
 
 static auto CDropPool__OnDropEnterField_jmp = 0x00517331;
 static auto CDropPool__OnDropEnterField_ret = 0x00517336;
-
-static auto CAnimationDisplayer__LoadLayer = reinterpret_cast<void (__cdecl*)(
-    IWzGr2DLayerPtr* result,
-    IWzPropertyPtr pProp,
-    int bFlip,
-    IWzVector2DPtr pOrigin,
-    int rx,
-    int ry,
-    IWzGr2DLayerPtr pOverlay,
-    int z,
-    int alpha,
-    int magLevel
-)>(0x0044A8F0);
 
 unsigned char __stdcall CDropPool__OnDropEnterField_helper(CInPacket* iPacket, DROP* pDrop) {
     int nIndex;
@@ -97,7 +103,9 @@ unsigned char __stdcall CDropPool__OnDropEnterField_helper(CInPacket* iPacket, D
         case 3:
             nIndex = 2;
             break;
-        // no legendary grade in v95
+        case 4:
+            nIndex = 3; // note: no legendary grade in v95
+            break;
         default:
             nIndex = -1;
             break;
@@ -108,10 +116,10 @@ unsigned char __stdcall CDropPool__OnDropEnterField_helper(CInPacket* iPacket, D
         CHECK_HRESULT(pDrop->pLayer()->get_origin(&vOrigin));
         IWzVector2DPtr pOrigin(vOrigin.GetUnknown(false, false));
         IWzGr2DLayerPtr pOverlay;
-        CAnimationDisplayer__LoadLayer(std::addressof(pDrop->pLayerFront()), g_pFront[nIndex], 0, pOrigin, 0, 0, pOverlay, 1, 0, 0);
+        CAnimationDisplayer::LoadLayer(std::addressof(pDrop->pLayerFront()), g_pFront[nIndex], 0, pOrigin, 0, 0, pOverlay, 1, 0, 0);
         int nZ;
         CHECK_HRESULT(pDrop->pLayer()->get_z(&nZ));
-        CAnimationDisplayer__LoadLayer(std::addressof(pDrop->pLayerBack()), g_pBack[nIndex], 0, pOrigin, 0, 0, pOverlay, nZ - 1, 0, 0);
+        CAnimationDisplayer::LoadLayer(std::addressof(pDrop->pLayerBack()), g_pBack[nIndex], 0, pOrigin, 0, 0, pOverlay, nZ - 1, 0, 0);
     }
     return iPacket->Decode1(); // overwritten Decode1
 }
@@ -146,6 +154,18 @@ void __stdcall CDropPool__Update_helper(DROP* pDrop) {
     CHECK_HRESULT(pDrop->pLayerBack()->get_alpha(&pAlphaBack));
     CHECK_HRESULT(pAlphaBack->raw_RelMove(255, 255, Ztl_variant_t(), Ztl_variant_t()));
     CHECK_HRESULT(pDrop->pLayerBack()->raw_Animate(GA_REPEAT, Ztl_variant_t(), Ztl_variant_t()));
+
+    Ztl_variant_t vOrigin;
+    CHECK_HRESULT(pDrop->pLayer()->get_origin(&vOrigin));
+    IWzVector2DPtr pOrigin(vOrigin.GetUnknown(false, false));
+    int nZ;
+    CHECK_HRESULT(pDrop->pLayer()->get_z(&nZ));
+    IWzGr2DLayerPtr pEffectLayer;
+    CAnimationDisplayer::LoadLayer(std::addressof(pEffectLayer), g_pEffect, 0, pOrigin, 0, 0, pDrop->pLayer(), nZ - 2, 255, 0);
+    if (pEffectLayer) {
+        CHECK_HRESULT(pEffectLayer->raw_Animate(GA_NORMAL, Ztl_variant_t(), Ztl_variant_t()));
+        CAnimationDisplayer::GetInstance()->RegisterOneTimeAnimation(pEffectLayer, 0, IWzGr2DLayerPtr());
+    }
 }
 
 void __declspec(naked) CDropPool__Update_hook() {
