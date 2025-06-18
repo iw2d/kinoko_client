@@ -93,6 +93,9 @@ void __fastcall CUIToolTip__SetToolTip_Equip_Basic_hook(CUIToolTip* pThis, void*
 
     // CItemInfo::GetEquipItem(CItemInfo::GetInstance(), nItemID);
     EQUIPITEM* pEquipItem = reinterpret_cast<EQUIPITEM* (__thiscall*)(CItemInfo*, int)>(0x005C0820)(CItemInfo::GetInstance(), nItemID);
+    if (!pEquipItem) {
+        return;
+    }
     PrintElementDamage(pThis, "POISON DAMAGE :", pEquipItem->nirPoison());      // incRMAS
     PrintElementDamage(pThis, "ICE DAMAGE :", pEquipItem->nirIce());            // incRMAI
     PrintElementDamage(pThis, "FIRE DAMAGE :", pEquipItem->nirFire());          // incRMAF
