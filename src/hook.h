@@ -1,12 +1,13 @@
 #pragma once
 #include "debug.h"
+#include <cstdint>
 
 #ifdef _DEBUG
-    #define ATTACH_HOOK(TARGET, DETOUR) \
-        AttachHook(reinterpret_cast<void**>(&TARGET), CastHook(&DETOUR)) ? true : (ErrorMessage("Failed to attach detour function \"%s\" at target address : 0x%08X.", #DETOUR, TARGET), false)
+#define ATTACH_HOOK(TARGET, DETOUR) \
+    AttachHook(reinterpret_cast<void**>(&TARGET), CastHook(&DETOUR)) ? true : (ErrorMessage("Failed to attach detour function \"%s\" at target address : 0x%08X.", #DETOUR, TARGET), false)
 #else
-    #define ATTACH_HOOK(TARGET, DETOUR) \
-        AttachHook(reinterpret_cast<void**>(&TARGET), CastHook(&DETOUR))
+#define ATTACH_HOOK(TARGET, DETOUR) \
+    AttachHook(reinterpret_cast<void**>(&TARGET), CastHook(&DETOUR))
 #endif
 
 
@@ -15,35 +16,13 @@ void AttachSystemHooks();
 
 // called in system.cpp -> CreateMutexA_hook
 void AttachClientBypass();
-void AttachClientInlink();
-void AttachClientHelper();
-void AttachItemEffectMod();
-void AttachStringPoolMod();
-void AttachResolutionMod();
-void AttachChatBalloonMod();
-void AttachPortableChairMod();
-void AttachTemporaryStatMod();
-void AttachHyperTeleportMod();
-void AttachElementalDamageMod();
-void AttachExceptionHandler();
 
-static void AttachClientHooks() {
+inline void AttachClientHooks() {
     AttachClientBypass();
-    AttachClientInlink();
-    AttachClientHelper();
-    AttachItemEffectMod();
-    AttachStringPoolMod();
-    AttachResolutionMod();
-    AttachChatBalloonMod();
-    AttachPortableChairMod();
-    AttachTemporaryStatMod();
-    AttachHyperTeleportMod();
-    AttachElementalDamageMod();
-    AttachExceptionHandler();
 }
 
 
-template<typename T>
+template <typename T>
 __forceinline auto CastHook(T fn) -> void* {
     union {
         T fn;
@@ -57,11 +36,11 @@ bool AttachHook(void** ppTarget, void* pDetour);
 
 void* VMTHook(void* pInstance, void* pDetour, size_t uIndex);
 
-void* GetAddress(const char* sModuelName, const char* sProcName);
+void* GetAddress(const char* sModuleName, const char* sProcName);
 
-void Patch1(uintptr_t pAddress, unsigned char uValue);
+void Patch1(uintptr_t pAddress, uint8_t uValue);
 
-void Patch4(uintptr_t pAddress, unsigned int uValue);
+void Patch4(uintptr_t pAddress, uint32_t uValue);
 
 void PatchStr(uintptr_t uAddress, const char* sValue);
 

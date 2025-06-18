@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "hook.h"
 #include "debug.h"
+#include <detours.h>
 
 
 bool AttachHook(void** ppTarget, void* pDetour) {
@@ -28,7 +29,7 @@ bool AttachHook(void** ppTarget, void* pDetour) {
 }
 
 void* VMTHook(void* pInstance, void* pDetour, size_t uIndex) {
-    void** vtable = *reinterpret_cast<void***>(pInstance);
+    void** vtable = *static_cast<void***>(pInstance);
     void* pTarget = vtable[uIndex];
     AttachHook(&pTarget, pDetour);
     return pTarget;
@@ -47,17 +48,17 @@ void* GetAddress(const char* sModuleName, const char* sProcName) {
 }
 
 
-void Patch1(uintptr_t pAddress, unsigned char uValue) {
+void Patch1(uintptr_t pAddress, uint8_t uValue) {
     DWORD flOldProtect;
     VirtualProtect(reinterpret_cast<LPVOID>(pAddress), 1, PAGE_EXECUTE_READWRITE, &flOldProtect);
-    *reinterpret_cast<unsigned char*>(pAddress) = uValue;
+    *reinterpret_cast<uint8_t*>(pAddress) = uValue;
     VirtualProtect(reinterpret_cast<LPVOID>(pAddress), 1, flOldProtect, &flOldProtect);
 }
 
-void Patch4(uintptr_t pAddress, unsigned int uValue) {
+void Patch4(uintptr_t pAddress, uint32_t uValue) {
     DWORD flOldProtect;
     VirtualProtect(reinterpret_cast<LPVOID>(pAddress), 4, PAGE_EXECUTE_READWRITE, &flOldProtect);
-    *reinterpret_cast<unsigned int*>(pAddress) = uValue;
+    *reinterpret_cast<uint32_t*>(pAddress) = uValue;
     VirtualProtect(reinterpret_cast<LPVOID>(pAddress), 4, flOldProtect, &flOldProtect);
 }
 
