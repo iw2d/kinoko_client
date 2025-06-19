@@ -162,6 +162,7 @@ public:
         int32_t nIndex = T::SelectBufferIndex(_MemSize(p));
         if (nIndex < 0) {
             _FreeRaw(p);
+            return;
         }
         ZSynchronizedHelper<ZFatalSection> _sync(m_lock);
         *reinterpret_cast<void**>(p) = m_apBuff[nIndex];

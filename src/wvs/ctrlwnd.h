@@ -24,6 +24,7 @@ static_assert(sizeof(DRAGCTX) == 0xC);
 
 class CCtrlWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
 protected:
+    uint8_t padding[0x34 - sizeof(IGObj) - sizeof(IUIMsgHandler) - sizeof(ZRefCounted)];
     MEMBER_AT(uint32_t, 0x14, m_nCtrlId)
     MEMBER_AT(IWzVector2DPtr, 0x18, m_pLTCtrl)
     MEMBER_AT(CWnd*, 0x24, m_pParent)
@@ -154,3 +155,30 @@ public:
 };
 
 static_assert(sizeof(CCtrlComboBox) == 0x110);
+
+
+class CCtrlButton : public CCtrlWnd {
+public:
+    struct CREATEPARAM {
+        int32_t bAcceptFocus;
+        int32_t bDrawBack;
+        int32_t bAnimateOnce;
+        ZXString<wchar_t> sUOL;
+
+        CREATEPARAM() : bAcceptFocus(0), bDrawBack(0), bAnimateOnce(0) {
+        }
+        ~CREATEPARAM() = default;
+    };
+    static_assert(sizeof(CREATEPARAM) == 0x10);
+
+    uint8_t padding[0xADC - sizeof(CCtrlWnd)];
+
+    CCtrlButton() : CCtrlWnd(0) {
+        reinterpret_cast<void(__thiscall*)(CCtrlButton*)>(0x00471740)(this);
+    }
+    virtual void CreateCtrl(CWnd* pParent, uint32_t nId, int32_t nType, int32_t l, int32_t t, int32_t decClickArea, void* pData) {
+        reinterpret_cast<void(__thiscall*)(CCtrlButton*, CWnd*, uint32_t, int32_t, int32_t, int32_t, int32_t, void*)>(0x004DA330)(this, pParent, nId, nType, l, t, decClickArea, pData);
+    }
+};
+
+static_assert(sizeof(CCtrlButton) == 0xADC);

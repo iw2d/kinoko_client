@@ -2,11 +2,13 @@
 #include "hook.h"
 #include "debug.h"
 #include "wvs/wvsapp.h"
+#include "wvs/wvscontext.h"
 #include "wvs/inputsystem.h"
 #include "wvs/config.h"
 #include "wvs/stage.h"
 #include "wvs/login.h"
 #include "wvs/clientsocket.h"
+#include "wvs/temporarystatview.h"
 #include "ztl/zalloc.h"
 #include "ztl/zcoll.h"
 #include "ztl/zstr.h"
@@ -22,6 +24,7 @@ ZALLOCEX(ZAllocAnonSelector, 0x00C6E67C)
 ZALLOCEX(ZAllocStrSelector<char>, 0x00C6E6A8)
 ZALLOCEX(ZAllocStrSelector<wchar_t>, 0x00C6E64C)
 ZRECYCLABLE(ZInetAddr, 0x00C63EE4)
+
 
 static auto CWvsApp__ctor = 0x009CA8A0;
 
@@ -307,6 +310,13 @@ void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CC
     }
 }
 
+static auto CClientSocket__OnAliveReq = 0x004AFC90;
+
+void __fastcall CClientSocket__OnAliveReq_hook(CClientSocket* pThis, void* _EDX, CInPacket& iPacket) {
+    COutPacket oPacket(25); // CP_AliveAck
+    pThis->SendPacket(oPacket);
+}
+
 
 static auto CLogin__SendCheckPasswordPacket = 0x005DB9D0;
 
@@ -336,15 +346,24 @@ int32_t __fastcall CLogin__SendCheckPasswordPacket_hook(CLogin* pThis, void* _ED
 }
 
 
+static auto CWvsContext__OnEnterField = 0x009DBEC0;
+
+void __fastcall CWvsContext__OnEnterField_hook(CWvsContext* pThis, void* _EDX) {
+    // CWvsContext::UI_CloseRevive(this);
+    reinterpret_cast<void(__thiscall*)(CWvsContext*)>(0x009CCCD0)(pThis);
+    pThis->m_temporaryStatView.Show();
+    pThis->m_bKillMobFromEnterField = 0;
+}
+
+
 void AttachClientBypass() {
     ATTACH_HOOK(CWvsApp__ctor, CWvsApp__ctor_hook);
     ATTACH_HOOK(CWvsApp__SetUp, CWvsApp__SetUp_hook);
     ATTACH_HOOK(CWvsApp__Run, CWvsApp__Run_hook);
     ATTACH_HOOK(CClientSocket__Connect, CClientSocket__Connect_hook);
+    ATTACH_HOOK(CClientSocket__OnAliveReq, CClientSocket__OnAliveReq_hook);
     ATTACH_HOOK(CLogin__SendCheckPasswordPacket, CLogin__SendCheckPasswordPacket_hook);
-
-    PatchJmp(0x009DBEEE, 0x009DC278); // CWvsContext::OnEnterField
-    PatchJmp(0x004AFCF3, 0x004AFE30); // CClientSocket::OnAliveReq
+    ATTACH_HOOK(CWvsContext__OnEnterField, CWvsContext__OnEnterField_hook);
 
     PatchRetZero(0x004AB900); // DR_check
     PatchRetZero(0x0045EBD0); // Hidedll

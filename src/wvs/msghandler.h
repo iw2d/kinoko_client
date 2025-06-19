@@ -67,7 +67,7 @@ public:
     virtual int32_t GetAbsTop() {
         return 0;
     }
-    virtual void OnClearToolTip() {
+    virtual void ClearToolTip() {
         ;
     }
     virtual void OnIMEModeChange(char cMode) {

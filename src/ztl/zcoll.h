@@ -16,6 +16,9 @@ public:
     }
     ZArray() : a(nullptr) {
     }
+    ~ZArray() {
+        RemoveAll();
+    }
     const T& operator[](size_t i) const {
         return a[i];
     }

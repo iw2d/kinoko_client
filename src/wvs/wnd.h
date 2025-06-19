@@ -11,6 +11,7 @@ class CCtrlWnd;
 
 class CWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
 protected:
+    uint8_t padding[0x80 - sizeof(IGObj) - sizeof(IUIMsgHandler) - sizeof(ZRefCounted)];
     MEMBER_AT(uint32_t, 0x14, m_dwWndKey)
     MEMBER_AT(uint32_t, 0x3C, m_bScreenCoord)
 
@@ -83,7 +84,7 @@ public:
         return reinterpret_cast<int32_t(__thiscall*)(IUIMsgHandler*, int32_t, int32_t, int32_t)>(0x009AE4D0)(this, rx, ry, nWheel);
     }
     virtual void OnMouseEnter(int32_t bEnter) override {
-        return reinterpret_cast<void(__thiscall*)(IUIMsgHandler*, int32_t)>(0x009AD370)(this, bEnter);
+        reinterpret_cast<void(__thiscall*)(IUIMsgHandler*, int32_t)>(0x009AD370)(this, bEnter);
     }
     virtual int32_t GetAbsLeft() override {
         return reinterpret_cast<int32_t(__thiscall*)(IUIMsgHandler*)>(0x009AD480)(this);
@@ -96,3 +97,5 @@ public:
         reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009B0E50)(this);
     }
 };
+
+static_assert(sizeof(CWnd) == 0x80);
