@@ -28,40 +28,40 @@ static auto CWvsApp__ctor = 0x009CA8A0;
 void __fastcall CWvsApp__ctor_hook(CWvsApp* pThis, void* _EDX, const char* sCmdLine) {
     DEBUG_MESSAGE("CWvsApp::CWvsApp");
     CWvsApp::ms_pInstance = pThis;
-    pThis->m_hWnd() = nullptr;
-    pThis->m_bPCOMInitialized() = 0;
-    pThis->m_hHook() = nullptr;
-    pThis->m_nOSVersion() = 0;
-    pThis->m_nOSMinorVersion() = 0;
-    pThis->m_nOSBuildNumber() = 0;
-    construct<ZXString<char>>(&pThis->m_sCSDVersion());
-    pThis->m_b64BitInfo() = 0;
-    pThis->m_tUpdateTime() = 0;
-    pThis->m_bFirstUpdate() = 1;
-    construct<ZXString<char>>(&pThis->m_sCmdLine());
-    pThis->m_nGameStartMode() = 0;
-    pThis->m_bAutoConnect() = 1;
-    pThis->m_bShowAdBalloon() = 0;
-    pThis->m_bExitByTitleEscape() = 0;
-    pThis->m_hrZExceptionCode() = 0;
-    pThis->m_hrComErrorCode() = 0;
-    pThis->m_tNextSecurityCheck() = 0;
-    pThis->m_bEnabledDX9() = true;
-    construct<ZArray<uint8_t>>(&pThis->m_pBackupBuffer());
-    pThis->m_dwBackupBufferSize() = 0;
-    pThis->m_dwClearStackLog() = 0;
-    pThis->m_bWindowActive() = 1;
+    pThis->m_hWnd = nullptr;
+    pThis->m_bPCOMInitialized = 0;
+    pThis->m_hHook = nullptr;
+    pThis->m_nOSVersion = 0;
+    pThis->m_nOSMinorVersion = 0;
+    pThis->m_nOSBuildNumber = 0;
+    construct<ZXString<char>>(&pThis->m_sCSDVersion);
+    pThis->m_b64BitInfo = 0;
+    pThis->m_tUpdateTime = 0;
+    pThis->m_bFirstUpdate = 1;
+    construct<ZXString<char>>(&pThis->m_sCmdLine);
+    pThis->m_nGameStartMode = 0;
+    pThis->m_bAutoConnect = 1;
+    pThis->m_bShowAdBalloon = 0;
+    pThis->m_bExitByTitleEscape = 0;
+    pThis->m_hrZExceptionCode = 0;
+    pThis->m_hrComErrorCode = 0;
+    pThis->m_tNextSecurityCheck = 0;
+    pThis->m_bEnabledDX9 = true;
+    construct<ZArray<uint8_t>>(&pThis->m_pBackupBuffer);
+    pThis->m_dwBackupBufferSize = 0;
+    pThis->m_dwClearStackLog = 0;
+    pThis->m_bWindowActive = 1;
 
-    pThis->m_pBackupBuffer().Alloc(0x1000);
-    pThis->m_nGameStartMode() = 2;
-    pThis->m_dwMainThreadId() = GetCurrentThreadId();
+    pThis->m_pBackupBuffer.Alloc(0x1000);
+    pThis->m_nGameStartMode = 2;
+    pThis->m_dwMainThreadId = GetCurrentThreadId();
 
     OSVERSIONINFOA ovi;
     ovi.dwOSVersionInfoSize = 148;
     GetVersionExA(&ovi);
-    pThis->m_bWin9x() = ovi.dwPlatformId == 1;
-    if (ovi.dwMajorVersion >= 6 && !pThis->m_nGameStartMode()) {
-        pThis->m_nGameStartMode() = 2;
+    pThis->m_bWin9x = ovi.dwPlatformId == 1;
+    if (ovi.dwMajorVersion >= 6 && !pThis->m_nGameStartMode) {
+        pThis->m_nGameStartMode = 2;
     }
 
     typedef BOOL(WINAPI * LPFN_ISWOW64PROCESS)(HANDLE, PBOOL);
@@ -76,12 +76,12 @@ void __fastcall CWvsApp__ctor_hook(CWvsApp* pThis, void* _EDX, const char* sCmdL
     }
 
     // CWvsApp::SetClearStackLog(this, (bIs64 << 8) + (this->m_nOSVersion << 12));
-    reinterpret_cast<void(__thiscall*)(CWvsApp*, unsigned int)>(0x009C1960)(pThis, (bIs64 << 8) + (pThis->m_nOSVersion() << 12));
-    pThis->m_nOSVersion() = ovi.dwMajorVersion;
-    pThis->m_nOSMinorVersion() = ovi.dwMinorVersion;
-    pThis->m_nOSBuildNumber() = ovi.dwBuildNumber;
-    pThis->m_sCSDVersion() = ovi.szCSDVersion;
-    pThis->m_b64BitInfo() = bIs64;
+    reinterpret_cast<void(__thiscall*)(CWvsApp*, unsigned int)>(0x009C1960)(pThis, (bIs64 << 8) + (pThis->m_nOSVersion << 12));
+    pThis->m_nOSVersion = ovi.dwMajorVersion;
+    pThis->m_nOSMinorVersion = ovi.dwMinorVersion;
+    pThis->m_nOSBuildNumber = ovi.dwBuildNumber;
+    pThis->m_sCSDVersion = ovi.szCSDVersion;
+    pThis->m_b64BitInfo = bIs64;
 }
 
 
@@ -124,11 +124,11 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     reinterpret_cast<void(__thiscall*)(CWvsApp*)>(0x009C7670)(pThis);
     // CWvsApp::InitializeInput(this);
     reinterpret_cast<void(__cdecl*)()>(0x009C7C30)();
-    reinterpret_cast<void(__thiscall*)(CInputSystem*, HWND, void**)>(0x00571A60)(CInputSystem::GetInstance(), pThis->m_hWnd(), pThis->m_ahInput());
+    reinterpret_cast<void(__thiscall*)(CInputSystem*, HWND, void**)>(0x00571A60)(CInputSystem::GetInstance(), pThis->m_hWnd, pThis->m_ahInput);
 
-    ShowWindow(pThis->m_hWnd(), SW_SHOW);
-    UpdateWindow(pThis->m_hWnd());
-    SetForegroundWindow(pThis->m_hWnd());
+    ShowWindow(pThis->m_hWnd, SW_SHOW);
+    UpdateWindow(pThis->m_hWnd);
+    SetForegroundWindow(pThis->m_hWnd);
     CHECK_HR(get_gr()->raw_RenderFrame());
     // CWvsApp::InitializeSound(this);
     reinterpret_cast<void(__thiscall*)(CWvsApp*)>(0x009CA170)(pThis);
@@ -180,24 +180,24 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
 static auto CWvsApp__Run = 0x009C5F00;
 
 void __fastcall CWvsApp__CallUpdate_hook(CWvsApp* pThis, void* _EDX, int32_t tCurTime) {
-    if (pThis->m_bFirstUpdate()) {
-        pThis->m_tUpdateTime() = tCurTime;
-        pThis->m_tLastServerIPCheck() = tCurTime;
-        pThis->m_tLastServerIPCheck2() = tCurTime;
-        pThis->m_tLastGGHookingAPICheck() = tCurTime;
-        pThis->m_tLastSecurityCheck() = tCurTime;
-        pThis->m_bFirstUpdate() = 0;
+    if (pThis->m_bFirstUpdate) {
+        pThis->m_tUpdateTime = tCurTime;
+        pThis->m_tLastServerIPCheck = tCurTime;
+        pThis->m_tLastServerIPCheck2 = tCurTime;
+        pThis->m_tLastGGHookingAPICheck = tCurTime;
+        pThis->m_tLastSecurityCheck = tCurTime;
+        pThis->m_bFirstUpdate = 0;
     }
-    while (tCurTime - pThis->m_tUpdateTime() > 0) {
+    while (tCurTime - pThis->m_tUpdateTime > 0) {
         ZRef<CStage> pStage(get_stage());
         if (pStage) {
             pStage->Update();
         }
         // CWndMan::s_Update();
         reinterpret_cast<void(__cdecl*)()>(0x009B4B00)();
-        pThis->m_tUpdateTime() += 30;
-        if (tCurTime - pThis->m_tUpdateTime() > 0) {
-            CHECK_HR(get_gr()->raw_UpdateCurrentTime(pThis->m_tUpdateTime()));
+        pThis->m_tUpdateTime += 30;
+        if (tCurTime - pThis->m_tUpdateTime > 0) {
+            CHECK_HR(get_gr()->raw_UpdateCurrentTime(pThis->m_tUpdateTime));
         }
     }
     CHECK_HR(get_gr()->raw_UpdateCurrentTime(tCurTime));
@@ -214,7 +214,7 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
         reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004B0220)(CClientSocket::GetInstance());
     }
     do {
-        DWORD dwRet = MsgWaitForMultipleObjects(3, pThis->m_ahInput(), 0, 0, 0xFF);
+        DWORD dwRet = MsgWaitForMultipleObjects(3, pThis->m_ahInput, 0, 0, 0xFF);
         if (dwRet <= 2) {
             // CInputSystem::UpdateDevice(TSingleton<CInputSystem>::GetInstance(), dwRet);
             reinterpret_cast<void(__thiscall*)(CInputSystem*, int32_t)>(0x00571710)(CInputSystem::GetInstance(), dwRet);
@@ -242,7 +242,7 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
                     ZException exception(hr);
                     if (hr == 0x20000000) {
                         // CPatchException::CPatchException(&exception, this->m_nTargetVersion);
-                        reinterpret_cast<void(__thiscall*)(void*, int32_t)>(0x00520FA0)(&exception, pThis->m_nTargetVersion());
+                        reinterpret_cast<void(__thiscall*)(void*, int32_t)>(0x00520FA0)(&exception, pThis->m_nTargetVersion);
                     } else if (hr >= 0x21000000 && hr <= 0x21000006) {
                         // CDisconnectException::CDisconnectException(&exception, hr);
                         reinterpret_cast<void(__thiscall*)(void*, HRESULT)>(0x00429860)(&exception, hr);
@@ -282,25 +282,25 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
 static auto CClientSocket__Connect = 0x004B0340;
 
 void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CClientSocket::CONNECTCONTEXT* ctx) {
-    DEBUG_MESSAGE("CClientSocket::Connect all");
-    pThis->m_ctxConnect().lAddr.RemoveAll();
-    pThis->m_ctxConnect().lAddr.AddTail(ctx->lAddr);
-    pThis->m_ctxConnect().posList = ctx->posList;
-    pThis->m_ctxConnect().bLogin = ctx->bLogin;
-    pThis->m_ctxConnect().posList = &pThis->m_ctxConnect().lAddr.GetHead();
-    ZInetAddr& next = ZList<ZInetAddr>::GetNext(pThis->m_ctxConnect().posList);
+    DEBUG_MESSAGE("CClientSocket::Connect");
+    pThis->m_ctxConnect.lAddr.RemoveAll();
+    pThis->m_ctxConnect.lAddr.AddTail(ctx->lAddr);
+    pThis->m_ctxConnect.posList = ctx->posList;
+    pThis->m_ctxConnect.bLogin = ctx->bLogin;
+    pThis->m_ctxConnect.posList = &pThis->m_ctxConnect.lAddr.GetHead();
+    ZInetAddr& next = ZList<ZInetAddr>::GetNext(pThis->m_ctxConnect.posList);
 
     DEBUG_MESSAGE("CClientSocket::Connect (addr)");
     // CClientSocket::ClearSendReceiveCtx(this);
     reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004AE1A0)(pThis);
     // ZSocketBase::CloseSocket(&this->m_sock);
-    reinterpret_cast<void(__thiscall*)(ZSocketBase*)>(0x004ACF30)(&pThis->m_sock());
+    reinterpret_cast<void(__thiscall*)(ZSocketBase*)>(0x004ACF30)(&pThis->m_sock);
     // ZSocketBase::Socket(&this->m_sock, 1, 2, 0);
-    reinterpret_cast<void(__thiscall*)(ZSocketBase*, int, int, int)>(0x004ACF50)(&pThis->m_sock(), 1, 2, 0);
+    reinterpret_cast<void(__thiscall*)(ZSocketBase*, int, int, int)>(0x004ACF50)(&pThis->m_sock, 1, 2, 0);
     // CClientSocket::SetTimeout(this);
     reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004ACBA0)(pThis);
-    if (WSAAsyncSelect(pThis->m_sock(), pThis->m_hWnd(), 0x401, 0x33) == -1 ||
-        connect(pThis->m_sock(), next, 16) != -1 ||
+    if (WSAAsyncSelect(pThis->m_sock, pThis->m_hWnd, 0x401, 0x33) == -1 ||
+        connect(pThis->m_sock, next, 16) != -1 ||
         WSAGetLastError() != WSAEWOULDBLOCK) {
         // CClientSocket::OnConnect(this, 0);
         reinterpret_cast<void(__thiscall*)(CClientSocket*, int)>(0x004AEF10)(pThis, 0);
@@ -311,12 +311,12 @@ void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CC
 static auto CLogin__SendCheckPasswordPacket = 0x005DB9D0;
 
 int32_t __fastcall CLogin__SendCheckPasswordPacket_hook(CLogin* pThis, void* _EDX, char* sID, char* sPasswd) {
-    if (pThis->m_bRequestSent()) {
+    if (pThis->m_bRequestSent) {
         return 0;
     }
-    pThis->m_bRequestSent() = 1;
-    pThis->m_WorldItem().RemoveAll();
-    pThis->m_aBalloon().RemoveAll();
+    pThis->m_bRequestSent = 1;
+    pThis->m_WorldItem.RemoveAll();
+    pThis->m_aBalloon.RemoveAll();
 
     CSystemInfo si;
     // CSystemInfo::Init(&si);
@@ -327,7 +327,7 @@ int32_t __fastcall CLogin__SendCheckPasswordPacket_hook(CLogin* pThis, void* _ED
     oPacket.EncodeStr(sPasswd);
     oPacket.EncodeBuffer(si.MachineId, 16);
     oPacket.Encode4(0); // CSystemInfo::GetGameRoomClient(&v15)
-    oPacket.Encode1(CWvsApp::GetInstance()->m_nGameStartMode());
+    oPacket.Encode1(CWvsApp::GetInstance()->m_nGameStartMode);
     oPacket.Encode1(0);
     oPacket.Encode1(0);
     oPacket.Encode4(0); // CConfig::GetPartnerCode(TSingleton<CConfig>::ms_pInstance._m_pStr)

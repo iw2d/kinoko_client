@@ -25,12 +25,12 @@ public:
     MEMBER_AT(uint32_t, 0x84, m_uSeqSnd)
 
     __forceinline void SendPacket(const COutPacket& oPacket) {
-        ZSynchronizedHelper<ZFatalSection> sync(&m_lockSend());
-        if (m_sock() && m_sock() != INVALID_SOCKET && !m_ctxConnect().lAddr.GetCount()) {
+        ZSynchronizedHelper<ZFatalSection> sync(&m_lockSend);
+        if (m_sock && m_sock != INVALID_SOCKET && !m_ctxConnect.lAddr.GetCount()) {
             // COutPacket::MakeBufferList(oPacket, &m_lpSendBuff, 95, &m_uSeqSnd, 1, m_uSeqSnd);
-            reinterpret_cast<void(__thiscall*)(COutPacket*, ZList<ZRef<ZSocketBuffer>>*, uint16_t, uint32_t*, int32_t, uint32_t)>(0x0068D100)(const_cast<COutPacket*>(&oPacket), &m_lpSendBuff(), 95, &m_uSeqSnd(), 1, m_uSeqSnd());
+            reinterpret_cast<void(__thiscall*)(COutPacket*, ZList<ZRef<ZSocketBuffer>>*, uint16_t, uint32_t*, int32_t, uint32_t)>(0x0068D100)(const_cast<COutPacket*>(&oPacket), &m_lpSendBuff, 95, &m_uSeqSnd, 1, m_uSeqSnd);
             // m_uSeqSnd = CIGCipher::innoHash((unsigned __int8 *)&m_uSeqSnd, 4, 0);
-            m_uSeqSnd() = reinterpret_cast<unsigned int(__cdecl*)(unsigned char*, int, unsigned int*)>(0x00A1BF30)(reinterpret_cast<unsigned char*>(&m_uSeqSnd()), 4, nullptr);
+            m_uSeqSnd = reinterpret_cast<uint32_t(__cdecl*)(uint8_t*, int32_t, uint32_t*)>(0x00A1BF30)(reinterpret_cast<uint8_t*>(&m_uSeqSnd), 4, nullptr);
             // CClientSocket::Flush(this);
             reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004AF6A0)(this);
         }

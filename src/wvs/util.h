@@ -7,12 +7,17 @@
     _com_util::CheckError(_hr)
 
 #define MEMBER_AT(T, OFFSET, NAME) \
-    __forceinline auto& NAME() { \
+    __declspec(property(get = get_##NAME, put = set_##NAME)) T NAME; \
+    __forceinline T& get_##NAME() { \
         return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) + OFFSET); \
+    } \
+    __forceinline void set_##NAME(const T& value) { \
+        *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) + OFFSET) = value; \
     }
 
 #define MEMBER_ARRAY_AT(T, N, OFFSET, NAME) \
-    __forceinline T* NAME() { \
+    __declspec(property(get = get_##NAME)) T* NAME; \
+    __forceinline T* get_##NAME() { \
         return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) + OFFSET); \
     }
 
