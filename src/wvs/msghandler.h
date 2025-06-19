@@ -1,7 +1,7 @@
 #pragma once
 #include "rtti.h"
-#include "wzlib/gr2d.h"
 #include "ztl/zalloc.h"
+#include "wzlib/gr2d.h"
 #include "common/dbbasic.h"
 #include "common/packet.h"
 #include <cstdint>
@@ -79,8 +79,12 @@ public:
     virtual void OnIMEComp(const char* sComp, void* adwCls, uint32_t nClsIdx, int32_t nCursor, void* lCand, int32_t nBegin, int32_t nPage, int32_t nCur) {
         ;
     }
-    virtual const CRTTI* GetRTTI() const = 0;
-    virtual int IsKindOf(const CRTTI* pRTTI) const = 0;
+    virtual const CRTTI* GetRTTI() const {
+        return nullptr;
+    }
+    virtual int32_t IsKindOf(const CRTTI* pRTTI) const {
+        return 0;
+    }
 };
 
 static_assert(sizeof(IUIMsgHandler) == 0x4);

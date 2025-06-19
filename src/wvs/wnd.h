@@ -1,21 +1,19 @@
 #pragma once
+#include "util.h"
 #include "gobj.h"
 #include "msghandler.h"
 #include "ztl/zalloc.h"
 #include <cstdint>
 
 
-struct DRAGCTX {
-    IUIMsgHandler* pContainer;
-    ZRef<IDraggable> pObj;
-};
-
-static_assert(sizeof(DRAGCTX) == 0xC);
-
-
+struct DRAGCTX;
 class CCtrlWnd;
 
 class CWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
+protected:
+    MEMBER_AT(uint32_t, 0x14, m_dwWndKey)
+    MEMBER_AT(uint32_t, 0x3C, m_bScreenCoord)
+
 public:
     CWnd() {
         reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009AED30)(this);
@@ -31,7 +29,7 @@ public:
         reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009AE7C0)(this);
     }
     virtual int32_t OnDragDrop(int32_t nState, DRAGCTX& ctx, int32_t rx, int32_t ry) {
-        ;
+        return 0;
     }
     virtual void PreCreateWnd(int32_t l, int32_t t, int32_t w, int32_t h, int32_t z, int32_t bScreenCoord, void* pData) {
         reinterpret_cast<void(__thiscall*)(CWnd*, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, void*)>(0x009ADDC0)(this, l, t, w, h, z, bScreenCoord, pData);
@@ -92,5 +90,9 @@ public:
     }
     virtual int32_t GetAbsTop() override {
         return reinterpret_cast<int32_t(__thiscall*)(IUIMsgHandler*)>(0x009AD570)(this);
+    }
+
+    void Destroy() {
+        reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009B0E50)(this);
     }
 };

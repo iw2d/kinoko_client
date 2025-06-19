@@ -311,23 +311,41 @@ public:
         }
     }
     ZRef(const ZRef<T>& r, int32_t bAddRef = true) : p(r.p) {
-        if (p) {
+        if (bAddRef) {
             _AddRef();
         }
     }
     ZRef() : p(nullptr) {
     }
+    operator bool() const {
+        return p != nullptr;
+    }
     int32_t operator!() const {
-        return !p;
+        return p == nullptr;
     }
     operator T*() const {
         return p;
     }
-    T& operator*() const {
-        return *p;
-    }
     T* operator->() const {
         return p;
+    }
+
+    ZRef<T>& operator=(const ZRef<T>& r) {
+        if (p == r.p) {
+            return *this;
+        }
+        _Release();
+        if (r.p) {
+            p = r.p;
+            _AddRef();
+        }
+        return *this;
+    }
+    ZRef<T>& operator=(T* pT) {
+        _Release();
+        p = pT;
+        _AddRef();
+        return *this;
     }
 
 private:
@@ -336,7 +354,9 @@ private:
         p = _AllocRaw(p);
     }
     void _AddRef() {
-        _AddRefRaw(p);
+        if (p){
+            _AddRefRaw(p);
+        }
     }
     void _AddRefRaw(void* __formal) {
         auto pDummy = ZRefCountedDummy<T>::From(p);

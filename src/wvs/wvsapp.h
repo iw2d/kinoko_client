@@ -1,11 +1,11 @@
 #pragma once
 #include "util.h"
-#include "wzlib/gr2d.h"
-#include "wzlib/pcom.h"
 #include "ztl/tsingleton.h"
 #include "ztl/zalloc.h"
 #include "ztl/zcoll.h"
 #include "ztl/zstr.h"
+#include "wzlib/gr2d.h"
+#include "wzlib/pcom.h"
 
 #include <windows.h>
 #include <cstdint>

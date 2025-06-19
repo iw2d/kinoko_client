@@ -1,5 +1,6 @@
 #pragma once
 #include "zalloc.h"
+#include "ztl.h"
 #include <cstdint>
 #include <new>
 
@@ -100,12 +101,12 @@ private:
 
     static void _Construct(T* b, T* e) {
         for (T* i = b; i < e; ++i) {
-            new (i) T();
+            construct<T>(i);
         }
     }
     static void _Destroy(T* b, T* e) {
         for (T* i = b; i < e; ++i) {
-            i->~T();
+            destruct<T>(i);
         }
     }
 };

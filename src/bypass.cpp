@@ -75,7 +75,7 @@ void __fastcall CWvsApp__ctor_hook(CWvsApp* pThis, void* _EDX, const char* sCmdL
         reinterpret_cast<void(__cdecl*)()>(0x0045ECD0)();
     }
 
-    // CWvsApp::SetClearStackLog(this, (bIs64 << 8) + (this->m_nOSVersion << 12));
+    // CWvsApp::SetClearStackLog(this, (bIs64 << 8) + (m_nOSVersion << 12));
     reinterpret_cast<void(__thiscall*)(CWvsApp*, unsigned int)>(0x009C1960)(pThis, (bIs64 << 8) + (pThis->m_nOSVersion << 12));
     pThis->m_nOSVersion = ovi.dwMajorVersion;
     pThis->m_nOSMinorVersion = ovi.dwMinorVersion;
@@ -189,7 +189,7 @@ void __fastcall CWvsApp__CallUpdate_hook(CWvsApp* pThis, void* _EDX, int32_t tCu
         pThis->m_bFirstUpdate = 0;
     }
     while (tCurTime - pThis->m_tUpdateTime > 0) {
-        ZRef<CStage> pStage(get_stage());
+        auto pStage = get_stage();
         if (pStage) {
             pStage->Update();
         }

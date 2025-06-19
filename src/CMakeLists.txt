@@ -3,6 +3,7 @@ add_library(injector SHARED
         hook.cpp
         system.cpp
         bypass.cpp
+        resolution.cpp
         debug.cpp
 )
 

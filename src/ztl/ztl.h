@@ -7,6 +7,13 @@ T* construct(T* p) {
     return new (p) T();
 }
 
+template <typename T>
+void destruct(T* p) {
+    if (p) {
+        p->~T();
+    }
+}
+
 
 class ZException {
 public:

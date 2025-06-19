@@ -128,6 +128,135 @@ inline HRESULT __cdecl ZComVariantChangeType(tagVARIANT* pvargDest, tagVARIANT* 
 } // namespace ZComAPI
 
 
+inline BSTR __stdcall ZtlConvertStringToBSTR(const char* pSrc) {
+    if (!pSrc) {
+        return nullptr;
+    }
+    auto n = MultiByteToWideChar(0, 0, pSrc, -1, nullptr, 0) - 1;
+    auto p = static_cast<uint32_t*>(CoTaskMemAlloc(sizeof(wchar_t) * n + 6));
+    if (!p) {
+        return nullptr;
+    }
+    *p = sizeof(wchar_t) * n;
+    auto s = reinterpret_cast<wchar_t*>(p + 1);
+    s[n] = 0;
+    MultiByteToWideChar(0, 0, pSrc, -1, s, 0x3FFFFFFF);
+    return s;
+}
+
+inline char* __stdcall ZtlConvertBSTRToString(const wchar_t* pSrc) {
+    if (!pSrc) {
+        return nullptr;
+    }
+    auto n = WideCharToMultiByte(0, 0, pSrc, -1, 0, 0, nullptr, nullptr);
+    auto s = new char[n];
+    WideCharToMultiByte(0, 0, pSrc, -1, s, 0x3FFFFFFF, nullptr, nullptr);
+    return s;
+}
+
+class Ztl_bstr_t {
+private:
+    class Data_t {
+    private:
+        wchar_t* m_wstr;
+        char* m_str;
+        uint32_t m_RefCount;
+
+    public:
+        Data_t(const wchar_t* s) : m_str(nullptr), m_RefCount(1) {
+            m_wstr = ZComAPI::ZComSysAllocString(s);
+            if (!m_wstr && s) {
+                _com_issue_error(E_OUTOFMEMORY);
+            }
+        }
+        Data_t(const char* s) : m_str(nullptr), m_RefCount(1) {
+            m_wstr = ZtlConvertStringToBSTR(s);
+        }
+        uint32_t AddRef() {
+            InterlockedIncrement(reinterpret_cast<long*>(&m_RefCount));
+            return m_RefCount;
+        }
+        uint32_t Release() {
+            uint32_t uRefCount = InterlockedDecrement(reinterpret_cast<long*>(&m_RefCount));
+            if (uRefCount == 0) {
+                delete this;
+            }
+            return uRefCount;
+        }
+        uint32_t RefCount() const {
+            return m_RefCount;
+        }
+        operator const wchar_t*() const {
+            return m_wstr;
+        }
+        operator const char*() const {
+            return m_str;
+        }
+        const wchar_t* GetWString() const {
+            return m_wstr;
+        }
+        const char* GetString() {
+            if (!m_str) {
+                m_str = ZtlConvertBSTRToString(m_wstr);
+            }
+            return m_str;
+        }
+
+    private:
+        ~Data_t() {
+            _Free();
+        }
+        void _Free() {
+            if (m_wstr) {
+                CoTaskMemFree(reinterpret_cast<uint32_t*>(m_wstr) - 1);
+                m_wstr = nullptr;
+            }
+            if (m_str) {
+                delete[] m_str;
+                m_str = nullptr;
+            }
+        }
+    };
+
+    static_assert(sizeof(Data_t) == 0xC);
+
+    Data_t* m_Data;
+
+public:
+    Ztl_bstr_t(const Ztl_bstr_t& s) : m_Data(s.m_Data) {
+        if (m_Data) {
+            m_Data->AddRef();
+        }
+    }
+    Ztl_bstr_t(const wchar_t* s) : m_Data(new Data_t(s)) {
+        if (!m_Data) {
+            _com_issue_error(E_OUTOFMEMORY);
+        }
+    }
+    Ztl_bstr_t(const char* s) : m_Data(new Data_t(s)) {
+        if (!m_Data) {
+            _com_issue_error(E_OUTOFMEMORY);
+        }
+    }
+    Ztl_bstr_t() : m_Data(nullptr) {
+    }
+    operator const wchar_t*() const {
+        return (m_Data != nullptr) ? m_Data->GetWString() : nullptr;
+    }
+    operator const char*() const {
+        return (m_Data != nullptr) ? m_Data->GetString() : nullptr;
+    }
+    ~Ztl_bstr_t() {
+        if (m_Data) {
+            m_Data->Release();
+            m_Data = nullptr;
+        }
+    }
+};
+
+static_assert(sizeof(Ztl_bstr_t) == 0x4);
+
+
 class Ztl_variant_t : public tagVARIANT {
 public:
     Ztl_variant_t(int32_t lSrc, VARTYPE vtSrc = VT_I4) {
