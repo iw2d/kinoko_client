@@ -243,8 +243,14 @@ public:
     operator const wchar_t*() const {
         return (m_Data != nullptr) ? m_Data->GetWString() : nullptr;
     }
+    operator wchar_t*() const {
+        return const_cast<wchar_t*>((m_Data != nullptr) ? m_Data->GetWString() : nullptr);
+    }
     operator const char*() const {
         return (m_Data != nullptr) ? m_Data->GetString() : nullptr;
+    }
+    operator char*() const {
+        return const_cast<char*>((m_Data != nullptr) ? m_Data->GetString() : nullptr);
     }
     ~Ztl_bstr_t() {
         if (m_Data) {

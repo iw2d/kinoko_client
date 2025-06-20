@@ -16,6 +16,19 @@ protected:
     MEMBER_AT(uint32_t, 0x3C, m_bScreenCoord)
 
 public:
+    enum UIOrigin : int32_t {
+        Origin_LT = 0x0,
+        Origin_CT = 0x1,
+        Origin_RT = 0x2,
+        Origin_LC = 0x3,
+        Origin_CC = 0x4,
+        Origin_RC = 0x5,
+        Origin_LB = 0x6,
+        Origin_CB = 0x7,
+        Origin_RB = 0x8,
+        Origin_NUM = 0x9,
+    };
+
     CWnd() {
         reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009AED30)(this);
     }

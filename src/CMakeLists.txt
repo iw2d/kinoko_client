@@ -3,7 +3,7 @@ add_library(injector SHARED
         hook.cpp
         system.cpp
         bypass.cpp
-        resolution.cpp
+        sysopt.cpp
         debug.cpp
 )
 

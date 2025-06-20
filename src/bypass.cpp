@@ -79,7 +79,7 @@ void __fastcall CWvsApp__ctor_hook(CWvsApp* pThis, void* _EDX, const char* sCmdL
     }
 
     // CWvsApp::SetClearStackLog(this, (bIs64 << 8) + (m_nOSVersion << 12));
-    reinterpret_cast<void(__thiscall*)(CWvsApp*, unsigned int)>(0x009C1960)(pThis, (bIs64 << 8) + (pThis->m_nOSVersion << 12));
+    reinterpret_cast<void(__thiscall*)(CWvsApp*, uint32_t)>(0x009C1960)(pThis, (bIs64 << 8) + (pThis->m_nOSVersion << 12));
     pThis->m_nOSVersion = ovi.dwMajorVersion;
     pThis->m_nOSMinorVersion = ovi.dwMinorVersion;
     pThis->m_nOSBuildNumber = ovi.dwBuildNumber;
@@ -260,14 +260,14 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
             // if (CInputSystem::GenerateAutoKeyDown(TSingleton<CInputSystem>::GetInstance(), &isMsg))
             if (reinterpret_cast<int(__thiscall*)(CInputSystem*, ISMSG*)>(0x0056F990)(CInputSystem::GetInstance(), &isMsg)) {
                 // CWvsApp::ISMsgProc(this, isMsg.message, isMsg.wParam, isMsg.lParam);
-                reinterpret_cast<void(__thiscall*)(CWvsApp*, unsigned int, unsigned int, int)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
+                reinterpret_cast<void(__thiscall*)(CWvsApp*, uint32_t, uint32_t, int32_t)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
             }
             // if (CInputSystem::GenerateAutoBtnDown(TSingleton<CInputSystem>::GetInstance(), &isMsg))
             if (reinterpret_cast<int(__thiscall*)(CInputSystem*, ISMSG*)>(0x0056FAC0)(CInputSystem::GetInstance(), &isMsg)) {
                 // CWvsApp::ISMsgProc(this, isMsg.message, isMsg.wParam, isMsg.lParam);
-                reinterpret_cast<void(__thiscall*)(CWvsApp*, unsigned int, unsigned int, int)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
+                reinterpret_cast<void(__thiscall*)(CWvsApp*, uint32_t, uint32_t, int32_t)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
             }
-            int tCurTime;
+            int32_t tCurTime;
             CHECK_HR(get_gr()->get_nextRenderTime(&tCurTime));
             CWvsApp__CallUpdate_hook(pThis, _EDX, tCurTime);
             // CWndMan::RedrawInvalidatedWindows();
@@ -356,6 +356,13 @@ void __fastcall CWvsContext__OnEnterField_hook(CWvsContext* pThis, void* _EDX) {
 }
 
 
+static auto CInputSystem__DetectJoystick = reinterpret_cast<void(__thiscall*)(CInputSystem*)>(0x00571740);
+
+void __fastcall CInputSystem__DetectJoystick_hook(void* pThis, void* _EDX) {
+    // noop
+}
+
+
 void AttachClientBypass() {
     ATTACH_HOOK(CWvsApp__ctor, CWvsApp__ctor_hook);
     ATTACH_HOOK(CWvsApp__SetUp, CWvsApp__SetUp_hook);
@@ -364,6 +371,7 @@ void AttachClientBypass() {
     ATTACH_HOOK(CClientSocket__OnAliveReq, CClientSocket__OnAliveReq_hook);
     ATTACH_HOOK(CLogin__SendCheckPasswordPacket, CLogin__SendCheckPasswordPacket_hook);
     ATTACH_HOOK(CWvsContext__OnEnterField, CWvsContext__OnEnterField_hook);
+    ATTACH_HOOK(CInputSystem__DetectJoystick, CInputSystem__DetectJoystick_hook);
 
     PatchRetZero(0x004AB900); // DR_check
     PatchRetZero(0x0045EBD0); // Hidedll

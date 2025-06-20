@@ -126,13 +126,12 @@ public:
         MEMBER_AT(int32_t, 0x0, nBackColor)
         MEMBER_AT(int32_t, 0x4, nBackFocusedColor)
         MEMBER_AT(int32_t, 0x8, nBorderColor)
-        MEMBER_AT(Ztl_bstr_t, 0x4C, sButtonUOL)
 
         CREATEPARAM() {
             reinterpret_cast<void(__thiscall*)(CREATEPARAM*)>(0x004894F0)(this);
         }
         ~CREATEPARAM() {
-            destruct(&sButtonUOL);
+            reinterpret_cast<void(__thiscall*)(CREATEPARAM*)>(0x0048A920)(this);
         }
     };
     static_assert(sizeof(CREATEPARAM) == 0x54);
@@ -167,7 +166,8 @@ public:
 
         CREATEPARAM() : bAcceptFocus(0), bDrawBack(0), bAnimateOnce(0) {
         }
-        ~CREATEPARAM() = default;
+        ~CREATEPARAM() {
+        }
     };
     static_assert(sizeof(CREATEPARAM) == 0x10);
 
@@ -182,3 +182,38 @@ public:
 };
 
 static_assert(sizeof(CCtrlButton) == 0xADC);
+
+
+class CCtrlCheckBox : public CCtrlWnd {
+public:
+    struct CREATEPARAM {
+        uint8_t padding[0x34];
+        MEMBER_AT(int32_t, 0x4, nBackColor)
+        MEMBER_AT(ZXString<char>, 0x8, sText)
+        MEMBER_AT(int32_t, 0x1c, nWidth)
+        MEMBER_AT(int32_t, 0x20, nHeight)
+
+        CREATEPARAM() {
+            reinterpret_cast<void(__thiscall*)(CREATEPARAM*)>(0x00488990)(this);
+        }
+        ~CREATEPARAM() {
+            reinterpret_cast<void(__thiscall*)(CREATEPARAM*)>(0x00484710)(this);
+        }
+    };
+    static_assert(sizeof(CREATEPARAM) == 0x34);
+
+    uint8_t padding[0x74 - sizeof(CCtrlWnd)];
+    MEMBER_AT(int32_t, 0x48, m_bChecked)
+
+    CCtrlCheckBox() : CCtrlWnd(0) {
+        reinterpret_cast<void(__thiscall*)(CCtrlCheckBox*)>(0x00489250)(this);
+    }
+    virtual void CreateCtrl(CWnd* pParent, uint32_t nId, int32_t l, int32_t t, void* pData) {
+        reinterpret_cast<void(__thiscall*)(CCtrlCheckBox*, CWnd*, uint32_t, int32_t, int32_t, void*)>(0x004D6F60)(this, pParent, nId, l, t, pData);
+    }
+    void SetChecked(int32_t bChecked) {
+        reinterpret_cast<void(__thiscall*)(CCtrlCheckBox*, int32_t)>(0x004D4570)(this, bChecked);
+    }
+};
+
+static_assert(sizeof(CCtrlCheckBox) == 0x74);

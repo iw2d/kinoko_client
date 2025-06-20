@@ -4,7 +4,7 @@
 #include <cstdint>
 
 
-inline FARPROC* _g_ppfnPCOMAPIs = reinterpret_cast<FARPROC*>(0x00670E1C); // changed from FARPROC _g_apfnPCOMAPIs[5];
+inline FARPROC* _g_ppfnPCOMAPIs = reinterpret_cast<FARPROC*>(0x00C6DB54); // changed from FARPROC _g_apfnPCOMAPIs[5];
 
 template<typename T>
 void __cdecl PcCreateObject(const wchar_t* sUOL, T& pObj, IUnknown* pUnkOuter) {
