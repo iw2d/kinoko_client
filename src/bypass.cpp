@@ -9,6 +9,7 @@
 #include "wvs/login.h"
 #include "wvs/clientsocket.h"
 #include "wvs/temporarystatview.h"
+#include "wvs/ctrlwnd.h"
 #include "ztl/zalloc.h"
 #include "ztl/zcoll.h"
 #include "ztl/zstr.h"
@@ -125,8 +126,9 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     DEBUG_MESSAGE("CWvsApp::SetUp - Graphic & Sound...");
     // CWvsApp::InitializeGr2D(this);
     reinterpret_cast<void(__thiscall*)(CWvsApp*)>(0x009C7670)(pThis);
-    // CWvsApp::InitializeInput(this);
+    // TSingleton<CInputSystem>::CreateInstance();
     reinterpret_cast<void(__cdecl*)()>(0x009C7C30)();
+    // CInputSystem::Init(CInputSystem::GetInstance(), m_hWnd, m_ahInput);
     reinterpret_cast<void(__thiscall*)(CInputSystem*, HWND, void**)>(0x00571A60)(CInputSystem::GetInstance(), pThis->m_hWnd, pThis->m_ahInput);
 
     ShowWindow(pThis->m_hWnd, SW_SHOW);
@@ -244,7 +246,7 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
                 if (reinterpret_cast<int(__thiscall*)(CWvsApp*, HRESULT*)>(0x009C0830)(pThis, &hr)) {
                     ZException exception(hr);
                     if (hr == 0x20000000) {
-                        // CPatchException::CPatchException(&exception, this->m_nTargetVersion);
+                        // CPatchException::CPatchException(&exception, m_nTargetVersion);
                         reinterpret_cast<void(__thiscall*)(void*, int32_t)>(0x00520FA0)(&exception, pThis->m_nTargetVersion);
                     } else if (hr >= 0x21000000 && hr <= 0x21000006) {
                         // CDisconnectException::CDisconnectException(&exception, hr);
@@ -296,9 +298,9 @@ void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CC
     DEBUG_MESSAGE("CClientSocket::Connect (addr)");
     // CClientSocket::ClearSendReceiveCtx(this);
     reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004AE1A0)(pThis);
-    // ZSocketBase::CloseSocket(&this->m_sock);
+    // ZSocketBase::CloseSocket(&m_sock);
     reinterpret_cast<void(__thiscall*)(ZSocketBase*)>(0x004ACF30)(&pThis->m_sock);
-    // ZSocketBase::Socket(&this->m_sock, 1, 2, 0);
+    // ZSocketBase::Socket(&m_sock, 1, 2, 0);
     reinterpret_cast<void(__thiscall*)(ZSocketBase*, int, int, int)>(0x004ACF50)(&pThis->m_sock, 1, 2, 0);
     // CClientSocket::SetTimeout(this);
     reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004ACBA0)(pThis);
@@ -356,10 +358,19 @@ void __fastcall CWvsContext__OnEnterField_hook(CWvsContext* pThis, void* _EDX) {
 }
 
 
-static auto CInputSystem__DetectJoystick = reinterpret_cast<void(__thiscall*)(CInputSystem*)>(0x00571740);
+static auto CInputSystem__DetectJoystick = 0x00571740;
 
-void __fastcall CInputSystem__DetectJoystick_hook(void* pThis, void* _EDX) {
+void __fastcall CInputSystem__DetectJoystick_hook(CInputSystem* pThis, void* _EDX) {
     // noop
+}
+
+
+static auto CCtrlComboBox__AddItem = 0x004DE640;
+
+void __fastcall CCtrlComboBox__AddItem_hook(CCtrlComboBox* pThis, void* _EDX, char* sItemName, unsigned int dwParam) {
+    pThis->AddItem("To Spouse", 0x6);   // ID_CHAT_TARGET_COUPLE
+    pThis->AddItem("Whisper", 0x7);     // ID_CHAT_TARGET_WHISPER
+    pThis->AddItem(sItemName, dwParam); // overwritten call for ID_CHAT_TARGET_ALL
 }
 
 
@@ -373,10 +384,14 @@ void AttachClientBypass() {
     ATTACH_HOOK(CWvsContext__OnEnterField, CWvsContext__OnEnterField_hook);
     ATTACH_HOOK(CInputSystem__DetectJoystick, CInputSystem__DetectJoystick_hook);
 
+    // CUIStatusBar::MakeCtrlEdit - add missing combo box items : "To Spouse", "Whisper"
+    PatchCall(0x00870E82, reinterpret_cast<uintptr_t>(&CCtrlComboBox__AddItem_hook));
+
     PatchRetZero(0x004AB900); // DR_check
     PatchRetZero(0x0045EBD0); // Hidedll
     PatchRetZero(0x009BF6C0); // SendHSLog
     PatchRetZero(0x009BF370); // CeTracer::Run
     PatchRetZero(0x009BF390); // ShowStartUpWndModal
     PatchRetZero(0x00429000); // ShowAdBalloon
+    PatchRetZero(0x009CC220); // CWvsApp::EnableWinKey
 }
