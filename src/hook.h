@@ -17,10 +17,14 @@ void AttachSystemHooks();
 // called in system.cpp -> CreateMutexA_hook
 void AttachClientBypass();
 void AttachSystemOptionMod();
+void AttachTemporaryStatMod();
+void AttachExceptionHandler();
 
 inline void AttachClientHooks() {
     AttachClientBypass();
     AttachSystemOptionMod();
+    AttachTemporaryStatMod();
+    AttachExceptionHandler();
 }
 
 

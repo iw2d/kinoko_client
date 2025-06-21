@@ -3,6 +3,7 @@
 #include "ztl/zalloc.h"
 #include "wzlib/pcom.h"
 #include "wzlib/sound.h"
+#include "wvs/util.h"
 #include "wvs/config.h"
 #include "wvs/dialog.h"
 #include "wvs/ctrlwnd.h"

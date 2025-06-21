@@ -280,7 +280,7 @@ public:
     virtual ~ZRefCountedDummy() override = default;
 
     static ZRefCountedDummy<T>* From(void* p) {
-        return reinterpret_cast<ZRefCountedDummy<T>*>(reinterpret_cast<T*>(p) - 1);
+        return reinterpret_cast<ZRefCountedDummy<T>*>(reinterpret_cast<uintptr_t>(p) - sizeof(ZRefCounted) - sizeof(ZRecyclable<ZRefCountedDummy<T>, 0x10, T>));
     }
 };
 static_assert(sizeof(ZRecyclable<ZRefCountedDummy<int>, 0x10, int>) == 0x4);

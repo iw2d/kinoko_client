@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "hook.h"
 #include "debug.h"
+#include "ztl/zalloc.h"
+#include "ztl/zcoll.h"
+#include "ztl/zstr.h"
+#include "ztl/ztl.h"
+#include "wvs/util.h"
 #include "wvs/wvsapp.h"
 #include "wvs/wvscontext.h"
 #include "wvs/inputsystem.h"
@@ -10,10 +15,6 @@
 #include "wvs/clientsocket.h"
 #include "wvs/temporarystatview.h"
 #include "wvs/ctrlwnd.h"
-#include "ztl/zalloc.h"
-#include "ztl/zcoll.h"
-#include "ztl/zstr.h"
-#include "ztl/ztl.h"
 
 #include <windows.h>
 #include <timeapi.h>
@@ -292,8 +293,8 @@ void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CC
     pThis->m_ctxConnect.lAddr.AddTail(ctx->lAddr);
     pThis->m_ctxConnect.posList = ctx->posList;
     pThis->m_ctxConnect.bLogin = ctx->bLogin;
-    pThis->m_ctxConnect.posList = &pThis->m_ctxConnect.lAddr.GetHead();
-    ZInetAddr& next = ZList<ZInetAddr>::GetNext(pThis->m_ctxConnect.posList);
+    pThis->m_ctxConnect.posList = pThis->m_ctxConnect.lAddr.GetHeadPosition();
+    auto next = ZList<ZInetAddr>::GetNext(pThis->m_ctxConnect.posList);
 
     DEBUG_MESSAGE("CClientSocket::Connect (addr)");
     // CClientSocket::ClearSendReceiveCtx(this);
@@ -353,7 +354,8 @@ static auto CWvsContext__OnEnterField = 0x009DBEC0;
 void __fastcall CWvsContext__OnEnterField_hook(CWvsContext* pThis, void* _EDX) {
     // CWvsContext::UI_CloseRevive(this);
     reinterpret_cast<void(__thiscall*)(CWvsContext*)>(0x009CCCD0)(pThis);
-    pThis->m_temporaryStatView.Show();
+    // CTemporaryStatView::Show(&m_temporaryStatView);
+    reinterpret_cast<void(__thiscall*)(CTemporaryStatView*)>(0x0075C6A0)(&pThis->m_temporaryStatView);
     pThis->m_bKillMobFromEnterField = 0;
 }
 

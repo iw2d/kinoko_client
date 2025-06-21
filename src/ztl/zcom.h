@@ -68,7 +68,7 @@ inline HRESULT __cdecl ZComVarBstrFromVariant(tagVARIANT* pvargDest, tagVARIANT*
     if (V_VT(pvargSrc) == VT_BSTR) {
         return ZComVariantCopy(pvargDest, pvargSrc);
     }
-    wchar_t buffer[256] = {};
+    wchar_t buffer[256];
     switch (V_VT(pvargSrc)) {
     case VT_EMPTY:
         break;

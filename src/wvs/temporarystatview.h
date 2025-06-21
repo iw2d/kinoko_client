@@ -8,6 +8,15 @@
 #include <cstdint>
 
 
+enum : int32_t {
+    TSV_NONE = 0x0,
+    TSV_ITEM = 0x1,
+    TSV_SKILL = 0x2,
+    TSV_ETC = 0x3,
+    TSV_PRIVILEGE = 0x4,
+};
+
+
 class CTemporaryStatView {
 public:
     class TEMPORARY_STAT : public ZRefCounted {
@@ -29,9 +38,18 @@ public:
     };
     static_assert(sizeof(TEMPORARY_STAT) == 0x48);
 
-    MEMBER_AT(ZList<ZRef<TEMPORARY_STAT>>, 0x4, m_lTemporaryStat)
+public:
+    ZList<ZRef<TEMPORARY_STAT>> m_lTemporaryStat;
 
-    void Show() {
-        reinterpret_cast<void(__thiscall*)(CTemporaryStatView*)>(0x0075C6A0)(this);
+    CTemporaryStatView() = default;
+    virtual ~CTemporaryStatView() = default;
+
+    void SetTemporary(int32_t nType, int32_t nID, int32_t tDuration, UINT128 uFlagTemp, ZXString<char> sToolTip, int32_t nSubID, int32_t nHideTime) {
+        reinterpret_cast<void (__thiscall*)(CTemporaryStatView*, int, int, int, UINT128, ZXString<char>, int, int)>(0x0075FA50)(this, nType, nID, tDuration, uFlagTemp, sToolTip, nSubID, nHideTime);
+    }
+    void ResetTemporary(int32_t nType, int32_t nID) {
+        reinterpret_cast<void (__thiscall*)(CTemporaryStatView*, int32_t, int32_t)>(0x0075D030)(this, nType, nID);
     }
 };
+
+static_assert(sizeof(CTemporaryStatView) == 0x18);

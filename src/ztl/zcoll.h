@@ -137,6 +137,12 @@ public:
     int32_t IsEmpty() const {
         return _m_uCount == 0;
     }
+    T* GetHeadPosition() const {
+        return _m_pHead;
+    }
+    T* GetTailPosition() const {
+        return _m_pTail;
+    }
     const T& GetHead() const {
         return *_m_pHead;
     }
