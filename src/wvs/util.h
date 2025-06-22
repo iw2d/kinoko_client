@@ -1,7 +1,12 @@
 #pragma once
+#include "ztl/zcom.h"
 #include "wzlib/gr2d.h"
+#include "wzlib/resman.h"
+#include "wzlib/property.h"
+#include "wzlib/canvas.h"
 #include <comutil.h>
 #include <cstdint>
+#include <memory>
 
 #define CHECK_HR(_hr) \
     _com_util::CheckError(_hr)
@@ -30,4 +35,18 @@
 
 inline IWzGr2DPtr& get_gr() {
     return *reinterpret_cast<IWzGr2DPtr*>(0x00C6F430);
+}
+
+inline IWzResManPtr& get_rm() {
+    return *reinterpret_cast<IWzResManPtr*>(0x00C6F434);
+}
+
+inline IUnknownPtr get_unknown(Ztl_variant_t& v){
+    IUnknownPtr result;
+    reinterpret_cast<IUnknownPtr*(__cdecl*)(IUnknownPtr*, Ztl_variant_t*)>(0x004176E0)(std::addressof(result), &v); // RVO in client
+    return result;
+}
+
+inline int32_t draw_number_by_image(IWzCanvasPtr pCanvas, int32_t nLeft, int32_t nTop, int32_t nNo, IWzPropertyPtr pBase, int32_t nHorzSpace) {
+    return reinterpret_cast<int32_t (__cdecl*)(IWzCanvasPtr, int32_t, int32_t, int32_t, IWzPropertyPtr, int32_t)>(0x00965780)(pCanvas, nLeft, nTop, nNo, pBase, nHorzSpace);
 }

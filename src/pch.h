@@ -10,5 +10,7 @@
 #include <ws2spi.h>
 #include <ws2tcpip.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstdint>
+#include <memory>

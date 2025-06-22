@@ -73,28 +73,28 @@ inline HRESULT __cdecl ZComVarBstrFromVariant(tagVARIANT* pvargDest, tagVARIANT*
     case VT_EMPTY:
         break;
     case VT_I1:
-        swprintf_s(buffer, L"%li", V_I1(pvargSrc));
+        swprintf_s(buffer, 256, L"%li", V_I1(pvargSrc));
         break;
     case VT_I2:
-        swprintf_s(buffer, L"%li", V_I2(pvargSrc));
+        swprintf_s(buffer, 256, L"%li", V_I2(pvargSrc));
         break;
     case VT_I4:
-        swprintf_s(buffer, L"%li", V_I4(pvargSrc));
+        swprintf_s(buffer, 256, L"%li", V_I4(pvargSrc));
         break;
     case VT_UI1:
-        swprintf_s(buffer, L"%lu", V_UI1(pvargSrc));
+        swprintf_s(buffer, 256, L"%lu", V_UI1(pvargSrc));
         break;
     case VT_UI2:
-        swprintf_s(buffer, L"%lu", V_UI2(pvargSrc));
+        swprintf_s(buffer, 256, L"%lu", V_UI2(pvargSrc));
         break;
     case VT_UI4:
-        swprintf_s(buffer, L"%lu", V_UI4(pvargSrc));
+        swprintf_s(buffer, 256, L"%lu", V_UI4(pvargSrc));
         break;
     case VT_R4:
-        swprintf_s(buffer, L"%f", V_R4(pvargSrc));
+        swprintf_s(buffer, 256, L"%f", V_R4(pvargSrc));
         break;
     case VT_R8:
-        swprintf_s(buffer, L"%lf", V_R8(pvargSrc));
+        swprintf_s(buffer, 256, L"%lf", V_R8(pvargSrc));
         break;
     default:
         return DISP_E_TYPEMISMATCH;
