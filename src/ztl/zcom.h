@@ -322,4 +322,6 @@ public:
     }
 };
 
+inline Ztl_variant_t vtEmpty;
+
 static_assert(sizeof(Ztl_variant_t) == 0x10);

@@ -6,6 +6,34 @@
 
 
 template <typename T>
+size_t length(const T* s);
+
+template <>
+inline size_t length<char>(const char* s) {
+    return strlen(s);
+}
+
+template <>
+inline size_t length<wchar_t>(const wchar_t* s) {
+    return wcslen(s);
+}
+
+
+template <typename T>
+int format(T* sBuffer, size_t uSize, const T* sFormat, va_list argList);
+
+template <>
+inline int format<char>(char* sBuffer, size_t uSize, const char* sFormat, va_list argList) {
+    return _vsnprintf_s(sBuffer, uSize, uSize, sFormat, argList);
+}
+
+template <>
+inline int format<wchar_t>(wchar_t* sBuffer, size_t uSize, const wchar_t* sFormat, va_list argList) {
+    return _vsnwprintf_s(sBuffer, uSize, uSize, sFormat, argList);
+}
+
+
+template <typename T>
 class ZXString {
     struct _ZXStringData {
         volatile long nRef;
@@ -57,13 +85,13 @@ public:
         return *this;
     }
     ZXString<T>& operator=(const T* s) {
-        Assign(s, std::char_traits<T>::length(s));
+        Assign(s, length<T>(s));
         return *this;
     }
 
-    void Assign(const T* s, int32_t n) {
+    void Assign(const T* s, int32_t n = -1) {
         if (s) {
-            int32_t nLength = n == -1 ? std::char_traits<T>::length(s) : n;
+            int32_t nLength = n == -1 ? length<T>(s) : n;
             T* pBuffer = GetBuffer(nLength, 0);
             memcpy(pBuffer, s, nLength * sizeof(T));
             ReleaseBuffer(nLength);
@@ -114,7 +142,7 @@ public:
         auto pData = _GetData();
         pData->nRef = 1;
         if (nLength == -1) {
-            pData->nByteLen = std::char_traits<T>::length(pData->pStr()) * sizeof(T);
+            pData->nByteLen = length<T>(pData->pStr()) * sizeof(T);
         } else {
             _m_pStr[nLength] = 0;
             pData->nByteLen = nLength;
@@ -124,18 +152,35 @@ public:
     operator const T*() const {
         return _m_pStr;
     }
+    operator T*() const {
+        return _m_pStr;
+    }
     const char& operator[](size_t i) const {
         return _m_pStr[i];
     }
     ZXString<T>& operator+=(const ZXString<char>& s) {
+        return Cat(s);
+    }
+    ZXString<T>& operator+=(const T* s) {
+        return Cat(s);
+    }
+
+    ZXString<T>& Format(const T* sFormat, ...) {
+        va_list argList;
+        va_start(argList, sFormat);
+        _FormatV(sFormat, argList);
+        va_end(argList);
+        return *this;
+    }
+    ZXString<T>& Cat(const ZXString<char>& s) {
         if (s._m_pStr) {
             return _Cat(s._m_pStr, s.GetLength());
         } else {
             return _Cat(nullptr, 0);
         }
     }
-    ZXString<T>& operator+=(const T* s) {
-        return _Cat(s, std::char_traits<T>::length(s));
+    ZXString<T>& Cat(const T* s) {
+        return _Cat(s, length<T>(s));
     }
 
 protected:
@@ -145,11 +190,24 @@ protected:
     _ZXStringData* _GetData() {
         return reinterpret_cast<_ZXStringData*>(_m_pStr) - 1;
     }
+    void _FormatV(const T* sFormat, va_list argList) {
+        int result = -1;
+        ZXString<T> s;
+        for (int32_t i = 16; i <= 1024; i *= 2) {
+            if (result >= 0) {
+                break;
+            }
+            T* sBuffer = s.GetBuffer(i, 0);
+            int result = format<T>(sBuffer, i, sFormat, argList);
+            s.ReleaseBuffer(result < 0 ? 0 : result);
+        }
+        *this = s;
+    }
     ZXString<T>& _Cat(const T* s, int32_t n) {
         if (n) {
             if (IsEmpty()) {
-                T* pBuffer = GetBuffer(n, 0);
-                memcpy(pBuffer, s, n * sizeof(T));
+                T* sBuffer = GetBuffer(n, 0);
+                memcpy(sBuffer, s, n * sizeof(T));
                 ReleaseBuffer(n);
             } else {
                 int32_t nReq = GetLength() + n;
@@ -157,8 +215,8 @@ protected:
                 while (nCap < nReq) {
                     nCap *= 2;
                 }
-                T* pBuffer = GetBuffer(n, 1);
-                memcpy(&pBuffer[GetLength()], s, n * sizeof(T));
+                T* sBuffer = GetBuffer(n, 1);
+                memcpy(&sBuffer[GetLength()], s, n * sizeof(T));
                 ReleaseBuffer(nReq);
             }
         }

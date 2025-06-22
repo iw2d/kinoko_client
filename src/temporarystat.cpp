@@ -56,9 +56,8 @@ void AdjustPositionWithOffset(CTemporaryStatView* tsv, int32_t nOffset) {
     while (pos) {
         auto pNext = ZList<ZRef<CTemporaryStatView::TEMPORARY_STAT>>::GetNext(pos);
         DEBUG_MESSAGE("NEXT 0x%08X", &pNext);
-        Ztl_variant_t vEmpty;
-        CHECK_HR(pNext->pLayer->raw_RelOffset(0, nOffset, vEmpty, vEmpty));
-        CHECK_HR(pNext->pLayerShadow->raw_RelOffset(0, nOffset, vEmpty, vEmpty));
+        CHECK_HR(pNext->pLayer->raw_RelOffset(0, nOffset, vtEmpty, vtEmpty));
+        CHECK_HR(pNext->pLayerShadow->raw_RelOffset(0, nOffset, vtEmpty, vtEmpty));
     }
 }
 
@@ -130,21 +129,20 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     // resolve shadow canvas
     wchar_t sShadowProperty[256];
     swprintf_s(sShadowProperty, 256, L"UI/UIWindow.img/Skill/CoolTime/%d", nShadowIndex);
-    Ztl_variant_t vEmpty;
     Ztl_variant_t vShadowProperty;
-    CHECK_HR(get_rm()->raw_GetObject(sShadowProperty, vEmpty, vEmpty, &vShadowProperty));
+    CHECK_HR(get_rm()->raw_GetObject(sShadowProperty, vtEmpty, vtEmpty, &vShadowProperty));
     IWzCanvasPtr pShadowCanvas(get_unknown(vShadowProperty));
 
     // create copy of shadow canvas
     IWzCanvasPtr pNewCanvas;
     PcCreateObject<IWzCanvasPtr>(L"Canvas", pNewCanvas, nullptr);
-    CHECK_HR(pNewCanvas->raw_Create(32, 32, vEmpty, vEmpty));
-    CHECK_HR(pNewCanvas->raw_Copy(0, 0, pShadowCanvas, vEmpty));
+    CHECK_HR(pNewCanvas->raw_Create(32, 32, vtEmpty, vtEmpty));
+    CHECK_HR(pNewCanvas->raw_Copy(0, 0, pShadowCanvas, vtEmpty));
 
     // draw number on canvas
     if (!g_pPropSecond) {
         Ztl_variant_t vPropSecond;
-        CHECK_HR(get_rm()->raw_GetObject(L"UI/Basic.img/ItemNo", vEmpty, vEmpty, &vPropSecond));
+        CHECK_HR(get_rm()->raw_GetObject(L"UI/Basic.img/ItemNo", vtEmpty, vtEmpty, &vPropSecond));
         g_pPropSecond = get_unknown(vPropSecond);
     }
     int32_t nOffset = 2;
@@ -165,7 +163,7 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     Ztl_variant_t vAlpha0(210, VT_I4);
     Ztl_variant_t vAlpha1(64, VT_I4);
     Ztl_variant_t vResult;
-    CHECK_HR(pThis->pLayerShadow->raw_InsertCanvas(pNewCanvas, vDelay, vAlpha0, vAlpha1, vEmpty, vEmpty, &vResult));
+    CHECK_HR(pThis->pLayerShadow->raw_InsertCanvas(pNewCanvas, vDelay, vAlpha0, vAlpha1, vtEmpty, vtEmpty, &vResult));
 }
 
 

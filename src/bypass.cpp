@@ -144,18 +144,18 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     reinterpret_cast<void(__thiscall*)(CWvsApp*)>(0x009C8440)(pThis);
     // TSingleton<CQuestMan>::CreateInstance()->LoadDemand();
     auto pQuestMan = reinterpret_cast<void*(__cdecl*)()>(0x009C21A0)();
-    if (!reinterpret_cast<int(__thiscall*)(void*)>(0x006C3D60)(pQuestMan)) {
+    if (!reinterpret_cast<int32_t(__thiscall*)(void*)>(0x006C3D60)(pQuestMan)) {
         ErrorMessage("Failed to load quest data.");
     }
     // CQuestMan::LoadPartyQuestInfo(pQuestMan);
-    reinterpret_cast<int(__thiscall*)(void*)>(0x006C5540)(pQuestMan);
+    reinterpret_cast<int32_t(__thiscall*)(void*)>(0x006C5540)(pQuestMan);
     // CQuestMan::LoadExclusive(pQuestMan);
-    reinterpret_cast<int(__thiscall*)(void*)>(0x006B9670)(pQuestMan);
+    reinterpret_cast<int32_t(__thiscall*)(void*)>(0x006B9670)(pQuestMan);
 
     DEBUG_MESSAGE("CwvsApp::SetUp - Complete!");
     // TSingleton<CMonsterBookMan>::CreateInstance()->LoadBook();
     auto pMonsterBookMan = reinterpret_cast<void*(__cdecl*)()>(0x009CA820)();
-    if (!reinterpret_cast<int(__thiscall*)(void*)>(0x00664C10)(pMonsterBookMan)) {
+    if (!reinterpret_cast<int32_t(__thiscall*)(void*)>(0x00664C10)(pMonsterBookMan)) {
         ErrorMessage("Failed to load monster book data.");
     }
     // CWvsApp::CreateWndManager(this);
@@ -226,7 +226,7 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
             reinterpret_cast<void(__thiscall*)(CInputSystem*, int32_t)>(0x00571710)(CInputSystem::GetInstance(), dwRet);
             do {
                 // if (!CInputSystem::GetISMessage(TSingleton<CInputSystem>::GetInstance(), &isMsg))
-                if (!reinterpret_cast<int(__thiscall*)(CInputSystem*, ISMSG*)>(0x005708F0)(CInputSystem::GetInstance(), &isMsg)) {
+                if (!reinterpret_cast<int32_t(__thiscall*)(CInputSystem*, ISMSG*)>(0x005708F0)(CInputSystem::GetInstance(), &isMsg)) {
                     break;
                 }
                 // CWvsApp::ISMsgProc(this, isMsg.message, isMsg.wParam, isMsg.lParam);
@@ -240,11 +240,11 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
                 TranslateMessage(&msg);
                 DispatchMessageA(&msg);
                 // if (CWvsApp::ExtractComErrorCode(this, &hr))
-                if (reinterpret_cast<int(__thiscall*)(CWvsApp*, HRESULT*)>(0x009C0860)(pThis, &hr)) {
+                if (reinterpret_cast<int32_t(__thiscall*)(CWvsApp*, HRESULT*)>(0x009C0860)(pThis, &hr)) {
                     _com_issue_error(hr);
                 }
                 // if (CWvsApp::ExtractZExceptionCode(this, &hr))
-                if (reinterpret_cast<int(__thiscall*)(CWvsApp*, HRESULT*)>(0x009C0830)(pThis, &hr)) {
+                if (reinterpret_cast<int32_t(__thiscall*)(CWvsApp*, HRESULT*)>(0x009C0830)(pThis, &hr)) {
                     ZException exception(hr);
                     if (hr == 0x20000000) {
                         // CPatchException::CPatchException(&exception, m_nTargetVersion);
@@ -261,12 +261,12 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
             } while (!*pbTerminate && msg.message != WM_QUIT);
         } else {
             // if (CInputSystem::GenerateAutoKeyDown(TSingleton<CInputSystem>::GetInstance(), &isMsg))
-            if (reinterpret_cast<int(__thiscall*)(CInputSystem*, ISMSG*)>(0x0056F990)(CInputSystem::GetInstance(), &isMsg)) {
+            if (reinterpret_cast<int32_t(__thiscall*)(CInputSystem*, ISMSG*)>(0x0056F990)(CInputSystem::GetInstance(), &isMsg)) {
                 // CWvsApp::ISMsgProc(this, isMsg.message, isMsg.wParam, isMsg.lParam);
                 reinterpret_cast<void(__thiscall*)(CWvsApp*, uint32_t, uint32_t, int32_t)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
             }
             // if (CInputSystem::GenerateAutoBtnDown(TSingleton<CInputSystem>::GetInstance(), &isMsg))
-            if (reinterpret_cast<int(__thiscall*)(CInputSystem*, ISMSG*)>(0x0056FAC0)(CInputSystem::GetInstance(), &isMsg)) {
+            if (reinterpret_cast<int32_t(__thiscall*)(CInputSystem*, ISMSG*)>(0x0056FAC0)(CInputSystem::GetInstance(), &isMsg)) {
                 // CWvsApp::ISMsgProc(this, isMsg.message, isMsg.wParam, isMsg.lParam);
                 reinterpret_cast<void(__thiscall*)(CWvsApp*, uint32_t, uint32_t, int32_t)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
             }

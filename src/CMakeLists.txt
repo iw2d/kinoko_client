@@ -3,6 +3,7 @@ add_library(injector SHARED
         hook.cpp
         system.cpp
         bypass.cpp
+        helper.cpp
         sysopt.cpp
         temporarystat.cpp
         walker.cpp

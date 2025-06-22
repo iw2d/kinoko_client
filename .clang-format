@@ -1,6 +1,7 @@
 BasedOnStyle: LLVM
 UseTab: Never
 IndentWidth: 4
+ContinuationIndentWidth: 8
 AccessModifierOffset: -4
 MaxEmptyLinesToKeep: 2
 ColumnLimit: 0
@@ -11,3 +12,4 @@ DerivePointerAlignment: false
 PointerAlignment: Left
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: DontAlign
+AlignAfterOpenBracket : DontAlign

@@ -1,7 +1,7 @@
 #pragma once
-#include "rtti.h"
 #include "ztl/zalloc.h"
 #include "wzlib/gr2d.h"
+#include "common/rtti.h"
 #include "common/dbbasic.h"
 #include "common/packet.h"
 #include <cstdint>
