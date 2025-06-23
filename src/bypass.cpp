@@ -369,7 +369,7 @@ void __fastcall CInputSystem__DetectJoystick_hook(CInputSystem* pThis, void* _ED
 
 static auto CCtrlComboBox__AddItem = 0x004DE640;
 
-void __fastcall CCtrlComboBox__AddItem_hook(CCtrlComboBox* pThis, void* _EDX, char* sItemName, unsigned int dwParam) {
+void __fastcall CCtrlComboBox__AddItem_hook(CCtrlComboBox* pThis, void* _EDX, char* sItemName, uint32_t dwParam) {
     pThis->AddItem("To Spouse", 0x6);   // ID_CHAT_TARGET_COUPLE
     pThis->AddItem("Whisper", 0x7);     // ID_CHAT_TARGET_WHISPER
     pThis->AddItem(sItemName, dwParam); // overwritten call for ID_CHAT_TARGET_ALL

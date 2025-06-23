@@ -145,7 +145,7 @@ DECLARE_INTERFACE_IID_(IWzGr2D, IUnknown, "e576ea33-d465-4f08-aab1-e78df73ee6d9"
     STDMETHOD(get_center)(THIS_ IWzVector2D**) PURE;
     STDMETHOD(raw_GetSnapshot)(THIS_ tagVARIANT, uint32_t, int32_t, int32_t) PURE;
     STDMETHOD(raw_CreateLayer)(THIS_ int32_t nLeft, int32_t nTop, uint32_t uWidth, uint32_t uHeight, int32_t nZ, tagVARIANT vCanvas, tagVARIANT dwFilter, IWzGr2DLayer**) PURE;
-    STDMETHOD(raw_AdjustCenter)(THIS_ int nAdjustCenterX, int nAdjustCenterY) PURE;
+    STDMETHOD(raw_AdjustCenter)(THIS_ int32_t nAdjustCenterX, int32_t nAdjustCenterY) PURE;
     STDMETHOD(raw_TakeScreenShot)(THIS_ wchar_t*, int32_t) PURE;
     STDMETHOD(raw_SetVideoMode)(THIS_ int32_t bMode) PURE;
     STDMETHOD(raw_SetVideoPath)(THIS_ wchar_t*, int32_t, int32_t) PURE;

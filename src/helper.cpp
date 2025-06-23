@@ -2,9 +2,12 @@
 #include "hook.h"
 #include "ztl/zalloc.h"
 #include "ztl/zstr.h"
+#include "wzlib/property.h"
 #include "wzlib/shape2d.h"
 #include "wzlib/gr2d.h"
 #include "common/vecctrl.h"
+#include "common/iteminfo.h"
+#include "common/skillinfo.h"
 #include "wvs/util.h"
 #include "wvs/userlocal.h"
 #include "wvs/inputsystem.h"
@@ -22,8 +25,8 @@ void __fastcall CUserLocal__Jump_hook(CUserLocal* pThis, void* _EDX, int32_t bEn
         return;
     }
     if (!bEnforced && pThis->m_bJumpKeyUp) {
-        int nJob = pThis->GetJobCode();
-        int nSkillID = 0;
+        int32_t nJob = pThis->GetJobCode();
+        int32_t nSkillID = 0;
         if (nJob / 10 == 41) {
             nSkillID = 4111006; // Night Lord
         } else if (nJob / 10 == 42) {
@@ -56,6 +59,45 @@ void __fastcall CVecCtrl__SetImpactNext_hook(CVecCtrl* pThis, void* _EDX, int32_
     CVecCtrl__SetImpactNext(pThis, nAttr, vx, vy);
 }
 
+
+static auto CItemInfo__GetMapString = reinterpret_cast<ZXString<char>*(__thiscall*)(CItemInfo*, ZXString<char>*, uint32_t, const char*)>(0x005A9CA0);
+
+ZXString<char>* __fastcall CItemInfo__GetMapString_hook(CItemInfo* pThis, void* _EDX, ZXString<char>* result, uint32_t dwFieldID, const char* sKey) {
+    CItemInfo__GetMapString(pThis, result, dwFieldID, sKey);
+    if (!strcmp(sKey, "mapName")) {
+        ZXString<char> sFieldID;
+        sFieldID.Format(" (%d)", dwFieldID);
+        result->Cat(sFieldID);
+    }
+    return result;
+}
+
+static auto CItemInfo__GetItemDesc = reinterpret_cast<ZXString<char>*(__thiscall*)(CItemInfo*, ZXString<char>*, int32_t)>(0x005B16E0);
+
+ZXString<char>* __fastcall CItemInfo__GetItemDesc_hook(CItemInfo* pThis, void* _EDX, ZXString<char>* result, int32_t nItemID) {
+    CItemInfo__GetItemDesc(pThis, result, nItemID);
+    if (result->GetLength() > 0) {
+        result->Cat("\r\n");
+    }
+    ZXString<char> sItemID;
+    sItemID.Format("#cItem ID : %d#", nItemID);
+    result->Cat(sItemID);
+    return result;
+}
+
+static auto CSkillInfo__LoadSkill = reinterpret_cast<ZRef<SKILLENTRY>*(__thiscall*)(CSkillInfo*, ZRef<SKILLENTRY>*, int32_t, IWzPropertyPtr, IWzPropertyPtr)>(0x0070C190);
+
+ZRef<SKILLENTRY>* __fastcall CSkillInfo__LoadSkill_hook(CSkillInfo* pThis, void* _EDX, ZRef<SKILLENTRY>* result, int32_t nSkillID, IWzPropertyPtr pSkill, IWzPropertyPtr pStrSR) {
+    CSkillInfo__LoadSkill(pThis, result, nSkillID, pSkill, pStrSR);
+    auto entry = *result;
+    if (entry->sDescription.GetLength() > 0) {
+        entry->sDescription.Cat("\r\n");
+    }
+    ZXString<char> sSkillID;
+    sSkillID.Format("#cSkill ID : %d#", nSkillID);
+    entry->sDescription.Cat(sSkillID);
+    return result;
+}
 
 static auto get_weapon_attack_speed = 0x005A66B0;
 
@@ -97,6 +139,7 @@ ZXString<char>* __cdecl get_weapon_attack_speed_hook(ZXString<char>* result, int
             Ztl_variant_t vEquip;
             CHECK_HR(get_rm()->raw_GetObject(sUOL, vtEmpty, vtEmpty, &vEquip));
             IWzPropertyPtr pEquip = vEquip.GetUnknown(false, false);
+
             Ztl_variant_t vInfo;
             CHECK_HR(pEquip->get_item(L"info", &vInfo));
             IWzPropertyPtr pInfo = vInfo.GetUnknown(false, false);
@@ -108,6 +151,30 @@ ZXString<char>* __cdecl get_weapon_attack_speed_hook(ZXString<char>* result, int
         }
     }
     return result;
+}
+
+static uintptr_t CUIQuestInfoDetail__Draw_jmp = 0x00824A93;
+static uintptr_t CUIQuestInfoDetail__Draw_ret = 0x00824C04;
+
+void __stdcall CUIQuestInfoDetail__Draw_helper(IWzCanvas* pCanvas, IWzFont* pFont, uint16_t usQuestID) {
+    wchar_t sQuestID[256];
+    swprintf_s(sQuestID, 256, L"Quest ID : %d", usQuestID);
+    uint32_t result[4];
+    CHECK_HR(pCanvas->raw_DrawText(35, 56, sQuestID, pFont, vtEmpty, vtEmpty, result));
+}
+
+void __declspec(naked) CUIQuestInfoDetail__Draw_hook() {
+    __asm {
+        mov     eax, [ ebp + 0x8C ]
+        movzx   edx, word ptr [ eax ]
+        push    edx                     ; this->m_pQI.p->usQuestID
+        mov     eax, [ ebp + 0xF0 ]
+        push    eax                     ; IWzFont*
+        push    esi                     ; IWzCanvas*
+        call    CUIQuestInfoDetail__Draw_helper
+        jmp     [ CUIQuestInfoDetail__Draw_ret ]
+    }
+    ;
 }
 
 
@@ -126,5 +193,10 @@ void AttachClientHelper() {
     PatchCall(0x009336D3, reinterpret_cast<uintptr_t>(&CUserLocal__Jump_hook));
 
     ATTACH_HOOK(CVecCtrl__SetImpactNext, CVecCtrl__SetImpactNext_hook); // vertical double jump
+    ATTACH_HOOK(CItemInfo__GetMapString, CItemInfo__GetMapString_hook); // append map ID to map name
+    ATTACH_HOOK(CItemInfo__GetItemDesc, CItemInfo__GetItemDesc_hook);   // append item ID to item description
+    ATTACH_HOOK(CSkillInfo__LoadSkill, CSkillInfo__LoadSkill_hook);     // append skill ID to skill description
     ATTACH_HOOK(get_weapon_attack_speed, get_weapon_attack_speed_hook); // append attack speed value to weapon speed string
+
+    PatchJmp(CUIQuestInfoDetail__Draw_jmp, reinterpret_cast<uintptr_t>(&CUIQuestInfoDetail__Draw_hook)); // replace "Low Level Quest"
 }

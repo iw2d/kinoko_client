@@ -93,7 +93,7 @@ void __fastcall CWvsContext__SetSkillCooltimeOver_hook(CWvsContext* pThis, void*
 
 static auto CWvsContext__RemoveSkillCooltimeReset = reinterpret_cast<void(__thiscall*)(CWvsContext*, int32_t)>(0x009CCF80);
 
-void __fastcall CWvsContext__RemoveSkillCooltimeReset_hook(CWvsContext* pThis, void* _EDX, int nSkillID) {
+void __fastcall CWvsContext__RemoveSkillCooltimeReset_hook(CWvsContext* pThis, void* _EDX, int32_t nSkillID) {
     CWvsContext__RemoveSkillCooltimeReset(pThis, nSkillID);
     g_tsvCooltime.ResetTemporary(TSV_SKILL, nSkillID);
 }
@@ -131,7 +131,7 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     swprintf_s(sShadowProperty, 256, L"UI/UIWindow.img/Skill/CoolTime/%d", nShadowIndex);
     Ztl_variant_t vShadowProperty;
     CHECK_HR(get_rm()->raw_GetObject(sShadowProperty, vtEmpty, vtEmpty, &vShadowProperty));
-    IWzCanvasPtr pShadowCanvas(get_unknown(vShadowProperty));
+    IWzCanvasPtr pShadowCanvas = get_unknown(vShadowProperty);
 
     // create copy of shadow canvas
     IWzCanvasPtr pNewCanvas;

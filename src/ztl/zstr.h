@@ -24,12 +24,12 @@ int format(T* sBuffer, size_t uSize, const T* sFormat, va_list argList);
 
 template <>
 inline int format<char>(char* sBuffer, size_t uSize, const char* sFormat, va_list argList) {
-    return _vsnprintf_s(sBuffer, uSize, uSize, sFormat, argList);
+    return _vsnprintf_s(sBuffer, uSize, _TRUNCATE, sFormat, argList);
 }
 
 template <>
 inline int format<wchar_t>(wchar_t* sBuffer, size_t uSize, const wchar_t* sFormat, va_list argList) {
-    return _vsnwprintf_s(sBuffer, uSize, uSize, sFormat, argList);
+    return _vsnwprintf_s(sBuffer, uSize, _TRUNCATE, sFormat, argList);
 }
 
 
@@ -145,7 +145,7 @@ public:
             pData->nByteLen = length<T>(pData->pStr()) * sizeof(T);
         } else {
             _m_pStr[nLength] = 0;
-            pData->nByteLen = nLength;
+            pData->nByteLen = nLength * sizeof(T);
         }
     }
 
@@ -198,7 +198,7 @@ protected:
                 break;
             }
             T* sBuffer = s.GetBuffer(i, 0);
-            int result = format<T>(sBuffer, i, sFormat, argList);
+            result = format<T>(sBuffer, i, sFormat, argList);
             s.ReleaseBuffer(result < 0 ? 0 : result);
         }
         *this = s;
@@ -215,7 +215,7 @@ protected:
                 while (nCap < nReq) {
                     nCap *= 2;
                 }
-                T* sBuffer = GetBuffer(n, 1);
+                T* sBuffer = GetBuffer(nCap, 1);
                 memcpy(&sBuffer[GetLength()], s, n * sizeof(T));
                 ReleaseBuffer(nReq);
             }
