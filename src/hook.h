@@ -34,7 +34,7 @@ static void AttachClientHooks() {
     AttachItemEffectMod();
     AttachStringPoolMod();
     AttachResolutionMod();
-    AttachChatBalloonMod();
+    // AttachChatBalloonMod();
     AttachPortableChairMod();
     AttachTemporaryStatMod();
     AttachHyperTeleportMod();
