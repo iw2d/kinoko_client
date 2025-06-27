@@ -6,6 +6,7 @@ add_library(injector SHARED
         helper.cpp
         resman.cpp
         sysopt.cpp
+        stringpool.cpp
         temporarystat.cpp
         walker.cpp
         debug.cpp
