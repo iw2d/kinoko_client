@@ -1,5 +1,5 @@
 #pragma once
-#include "stage.h"
+#include "wvs/stage.h"
 
 
 class CMapLoadable : public CStage {

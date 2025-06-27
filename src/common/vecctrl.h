@@ -1,8 +1,8 @@
 #pragma once
-#include "rtti.h"
-#include "secure.h"
 #include "ztl/zalloc.h"
 #include "wzlib/shape2d.h"
+#include "common/rtti.h"
+#include "common/secure.h"
 #include <windows.h>
 #include <cstdint>
 
@@ -61,8 +61,8 @@ class CAttrFoothold : public ZRefCounted {
     TSecType<double> walk;
     TSecType<double> drag;
     TSecType<double> force;
-    TSecType<int> forbidfalldown;
-    TSecType<int> cantThrough;
+    TSecType<int32_t> forbidfalldown;
+    TSecType<int32_t> cantThrough;
 };
 static_assert(sizeof(CAttrFoothold) == 0x48);
 

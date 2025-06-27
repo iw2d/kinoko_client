@@ -1,5 +1,5 @@
 #pragma once
-#include "util.h"
+#include "hook.h"
 #include "ztl/tsingleton.h"
 #include "ztl/zalloc.h"
 #include "ztl/zcoll.h"
@@ -37,7 +37,7 @@ public:
     MEMBER_AT(int32_t, 0x5C, m_tLastServerIPCheck2)
     MEMBER_AT(int32_t, 0x60, m_tLastGGHookingAPICheck)
     MEMBER_AT(int32_t, 0x64, m_tLastSecurityCheck)
-    MEMBER_ARRAY_AT(void*, 3, 0x68, m_ahInput)
+    MEMBER_ARRAY_AT(void*, 0x68, m_ahInput, 3)
     MEMBER_AT(int32_t, 0x74, m_tNextSecurityCheck)
     MEMBER_AT(bool, 0x78, m_bEnabledDX9)
     MEMBER_AT(ZArray<uint8_t>, 0x7C, m_pBackupBuffer)

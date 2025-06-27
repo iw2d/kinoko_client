@@ -1,9 +1,9 @@
 #pragma once
+#include "hook.h"
 #include "ztl/tsingleton.h"
 #include "ztl/zlock.h"
 #include "ztl/zcoll.h"
 #include "ztl/zsock.h"
-
 #include <windows.h>
 #include <cstdint>
 

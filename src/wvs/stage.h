@@ -1,7 +1,7 @@
 #pragma once
-#include "gobj.h"
-#include "msghandler.h"
 #include "ztl/zalloc.h"
+#include "wvs/gobj.h"
+#include "wvs/msghandler.h"
 
 
 class CStage : public IGObj, public IUIMsgHandler, public INetMsgHandler, public ZRefCounted {

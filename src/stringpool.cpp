@@ -15,14 +15,14 @@ class StringPool {
 public:
     class Key {
     public:
-        ZArray<unsigned char> m_aKey;
+        ZArray<uint8_t> m_aKey;
     };
     static_assert(sizeof(Key) == 0x4);
 };
 
-static auto StringPool__Key__ctor = reinterpret_cast<void (__thiscall*)(StringPool::Key*, const unsigned char*, uint32_t, uint32_t)>(0x00746470);
+static auto StringPool__Key__ctor = reinterpret_cast<void (__thiscall*)(StringPool::Key*, const uint8_t*, uint32_t, uint32_t)>(0x00746470);
 
-static auto StringPool__ms_aKey = reinterpret_cast<const unsigned char*>(0x00B98830);
+static auto StringPool__ms_aKey = reinterpret_cast<const uint8_t*>(0x00B98830);
 static auto StringPool__ms_aString = reinterpret_cast<const char**>(0x00C5A878);
 
 constexpr size_t GetLength(const char* s) {
@@ -38,7 +38,7 @@ void EncodeString(int nIdx, const char* sSource, char* sDestination) {
     StringPool__Key__ctor(&keygen, StringPool__ms_aKey, 0x10, 0);
     size_t n = strlen(sSource);
     for (size_t i = 0; i < n; ++i) {
-        unsigned char key = keygen.m_aKey[i % 0x10];
+        uint8_t key = keygen.m_aKey[i % 0x10];
         sDestination[i + 1] = sSource[i] ^ key;
         if (sSource[i] == key) {
             sDestination[i + 1] = key;

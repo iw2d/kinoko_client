@@ -8,6 +8,7 @@ add_library(injector SHARED
         sysopt.cpp
         stringpool.cpp
         temporarystat.cpp
+        elementaldamage.cpp
         walker.cpp
         debug.cpp
 )

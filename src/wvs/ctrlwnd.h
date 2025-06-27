@@ -1,13 +1,12 @@
 #pragma once
-#include "util.h"
-#include "gobj.h"
-#include "msghandler.h"
-#include "wnd.h"
+#include "hook.h"
 #include "ztl/zalloc.h"
 #include "ztl/zcom.h"
 #include "ztl/ztl.h"
 #include "wzlib/shape2d.h"
-
+#include "wvs/gobj.h"
+#include "wvs/msghandler.h"
+#include "wvs/wnd.h"
 #include <windows.h>
 #include <cstdint>
 

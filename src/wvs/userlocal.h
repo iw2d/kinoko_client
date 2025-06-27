@@ -1,10 +1,10 @@
 #pragma once
-#include "util.h"
-#include "gobj.h"
+#include "hook.h"
 #include "ztl/zalloc.h"
 #include "ztl/tsingleton.h"
 #include "wzlib/shape2d.h"
 #include "common/vecctrl.h"
+#include "wvs/gobj.h"
 #include <cstdint>
 
 

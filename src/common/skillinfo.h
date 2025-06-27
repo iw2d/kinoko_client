@@ -1,7 +1,7 @@
 #pragma once
+#include "hook.h"
 #include "ztl/tsingleton.h"
 #include "ztl/zstr.h"
-#include "wvs/util.h"
 #include <cstdint>
 
 

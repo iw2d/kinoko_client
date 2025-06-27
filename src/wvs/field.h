@@ -1,5 +1,5 @@
 #pragma once
-#include "maploadable.h"
+#include "wvs/maploadable.h"
 
 
 class CField : public CMapLoadable {

@@ -1,5 +1,4 @@
 #pragma once
-#include "util.h"
 #include "ztl/zalloc.h"
 #include "ztl/zcoll.h"
 #include "ztl/zstr.h"

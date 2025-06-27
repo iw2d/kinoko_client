@@ -1,8 +1,8 @@
 #pragma once
-#include "util.h"
-#include "gobj.h"
-#include "msghandler.h"
+#include "hook.h"
 #include "ztl/zalloc.h"
+#include "wvs/gobj.h"
+#include "wvs/msghandler.h"
 #include <cstdint>
 
 
