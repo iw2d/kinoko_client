@@ -55,7 +55,7 @@ public:
             _Release(_GetData());
         }
     }
-    ZXString(const char* s, int32_t n = -1) : _m_pStr(nullptr) {
+    ZXString(const T* s, int32_t n = -1) : _m_pStr(nullptr) {
         Assign(s, n);
     }
     ZXString(const ZXString<T>& s) : _m_pStr(nullptr) {

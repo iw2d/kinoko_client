@@ -4,6 +4,7 @@ add_library(injector SHARED
         system.cpp
         bypass.cpp
         helper.cpp
+        resman.cpp
         sysopt.cpp
         temporarystat.cpp
         walker.cpp

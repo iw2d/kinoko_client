@@ -44,4 +44,11 @@ public:
     MEMBER_AT(uint32_t, 0x80, m_dwBackupBufferSize)
     MEMBER_AT(uint32_t, 0x84, m_dwClearStackLog)
     MEMBER_AT(int32_t, 0x88, m_bWindowActive)
+
+    // called in bypass.cpp -> CWvsApp::SetUp
+    void InitializeResMan();
+
+    static void Dir_BackSlashToSlash(char* sDir);
+    static void Dir_SlashToBackSlash(char* sDir);
+    static void Dir_upDir(char* sDir);
 };

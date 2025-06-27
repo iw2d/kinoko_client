@@ -122,7 +122,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     // TSingleton<CBattleRecordMan>::CreateInstance();
     reinterpret_cast<void(__cdecl*)()>(0x009C2220)();
     // CWvsApp::InitializeResMan(this);
-    reinterpret_cast<void(__thiscall*)(CWvsApp*)>(0x009C9540)(pThis);
+    pThis->InitializeResMan();
 
     DEBUG_MESSAGE("CWvsApp::SetUp - Graphic & Sound...");
     // CWvsApp::InitializeGr2D(this);

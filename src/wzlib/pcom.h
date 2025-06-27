@@ -14,3 +14,7 @@ void __cdecl PcCreateObject(const wchar_t* sUOL, T& pObj, IUnknown* pUnkOuter) {
     }
     _com_util::CheckError(reinterpret_cast<HRESULT (__cdecl*)(const wchar_t*, const GUID*, T&, void*)>(_g_ppfnPCOMAPIs[0])(sUOL, &__uuidof(T), pObj, pUnkOuter));
 }
+
+inline void PcSetRootNameSpace(IUnknown* pNameSpace) {
+    _com_util::CheckError(reinterpret_cast<HRESULT (__cdecl*)(IUnknown**, int32_t)>(_g_ppfnPCOMAPIs[4])(&pNameSpace, 1));
+}

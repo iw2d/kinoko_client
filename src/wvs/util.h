@@ -2,6 +2,7 @@
 #include "ztl/zcom.h"
 #include "wzlib/gr2d.h"
 #include "wzlib/resman.h"
+#include "wzlib/namespace.h"
 #include "wzlib/property.h"
 #include "wzlib/canvas.h"
 #include <comutil.h>
@@ -39,6 +40,14 @@ inline IWzGr2DPtr& get_gr() {
 
 inline IWzResManPtr& get_rm() {
     return *reinterpret_cast<IWzResManPtr*>(0x00C6F434);
+}
+
+static inline IWzNameSpacePtr& get_root() {
+    return *reinterpret_cast<IWzNameSpacePtr*>(0x00C6F43C);
+}
+
+static inline IWzNameSpacePtr& get_sub(int32_t nIdx) {
+    return reinterpret_cast<IWzNameSpacePtr*>(0x00C6F440)[nIdx];
 }
 
 inline IUnknownPtr get_unknown(Ztl_variant_t& v){
