@@ -1,7 +1,8 @@
 #pragma once
-#include <comdef.h>
 #include "archive.h"
 #include "namespace.h"
+#include <comdef.h>
+#include <cstdint>
 
 
 DECLARE_INTERFACE_IID_(IWzPackage, IWzNameSpace, "e610818b-038d-4522-9232-30fcd5f4737c") {
@@ -16,10 +17,10 @@ DECLARE_INTERFACE_IID_(IWzPackage, IWzNameSpace, "e610818b-038d-4522-9232-30fcd5
     STDMETHOD(get_item)(THIS_ wchar_t*, tagVARIANT*) PURE;
     STDMETHOD(get_property)(THIS_ wchar_t*, tagVARIANT, IWzNameSpaceProperty**) PURE;
     STDMETHOD(get__NewEnum)(THIS_ IUnknown**) PURE;
-    STDMETHOD(raw_Mount)(THIS_ wchar_t*, IWzNameSpace*, int) PURE;
+    STDMETHOD(raw_Mount)(THIS_ wchar_t*, IWzNameSpace*, int32_t) PURE;
     STDMETHOD(raw_Unmount)(THIS_ wchar_t*, tagVARIANT) PURE;
-    STDMETHOD(raw__OnMountEvent)(THIS_ IWzNameSpace*, IWzNameSpace*, wchar_t*, int) PURE;
-    STDMETHOD(raw__OnGetLocalObject)(THIS_ int, wchar_t*, int*, tagVARIANT*) PURE;
+    STDMETHOD(raw__OnMountEvent)(THIS_ IWzNameSpace*, IWzNameSpace*, wchar_t*, int32_t) PURE;
+    STDMETHOD(raw__OnGetLocalObject)(THIS_ int32_t, wchar_t*, int32_t*, tagVARIANT*) PURE;
 
     /*** IWzPackage methods ***/
     STDMETHOD(raw_Init)(THIS_ wchar_t*, wchar_t*, IWzSeekableArchive*) PURE;
@@ -41,10 +42,10 @@ DECLARE_INTERFACE_IID_(IWzFileSystem, IWzWritableNameSpace, "352d8655-51e4-4668-
     STDMETHOD(get_item)(THIS_ wchar_t*, tagVARIANT*) PURE;
     STDMETHOD(get_property)(THIS_ wchar_t*, tagVARIANT, IWzNameSpaceProperty**) PURE;
     STDMETHOD(get__NewEnum)(THIS_ IUnknown**) PURE;
-    STDMETHOD(raw_Mount)(THIS_ wchar_t*, IWzNameSpace*, int) PURE;
+    STDMETHOD(raw_Mount)(THIS_ wchar_t*, IWzNameSpace*, int32_t) PURE;
     STDMETHOD(raw_Unmount)(THIS_ wchar_t*, tagVARIANT) PURE;
-    STDMETHOD(raw__OnMountEvent)(THIS_ IWzNameSpace*, IWzNameSpace*, wchar_t*, int) PURE;
-    STDMETHOD(raw__OnGetLocalObject)(THIS_ int, wchar_t*, int*, tagVARIANT*) PURE;
+    STDMETHOD(raw__OnMountEvent)(THIS_ IWzNameSpace*, IWzNameSpace*, wchar_t*, int32_t) PURE;
+    STDMETHOD(raw__OnGetLocalObject)(THIS_ int32_t, wchar_t*, int32_t*, tagVARIANT*) PURE;
 
     /*** IWzWritableNameSpace methods ***/
     STDMETHOD(raw_CreateChildNameSpace)(THIS_ wchar_t*, IWzNameSpace**) PURE;

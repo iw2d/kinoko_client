@@ -1,12 +1,12 @@
 #pragma once
+#include <cstdint>
 
 
-template<typename T, uintptr_t ADDRESS>
+template <typename T, uintptr_t ADDRESS>
 class TSingleton {
-protected:
+public:
     inline static T*& ms_pInstance = *reinterpret_cast<T**>(ADDRESS);
 
-public:
     static T* GetInstance() {
         return ms_pInstance;
     }

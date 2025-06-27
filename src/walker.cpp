@@ -1,108 +1,96 @@
-#include <stdio.h>
-#include <time.h>
+#include "pch.h"
+#include "hook.h"
+#include "debug.h"
+#include <windows.h>
+#include <pathcch.h>
+#include <cstdio>
+#include <ctime>
 #include <StackWalker.h>
 
-#include "hook.h"
-#include "config.h"
-#include "debug.h"
-
-#pragma warning(disable : 4996)
+#define EH_EXCEPTION_NUMBER 0xE06D7363
 
 
-class DebugWalker : public StackWalker {
+class StackTraceWalker : public StackWalker {
 public:
-    DebugWalker(LPCSTR szSymPath, FILE* file) {
-        StackWalker::StackWalker(StackWalkOptions::OptionsAll, szSymPath);
-        this->file = file;
+    FILE* m_file;
+
+    StackTraceWalker(FILE* file) : m_file(file) {
     }
+
 protected:
     virtual void OnOutput(LPCSTR szText) {
-        fprintf_s(this->file, szText);
-    }
-private:
-    FILE* file;
-};
-
-
-class ZException {
-public:
-    HRESULT m_hr;
-
-    ZException(HRESULT hr) {
-        this->m_hr = hr;
+        fprintf_s(m_file, szText);
     }
 };
 
 
-struct EHExceptionRecord {
-    unsigned int magicNumber;
-    void* pExceptionObject;
-    _ThrowInfo* pThrowInfo;
-};
-
-
-VOID WINAPI LogStackTrace() {
-    // Open log file
-    FILE* file;
-    fopen_s(&file, CONFIG_LOG_FILE, "a+");
-    // Log time
-    time_t rawTime;
-    time(&rawTime);
-    struct tm * timeInfo = localtime(&rawTime);
-    fprintf_s(file, "================================================================================\n");
-    fprintf_s(file, "Stack Trace : %s", asctime(timeInfo));
-    fprintf_s(file, "================================================================================\n");
-    // Initialize StackWalker
-    DebugWalker walker("MapleStory.pdb", file);
-    walker.ShowCallstack(GetCurrentThread());
-    fclose(file);
+bool TryOpenFile(FILE** pFile, const wchar_t* sFileName) {
+    for (size_t i = 0; i < 10; ++i) {
+        if (!_wfopen_s(pFile, sFileName, L"a")) {
+            return true;
+        }
+        Sleep(100);
+    }
+    return false;
 }
 
 
-VOID WINAPI LogException(PCONTEXT pContextRecord) {
-    // Open log file
+void LogStackTrace(PCONTEXT pContextRecord) {
+    wchar_t sPath[MAX_PATH];
+    GetModuleFileNameW(nullptr, sPath, MAX_PATH);
+    PathCchRemoveFileSpec(sPath, MAX_PATH);
+    PathCchAppend(sPath, MAX_PATH, L"log");
+    CreateDirectoryW(sPath, nullptr);
+
+    time_t now = time(nullptr);
+    struct tm localtime;
+    localtime_s(&localtime, &now);
+    wchar_t sFileName[MAX_PATH];
+    wcsftime(sFileName, MAX_PATH, L"%Y-%m-%d.txt", &localtime);
+    PathCchAppend(sPath, MAX_PATH, sFileName);
+
     FILE* file;
-    fopen_s(&file, CONFIG_LOG_FILE, "a+");
-    // Log time
-    time_t rawTime;
-    time(&rawTime);
-    struct tm * timeInfo = localtime(&rawTime);
+    if (!TryOpenFile(&file, sPath)) {
+        DebugMessage("Failed to open file %ls", sPath);
+        return;
+    }
+
+    char sTimeInfo[256];
+    strftime(sTimeInfo, MAX_PATH, "%Y-%m-%d %H:%M:%S", &localtime);
     fprintf_s(file, "================================================================================\n");
-    fprintf_s(file, "Exception : %s", asctime(timeInfo));
+    fprintf_s(file, "Stack Trace : %s\n", sTimeInfo);
     fprintf_s(file, "================================================================================\n");
-    // Initialize StackWalker
-    DebugWalker walker("MapleStory.pdb", file);
+
+    StackTraceWalker walker(file);
+    walker.SetSymPath("MapleStory.pdb");
     walker.ShowCallstack(GetCurrentThread(), pContextRecord);
     fclose(file);
 }
 
 
-LONG WINAPI VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
+LONG NTAPI VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     DWORD dwExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
     DWORD dwExceptionAddress = reinterpret_cast<DWORD>(pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
-    if (dwExceptionCode != STATUS_PRIVILEGED_INSTRUCTION && dwExceptionCode != DBG_PRINTEXCEPTION_C) {
-        if (dwExceptionCode == STATUS_ACCESS_VIOLATION) {
-            DebugMessage("Status Access Violation : 0x%08X - 0x%08X", dwExceptionAddress, pExceptionInfo->ExceptionRecord->ExceptionFlags);
-            LogException(pExceptionInfo->ContextRecord);
-        } else if (dwExceptionCode == 0xE06D7363) {
-            // CallCatchBlock
-            EHExceptionRecord* pExcept = reinterpret_cast<EHExceptionRecord*>(pExceptionInfo->ExceptionRecord->ExceptionInformation);
-            if (pExcept->magicNumber == 0x19930520 || pExcept->magicNumber == 0x19930521 || pExcept->magicNumber == 0x19930522) {
-                ZException* pExceptionObject = reinterpret_cast<ZException*>(pExcept->pExceptionObject);
-                DebugMessage("EHException : %s - 0x%08X", pExcept->pThrowInfo->pCatchableTypeArray->arrayOfCatchableTypes[0]->pType->name, pExceptionObject->m_hr);
-            }
-        } else {
-            DebugMessage("Exception Code 0x%08X : 0x%08X", dwExceptionCode, dwExceptionAddress);
-        }
+    switch (dwExceptionCode) {
+    case STATUS_PRIVILEGED_INSTRUCTION:
+    case DBG_PRINTEXCEPTION_C:
+    case DBG_PRINTEXCEPTION_WIDE_C:
+        break;
+    case STATUS_ACCESS_VIOLATION:
+        DebugMessage("Status Access Violation : 0x%08X : 0x%08X, flags : 0x%08X", dwExceptionCode, dwExceptionAddress, pExceptionInfo->ExceptionRecord->ExceptionFlags);
+        LogStackTrace(pExceptionInfo->ContextRecord);
+        break;
+    case EH_EXCEPTION_NUMBER:
+        break;
+    default:
+        DebugMessage("Exception Code 0x%08X : 0x%08X", dwExceptionCode, dwExceptionAddress);
+        break;
     }
-
     return EXCEPTION_CONTINUE_SEARCH;
 }
 
 
 void AttachExceptionHandler() {
-#ifdef _DEBUG
     AddVectoredExceptionHandler(1, VectoredExceptionHandler);
-#endif
 }

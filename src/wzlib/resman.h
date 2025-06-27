@@ -1,6 +1,6 @@
 #pragma once
-#include <comdef.h>
 #include "archive.h"
+#include <comdef.h>
 
 
 enum RESMAN_PARAM {
@@ -27,11 +27,11 @@ DECLARE_INTERFACE_IID_(IWzResMan, IUnknown, "57dfe40b-3e20-4dbc-97e8-805a50f381b
     /*** IWzResMan methods ***/
     STDMETHOD(get_rootNameSpace)(THIS_ IUnknown**) PURE;
     STDMETHOD(put_rootNameSpace)(THIS_ IUnknown*) PURE;
-    STDMETHOD(raw_SetResManParam)(THIS_ int, int, int) PURE;
+    STDMETHOD(raw_SetResManParam)(THIS_ int32_t, int32_t, int32_t) PURE;
     STDMETHOD(raw_CreateObject)(THIS_ wchar_t*, IUnknown**) PURE;
     STDMETHOD(raw_GetObject)(THIS_ wchar_t*, tagVARIANT, tagVARIANT, tagVARIANT*) PURE;
     STDMETHOD(raw_SerializeObject)(THIS_ IWzArchive*, tagVARIANT, IUnknown**) PURE;
-    STDMETHOD(raw_FlushCachedObjects)(THIS_ int) PURE;
+    STDMETHOD(raw_FlushCachedObjects)(THIS_ int32_t) PURE;
     STDMETHOD(raw_OverrideObject)(THIS_ wchar_t*, wchar_t*) PURE;
 
     END_INTERFACE;

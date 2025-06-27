@@ -1,6 +1,7 @@
 #pragma once
-#include <comdef.h>
 #include "archive.h"
+#include <comdef.h>
+#include <cstdint>
 
 
 DECLARE_INTERFACE_IID_(IWzSerialize, IUnknown, "01110bc6-d843-4ff1-918c-9cf64632fb15") {
@@ -17,4 +18,5 @@ DECLARE_INTERFACE_IID_(IWzSerialize, IUnknown, "01110bc6-d843-4ff1-918c-9cf64632
 
     END_INTERFACE;
 };
+
 _COM_SMARTPTR_TYPEDEF(IWzSerialize, __uuidof(IWzSerialize));
