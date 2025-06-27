@@ -6,5 +6,7 @@
 #define CONFIG_SERVER_ADDRESS "127.0.0.1"
 #define CONFIG_NEXON_SEARCH   "63.251.217."
 
+// #define CONFIG_GLOBAL_FOCUS
+
 extern char* g_sServerAddress;
 extern long g_nServerPort;

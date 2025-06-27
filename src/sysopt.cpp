@@ -37,7 +37,11 @@ void __fastcall CUISysOpt__OnCreate_hook(CUISysOpt* pThis, void* _EDX, void* pDa
     paramComboBox.nBorderColor = 0xFF999999;
 
     g_cbResolution = new CCtrlComboBox();
+#ifdef CONFIG_GLOBAL_FOCUS
     g_cbResolution->CreateCtrl(pThis, 2000, 0, 65, 58, 100, 18, &paramComboBox);
+#else
+    g_cbResolution->CreateCtrl(pThis, 2000, 0, 65, 58, 174, 18, &paramComboBox);
+#endif
     const char* asResolution[] = {
         "800 x 600",
         "1024 x 768",
@@ -51,6 +55,7 @@ void __fastcall CUISysOpt__OnCreate_hook(CUISysOpt* pThis, void* _EDX, void* pDa
     }
     g_cbResolution->SetSelect(pThis->m_sysOptCur.bSysOpt_LargeScreen);
 
+#ifdef CONFIG_GLOBAL_FOCUS
     CCtrlCheckBox::CREATEPARAM paramCheckBox;
     paramCheckBox.nBackColor = 0;
     paramCheckBox.nWidth = 150;
@@ -59,6 +64,7 @@ void __fastcall CUISysOpt__OnCreate_hook(CUISysOpt* pThis, void* _EDX, void* pDa
     g_cbGlobalFocus = new CCtrlCheckBox();
     g_cbGlobalFocus->CreateCtrl(pThis, 2001, 165, 60, &paramCheckBox);
     g_cbGlobalFocus->SetChecked(g_bGlobalFocus);
+#endif
 }
 
 static auto CUISysOpt__GetSysOptFromCtrl = reinterpret_cast<void(__thiscall*)(CUISysOpt*)>(0x009692A0);
@@ -66,7 +72,9 @@ static auto CUISysOpt__GetSysOptFromCtrl = reinterpret_cast<void(__thiscall*)(CU
 void __fastcall CUISysOpt__GetSysOptFromCtrl_hook(CUISysOpt* pThis, void* _EDX) {
     CUISysOpt__GetSysOptFromCtrl(pThis);
     pThis->m_sysOptCur.bSysOpt_LargeScreen = g_cbResolution->m_nSelect;
+#ifdef CONFIG_GLOBAL_FOCUS
     g_bGlobalFocus = g_cbGlobalFocus->m_bChecked;
+#endif
 }
 
 
@@ -99,6 +107,7 @@ void __fastcall CConfig__ApplySysOpt_hook(CConfig* pThis, void* _EDX, CONFIG_SYS
     if (pSysOpt && !bApplyVideo) {
         return;
     }
+#ifdef CONFIG_GLOBAL_FOCUS
     IWzSoundPtr pSound;
     PcCreateObject<IWzSoundPtr>(L"Sound_DX8", pSound, nullptr);
     int32_t bOldGlobalFocus;
@@ -114,6 +123,7 @@ void __fastcall CConfig__ApplySysOpt_hook(CConfig* pThis, void* _EDX, CONFIG_SYS
     if (pField) {
         CSoundMan::GetInstance()->PlayBGM(CSoundMan::GetInstance()->m_sBGMPath, 1, 600, 600, 1);
     }
+#endif
 }
 
 
