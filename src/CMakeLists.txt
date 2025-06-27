@@ -22,7 +22,7 @@ target_link_libraries(injector PRIVATE
         Ws2_32.lib
         Pathcch.lib
         StackWalker
-        detours
+        Detours
 )
 
 set_target_properties(injector PROPERTIES
@@ -40,7 +40,7 @@ set_target_properties(launcher PROPERTIES
 )
 
 target_link_libraries(launcher PRIVATE
-        detours
+        Detours
 )
 
 
