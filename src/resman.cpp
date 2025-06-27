@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "hook.h"
 #include "debug.h"
+#include "config.h"
 #include "wzlib/resman.h"
 #include "wzlib/namespace.h"
 #include "wzlib/package.h"
@@ -21,6 +22,17 @@ void CWvsApp::InitializeResMan() {
         PcCreateObject<IWzNameSpacePtr>(L"NameSpace", root, nullptr);
         PcSetRootNameSpace(root);
 
+#ifdef CONFIG_IMAGE_LOADING
+        IWzFileSystemPtr fs;
+        PcCreateObject<IWzFileSystemPtr>(L"NameSpace#FileSystem", fs, nullptr);
+        char sStartPath[MAX_PATH];
+        GetModuleFileNameA(nullptr, sStartPath, MAX_PATH);
+        Dir_BackSlashToSlash(sStartPath);
+        Dir_upDir(sStartPath);
+        strcat_s(sStartPath, MAX_PATH, "/Data");
+        CHECK_HR(fs->raw_Init(static_cast<wchar_t*>(Ztl_bstr_t(sStartPath))));
+        CHECK_HR(root->raw_Mount(L"/", fs, 0));
+#else
         IWzFileSystemPtr fs;
         PcCreateObject<IWzFileSystemPtr>(L"NameSpace#FileSystem", fs, nullptr);
         char sStartPath[MAX_PATH];
@@ -58,6 +70,7 @@ void CWvsApp::InitializeResMan() {
             CHECK_HR(pSubNameSpace->raw_Mount(L"/", pSubPackage, 0));
             CHECK_HR(get_sub(i)->raw_Mount(L"/", pSubNameSpace, 1));
         }
+#endif
     } catch (const _com_error& e) {
         HRESULT hr = e.Error();
         ZException exception(hr);
