@@ -12,6 +12,7 @@
 #include "wvs/userlocal.h"
 #include "wvs/inputsystem.h"
 #include "wvs/animationdisplayer.h"
+#include <cstdint>
 
 
 static auto CUserLocal__Jump = reinterpret_cast<void(__thiscall*)(CUserLocal*, int32_t)>(0x0090A1D0);

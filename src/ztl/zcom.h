@@ -252,6 +252,9 @@ public:
     operator char*() const {
         return const_cast<char*>((m_Data != nullptr) ? m_Data->GetString() : nullptr);
     }
+    bool operator!() const {
+        return (m_Data != NULL) ? !m_Data->GetWString() : true;
+    }
     ~Ztl_bstr_t() {
         if (m_Data) {
             m_Data->Release();

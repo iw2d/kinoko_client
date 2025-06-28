@@ -141,8 +141,8 @@ DECLARE_INTERFACE_IID_(IWzCanvas, IWzSerialize, "7600dc6c-9328-4bff-9624-5b0f5c0
     STDMETHOD(put_pixelFormat)(THIS_ CANVAS_PIXFORMAT) PURE;
     STDMETHOD(get_magLevel)(THIS_ int32_t*) PURE;
     STDMETHOD(put_magLevel)(THIS_ int32_t) PURE;
-    STDMETHOD(raw_GetSnapshotU)(THIS_ uint32_t*, uint32_t*, uint32_t*, uint32_t*, CANVAS_PIXFORMAT*, int32_t*) PURE;
-    STDMETHOD(raw_GetSnapshot)(THIS_ int32_t*, int32_t*, int32_t*, int32_t*, CANVAS_PIXFORMAT*, int32_t*) PURE;
+    STDMETHOD(raw_GetSnapshotU)(THIS_ uint32_t*, uint32_t*, uint32_t*, uint32_t*, int32_t*, int32_t*) PURE;
+    STDMETHOD(raw_GetSnapshot)(THIS_ int32_t*, int32_t*, int32_t*, int32_t*, int32_t*, int32_t*) PURE;
     STDMETHOD(get_property)(THIS_ IWzProperty**) PURE;
     STDMETHOD(get_cx)(THIS_ int32_t*) PURE;
     STDMETHOD(put_cx)(THIS_ int32_t) PURE;
