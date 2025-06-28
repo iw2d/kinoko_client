@@ -28,6 +28,8 @@ static_assert(sizeof(IDraggable) == 0x18);
 
 class IUIMsgHandler {
 public:
+    inline static CRTTI& ms_RTTI_IUIMsgHandler = *reinterpret_cast<CRTTI*>(0x00C6B348);
+
     virtual void OnKey(uint32_t wParam, uint32_t lParam) {
         ;
     }
@@ -80,10 +82,10 @@ public:
         ;
     }
     virtual const CRTTI* GetRTTI() const {
-        return nullptr;
+        return &ms_RTTI_IUIMsgHandler;
     }
     virtual int32_t IsKindOf(const CRTTI* pRTTI) const {
-        return 0;
+        return ms_RTTI_IUIMsgHandler.IsKindOf(pRTTI);
     }
 };
 

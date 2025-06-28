@@ -4,6 +4,7 @@
 #include "ztl/zcom.h"
 #include "ztl/ztl.h"
 #include "wzlib/shape2d.h"
+#include "wzlib/property.h"
 #include "wvs/gobj.h"
 #include "wvs/msghandler.h"
 #include "wvs/wnd.h"
@@ -175,12 +176,23 @@ public:
     CCtrlButton() : CCtrlWnd(0) {
         reinterpret_cast<void(__thiscall*)(CCtrlButton*)>(0x00471740)(this);
     }
-    virtual void CreateCtrl(CWnd* pParent, uint32_t nId, int32_t nType, int32_t l, int32_t t, int32_t decClickArea, void* pData) {
-        reinterpret_cast<void(__thiscall*)(CCtrlButton*, CWnd*, uint32_t, int32_t, int32_t, int32_t, int32_t, void*)>(0x004DA330)(this, pParent, nId, nType, l, t, decClickArea, pData);
+    virtual void CreateCtrl(CWnd* pParent, uint32_t nId, int32_t l, int32_t t, int32_t decClickArea, void* pData) {
+        reinterpret_cast<void(__thiscall*)(CCtrlButton*, CWnd*, uint32_t, int32_t, int32_t, int32_t, void*)>(0x004D77D0)(this, pParent, nId, l, t, decClickArea, pData);
     }
 };
 
 static_assert(sizeof(CCtrlButton) == 0xADC);
+
+
+class CCtrlOriginButton : public CCtrlButton {
+public:
+    int32_t m_bChecked;
+    IWzPropertyPtr m_pPropChecked;
+
+    CCtrlOriginButton() = default;
+};
+
+static_assert(sizeof(CCtrlOriginButton) == 0xAE4);
 
 
 class CCtrlCheckBox : public CCtrlWnd {

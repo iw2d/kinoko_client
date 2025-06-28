@@ -282,6 +282,15 @@ public:
             _com_issue_error(E_INVALIDARG);
         }
     }
+    Ztl_variant_t(IUnknown* pSrc, bool fAddRef = true) {
+        V_VT(this) = VT_UNKNOWN;
+        V_UNKNOWN(this) = pSrc;
+        if (fAddRef) {
+            if (V_UNKNOWN(this) != NULL) {
+                V_UNKNOWN(this)->AddRef();
+            }
+        }
+    }
     Ztl_variant_t(const tagVARIANT& varSrc) {
         VariantInit(this);
         _com_util::CheckError(ZComAPI::ZComVariantCopy(this, const_cast<tagVARIANT*>(&varSrc)));

@@ -2,18 +2,21 @@
 #include "hook.h"
 #include "ztl/tsingleton.h"
 #include "ztl/zalloc.h"
-#include "common/secure.h"
+#include "common/dbbasic.h"
 #include "wvs/temporarystatview.h"
 #include <cstdint>
+#include <memory>
 
-
-struct GW_ItemSlotBase : public ZRefCounted {
-    MEMBER_AT(TSecType<int32_t>, 0xC, nItemID)
-};
 
 struct CharacterData {
     MEMBER_ARRAY_AT(ZRef<GW_ItemSlotBase>, 0xF9, aEquipped, 60)
     MEMBER_ARRAY_AT(int32_t, 0x74D, aElemBoost, 8)
+
+    ZRef<GW_ItemSlotBase> GetItem(int32_t nTI, int32_t nPos) {
+        ZRef<GW_ItemSlotBase> result;
+        reinterpret_cast<ZRef<GW_ItemSlotBase>*(__thiscall*)(CharacterData*, ZRef<GW_ItemSlotBase>*, int32_t, int32_t)>(0x0042B990)(this, std::addressof(result), nTI, nPos);
+        return result;
+    }
 };
 
 class CWvsContext : public TSingleton<CWvsContext, 0x00C64068> {

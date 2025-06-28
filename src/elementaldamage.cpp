@@ -2,8 +2,10 @@
 #include "hook.h"
 #include "debug.h"
 #include "common/secure.h"
+#include "common/dbbasic.h"
 #include "common/iteminfo.h"
 #include "wvs/wvscontext.h"
+#include "wvs/uitooltip.h"
 #include <cstdint>
 
 
@@ -53,8 +55,6 @@ double __cdecl get_damage_adjusted_by_elemAttr_hook(double damage, int32_t nAttr
     return result * dBoost;
 }
 
-
-class CUIToolTip;
 
 static auto CUIToolTip__SetToolTip_Equip_Basic = reinterpret_cast<void(__thiscall*)(CUIToolTip*, void*)>(0x008A0BD0);
 static auto CUIToolTip__PrintValue = reinterpret_cast<void(__thiscall*)(CUIToolTip*, int32_t, int32_t, ZXString<char>, int32_t)>(0x00891230);

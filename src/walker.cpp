@@ -85,6 +85,7 @@ LONG NTAPI VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
         break;
     default:
         DebugMessage("Exception Code 0x%08X : 0x%08X", dwExceptionCode, dwExceptionAddress);
+        LogStackTrace(pExceptionInfo->ContextRecord);
         break;
     }
     return EXCEPTION_CONTINUE_SEARCH;
