@@ -19,6 +19,10 @@
 #include <cstdint>
 
 
+static auto get_weapon_type = reinterpret_cast<int32_t(__cdecl*)(int32_t nItemID)>(0x0046F660);
+static auto get_bodypart_from_item = reinterpret_cast<int32_t(__cdecl*)(int32_t nItemID, int32_t nGender, int32_t* pnBodyPart, int32_t bAll)>(0x0046FBE0);
+
+
 class CDraggableItem : public IDraggable {
 public:
     MEMBER_AT(int32_t, 0x18, m_nItemTI)
@@ -143,13 +147,48 @@ public:
     }
 
     int32_t PutItem(GW_ItemSlotBase* pItem, int32_t nTI, int32_t nSlotPosition, int32_t x, int32_t y) {
+        if (pItem->IsCashItem()) {
+            Notice("You cannot use the fusion anvil on cash items.");
+            return 0;
+        }
+        int32_t nItemID = pItem->nItemID.GetData();
+        int32_t nBodyPart;
+        if (!get_bodypart_from_item(nItemID, 2, &nBodyPart, 0)) {
+            Notice("You cannot use the fusion anvil on this item.");
+            return 0;
+        }
+        int32_t nWeaponType = get_weapon_type(nItemID);
+
         int32_t cx;
         CHECK_HR(GetCanvas()->get_cx(&cx));
         int32_t nIndex = x < cx ? 0 : 1;
+        int32_t nIndex2 = nIndex ? 0 : 1;
+        DEBUG_MESSAGE("CUIFusionAnvil::PutItem [%d] %d %d %d", nIndex, nItemID, nBodyPart, nWeaponType);
+        if (m_apChangeItem[nIndex2]) {
+            int32_t nItemID2 = m_apChangeItem[nIndex2]->nItemID.GetData(); // TODO check anvil ID
+            DEBUG_MESSAGE("CUIFusionAnvil::PutItem [%d] = %d", nIndex2, nItemID2);
+            if (nItemID == nItemID2) {
+                Notice("You cannot fuse items that have the same appearance.");
+                return 0;
+            }
+            int32_t nBodyPart2;
+            if (!get_bodypart_from_item(nItemID2, 2, &nBodyPart2, 0) || nBodyPart != nBodyPart2) {
+                Notice("The fusion anvil only works on equipment of the same type.");
+                return 0;
+            }
+            if (nWeaponType && nWeaponType != get_weapon_type(nItemID2)) {
+                Notice("The fusion anvil only works on weapons of the same type.");
+                return 0;
+            }
+        }
         m_apChangeItem[nIndex] = pItem;
         m_anChangeItemPos[nIndex] = nSlotPosition;
         InvalidateRect(nullptr);
         return 0;
+    }
+    int32_t Notice(const char* sMessage) {
+        // CUtilDlg::Notice
+        return reinterpret_cast<int32_t(__cdecl*)(ZXString<char>, const wchar_t*, ZRef<CDialog>*, int32_t, int32_t)>(0x00977220)(ZXString<char>(sMessage), nullptr, nullptr, 1, 0);
     }
 };
 
