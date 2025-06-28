@@ -37,6 +37,7 @@ public:
     ZRef<CCtrlButton> m_pBtClose;
     IWzGr2DLayerPtr m_pLayerEffect;
     IWzGr2DLayerPtr m_pLayerItem[2];
+    IWzCanvasPtr m_pBackgrndCanvas;
     IWzCanvasPtr m_pSubTitleCanvas;
     GW_ItemSlotBase* m_apChangeItem[2] = {};
     int32_t m_anChangeItemPos[2] = {};
@@ -59,6 +60,9 @@ public:
         m_pLayerEffect = m_lm.AddLayer(L"UI/UIWindow0.img/Synthesizing/Effect", 1, 1);
         CHECK_HR(m_pLayerEffect->raw_Animate(GA_REPEAT, vtEmpty, vtEmpty));
 
+        Ztl_variant_t vBackgrnd;
+        CHECK_HR(get_rm()->raw_GetObject(L"UI/UIWindow0.img/Synthesizing/backgrnd1", vtEmpty, vtEmpty, &vBackgrnd));
+        m_pBackgrndCanvas = get_unknown(vBackgrnd);
         Ztl_variant_t vSubTitle;
         CHECK_HR(get_rm()->raw_GetObject(L"UI/UIWindow0.img/Synthesizing/SubTitle", vtEmpty, vtEmpty, &vSubTitle));
         m_pSubTitleCanvas = get_unknown(vSubTitle);
@@ -81,8 +85,11 @@ public:
     }
     virtual void Draw(const tagRECT* pRect) {
         CWnd::Draw(pRect);
+        IWzCanvasPtr pCanvas = GetCanvas();
+        if (m_pBackgrndCanvas) {
+            m_lm.CopyToCanvas(pCanvas, m_pBackgrndCanvas, 0, 0);
+        }
         if (m_pSubTitleCanvas) {
-            IWzCanvasPtr pCanvas = GetCanvas();
             m_lm.CopyToCanvas(pCanvas, m_pSubTitleCanvas, 0, 0);
         }
         for (auto i = 0; i < 2; ++i) {
