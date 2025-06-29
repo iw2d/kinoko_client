@@ -2,6 +2,7 @@
 #include "zlock.h"
 #include <windows.h>
 #include <cstdint>
+#include <memory>
 
 #define ZALLOC_GLOBAL \
     void* operator new(size_t uSize) { return ZAllocEx<ZAllocAnonSelector>::s_Alloc(uSize); } \
@@ -389,7 +390,7 @@ private:
     static T* _AllocRaw(void* __formal) {
         auto pDummy = new ZRefCountedDummy<T>();
         pDummy->_m_nRef = 1;
-        return &pDummy->t;
+        return std::addressof(pDummy->t);
     }
     static T* _AllocRaw(ZRefCounted* __formal) {
         auto p = new T();
