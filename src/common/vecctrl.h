@@ -108,8 +108,8 @@ public:
     virtual int32_t OnResolveMoveAction(int32_t nInputX, int32_t nInputY, int32_t nCurMoveAction, const CVecCtrl* pvc) = 0;
     virtual int32_t OnLayerZChanged(const CVecCtrl* pvc) = 0;
     virtual const ZRef<CAttrShoe>* GetShoeAttr(const ZRef<CAttrShoe>* result) const = 0;
-    virtual const tagPOINT* GetPos(const tagPOINT* result) const = 0;
-    virtual const tagPOINT* GetPosPrev(const tagPOINT* result) const = 0;
+    virtual const POINT* GetPos(const POINT* result) const = 0;
+    virtual const POINT* GetPosPrev(const POINT* result) const = 0;
     virtual int32_t GetZMass() const = 0;
     virtual const CRTTI* GetRTTI() const = 0;
     virtual int32_t IsKindOf(const CRTTI* pRTTI) const = 0;

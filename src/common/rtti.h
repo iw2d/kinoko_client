@@ -5,6 +5,8 @@
 struct CRTTI {
     const CRTTI* m_pPrev;
 
+    CRTTI(const CRTTI* pPrev) : m_pPrev(pPrev) {
+    }
     int32_t IsKindOf(const CRTTI* pRTTI) const {
         CRTTI result = {this};
         while (result.m_pPrev != pRTTI) {

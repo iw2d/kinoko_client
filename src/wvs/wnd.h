@@ -1,9 +1,12 @@
 #pragma once
 #include "hook.h"
 #include "ztl/zalloc.h"
+#include "wzlib/gr2d.h"
+#include "wzlib/canvas.h"
 #include "wvs/gobj.h"
 #include "wvs/msghandler.h"
 #include <cstdint>
+#include <memory>
 
 
 struct DRAGCTX;
@@ -11,6 +14,8 @@ class CCtrlWnd;
 
 class CWnd : public IGObj, public IUIMsgHandler, public ZRefCounted {
 protected:
+    inline static CRTTI& ms_RTTI_CWnd = *reinterpret_cast<CRTTI*>(0x00C6194C);
+
     uint8_t padding[0x80 - sizeof(IGObj) - sizeof(IUIMsgHandler) - sizeof(ZRefCounted)];
     MEMBER_AT(uint32_t, 0x14, m_dwWndKey)
     MEMBER_AT(uint32_t, 0x3C, m_bScreenCoord)
@@ -74,8 +79,8 @@ public:
     virtual int32_t OnActivate(int32_t bActive) {
         return reinterpret_cast<int32_t(__thiscall*)(CWnd*, int32_t)>(0x009AD350)(this, bActive);
     }
-    virtual void Draw(const tagRECT* pRect) {
-        reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009AE5C0)(this);
+    virtual void Draw(const RECT* pRect) {
+        reinterpret_cast<void(__thiscall*)(CWnd*, const RECT*)>(0x009AE5C0)(this, pRect);
     }
     virtual int32_t IsAMyAddon(CWnd* pWnd) {
         return 0;
@@ -105,9 +110,31 @@ public:
     virtual int32_t GetAbsTop() override {
         return reinterpret_cast<int32_t(__thiscall*)(IUIMsgHandler*)>(0x009AD570)(this);
     }
+    virtual const CRTTI* GetRTTI() const override {
+        return &ms_RTTI_CWnd;
+    }
+    virtual int32_t IsKindOf(const CRTTI* pRTTI) const override {
+        return ms_RTTI_CWnd.IsKindOf(pRTTI);
+    }
 
+    void CreateWnd() {
+        // TODO
+    }
     void Destroy() {
         reinterpret_cast<void(__thiscall*)(CWnd*)>(0x009B0E50)(this);
+    }
+    IWzGr2DLayerPtr GetLayer() {
+                IWzGr2DLayerPtr result;
+        reinterpret_cast<IWzGr2DLayerPtr*(__thiscall*)(CWnd*, IWzGr2DLayerPtr*)>(0x0042A270)(this, std::addressof(result));
+        return result;
+    }
+    IWzCanvasPtr GetCanvas() {
+        IWzCanvasPtr result;
+        reinterpret_cast<IWzCanvasPtr*(__thiscall*)(CWnd*, IWzCanvasPtr*)>(0x0042B170)(this, std::addressof(result));
+        return result;
+    }
+    void InvalidateRect(const RECT* pRect) {
+        reinterpret_cast<void(__thiscall*)(CWnd*, const RECT*)>(0x009AD3F0)(this, pRect);
     }
 };
 

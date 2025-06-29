@@ -2,6 +2,8 @@
 #include "hook.h"
 #include "ztl/tsingleton.h"
 #include "wzlib/property.h"
+#include "wzlib/canvas.h"
+#include "common/secure.h"
 #include <cstdint>
 #include <memory>
 
@@ -25,6 +27,9 @@ public:
         return result;
     }
     EQUIPITEM* GetEquipItem(int32_t nItemID) {
-        return reinterpret_cast<EQUIPITEM* (__thiscall*)(CItemInfo*, int32_t)>(0x005C0820)(this, nItemID);
+        return reinterpret_cast<EQUIPITEM*(__thiscall*)(CItemInfo*, int32_t)>(0x005C0820)(this, nItemID);
+    }
+    void DrawItemIconForSlot(IWzCanvasPtr pCanvas, int32_t nItemID, int32_t x, int32_t y, int32_t bProtectedItem, int32_t bMag2, int32_t bPetDead, int32_t bHideCashIcon, int32_t nEquipItemQuality, int32_t bHideQualityIcon, int32_t nMagSize) {
+        reinterpret_cast<void(__thiscall*)(CItemInfo*, IWzCanvasPtr, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t)>(0x005C0A40)(this, pCanvas, nItemID, x, y, bProtectedItem, bMag2, bPetDead, bHideCashIcon, nEquipItemQuality, bHideQualityIcon, nMagSize);
     }
 };

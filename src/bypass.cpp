@@ -211,7 +211,7 @@ void __fastcall CWvsApp__CallUpdate_hook(CWvsApp* pThis, void* _EDX, int32_t tCu
 
 void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTerminate) {
     HRESULT hr;
-    tagMSG msg;
+    MSG msg;
     ISMSG isMsg;
     memset(&msg, 0, sizeof(msg));
     memset(&isMsg, 0, sizeof(isMsg));

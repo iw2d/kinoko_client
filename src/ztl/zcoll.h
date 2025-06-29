@@ -2,7 +2,7 @@
 #include "zalloc.h"
 #include "ztl.h"
 #include <cstdint>
-#include <new>
+#include <memory>
 
 
 template <typename T>
@@ -57,7 +57,7 @@ public:
     }
     void RemoveAll() {
         if (a) {
-            _Destroy(a, &a[GetCount()]);
+            _Destroy(a, std::addressof(a[GetCount()]));
             ZAllocEx<ZAllocAnonSelector>::s_Free(reinterpret_cast<uint32_t*>(a) - 1);
             a = nullptr;
         }
@@ -72,7 +72,7 @@ private:
         auto p = static_cast<uint32_t*>(ZAllocEx<ZAllocAnonSelector>::s_Alloc(sizeof(T) * u + sizeof(uint32_t))) + 1;
         a = reinterpret_cast<T*>(p);
         _GetCount() = u;
-        _Construct(a, &a[u]);
+        _Construct(a, std::addressof(a[u]));
         return a;
     }
     T* _Realloc(uint32_t u, int32_t nMode, const ZAllocHelper& _ALLOC) {
@@ -88,10 +88,10 @@ private:
                 }
                 a = reinterpret_cast<T*>(p);
             } else if ((nMode & 2) == 0) {
-                _Construct(&a[uCount], &a[u]);
+                _Construct(std::addressof(a[uCount]), std::addressof(a[u]));
             }
         } else {
-            _Destroy(&a[u], &a[uCount]);
+            _Destroy(std::addressof(a[u]), std::addressof(a[uCount]));
         }
         if (a) {
             _GetCount() = u;

@@ -1,4 +1,5 @@
 #pragma once
+#include "common/dbbasic.h"
 #include <cstdint>
 
 
@@ -14,6 +15,9 @@ public:
     }
     void ClearToolTip() {
         reinterpret_cast<void(__thiscall*)(CUIToolTip*)>(0x00880F20)(this);
+    }
+    void ShowItemToolTip(int32_t x, int32_t y, GW_ItemSlotBase* p, void* pParam, void* pGoods, int32_t bCashShop, int32_t nNpcShopTimeLimitedItemPeriod, int32_t itcToolTip) {
+        reinterpret_cast<void(__thiscall*)(CUIToolTip*, int32_t, int32_t, GW_ItemSlotBase*, void*, void*, int32_t, int32_t, int32_t)>(0x008A9300)(this, x, y, p, pParam, pGoods, bCashShop, nNpcShopTimeLimitedItemPeriod, itcToolTip);
     }
 };
 

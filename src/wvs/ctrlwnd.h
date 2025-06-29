@@ -4,6 +4,7 @@
 #include "ztl/zcom.h"
 #include "ztl/ztl.h"
 #include "wzlib/shape2d.h"
+#include "wzlib/property.h"
 #include "wvs/gobj.h"
 #include "wvs/msghandler.h"
 #include "wvs/wnd.h"
@@ -68,13 +69,13 @@ public:
     virtual int32_t HitTest(uint32_t rx, uint32_t ry) {
         return reinterpret_cast<int32_t(__thiscall*)(CCtrlWnd*, uint32_t, uint32_t)>(0x004EFD30)(this, rx, ry);
     }
-    virtual void GetRect(tagRECT* pRect) {
-        reinterpret_cast<void(__thiscall*)(CCtrlWnd*, tagRECT*)>(0x004EFE10)(this, pRect);
+    virtual void GetRect(RECT* pRect) {
+        reinterpret_cast<void(__thiscall*)(CCtrlWnd*, RECT*)>(0x004EFE10)(this, pRect);
     }
     virtual void SetAbove(CCtrlWnd* pCtrl) {
         reinterpret_cast<void(__thiscall*)(CCtrlWnd*, CCtrlWnd*)>(0x004F0B50)(this, pCtrl);
     }
-    virtual void Draw(int32_t rx, int32_t ry, const tagRECT* pRect) {
+    virtual void Draw(int32_t rx, int32_t ry, const RECT* pRect) {
         ;
     }
 
@@ -175,12 +176,23 @@ public:
     CCtrlButton() : CCtrlWnd(0) {
         reinterpret_cast<void(__thiscall*)(CCtrlButton*)>(0x00471740)(this);
     }
-    virtual void CreateCtrl(CWnd* pParent, uint32_t nId, int32_t nType, int32_t l, int32_t t, int32_t decClickArea, void* pData) {
-        reinterpret_cast<void(__thiscall*)(CCtrlButton*, CWnd*, uint32_t, int32_t, int32_t, int32_t, int32_t, void*)>(0x004DA330)(this, pParent, nId, nType, l, t, decClickArea, pData);
+    virtual void CreateCtrl(CWnd* pParent, uint32_t nId, int32_t l, int32_t t, int32_t decClickArea, void* pData) {
+        reinterpret_cast<void(__thiscall*)(CCtrlButton*, CWnd*, uint32_t, int32_t, int32_t, int32_t, void*)>(0x004D77D0)(this, pParent, nId, l, t, decClickArea, pData);
     }
 };
 
 static_assert(sizeof(CCtrlButton) == 0xADC);
+
+
+class CCtrlOriginButton : public CCtrlButton {
+public:
+    int32_t m_bChecked;
+    IWzPropertyPtr m_pPropChecked;
+
+    CCtrlOriginButton() = default;
+};
+
+static_assert(sizeof(CCtrlOriginButton) == 0xAE4);
 
 
 class CCtrlCheckBox : public CCtrlWnd {

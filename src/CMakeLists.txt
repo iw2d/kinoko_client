@@ -4,6 +4,7 @@ add_library(injector SHARED
         system.cpp
         bypass.cpp
         helper.cpp
+        inlink.cpp
         resman.cpp
         sysopt.cpp
         stringpool.cpp

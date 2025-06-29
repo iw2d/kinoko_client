@@ -252,6 +252,9 @@ public:
     operator char*() const {
         return const_cast<char*>((m_Data != nullptr) ? m_Data->GetString() : nullptr);
     }
+    bool operator!() const {
+        return (m_Data != NULL) ? !m_Data->GetWString() : true;
+    }
     ~Ztl_bstr_t() {
         if (m_Data) {
             m_Data->Release();
@@ -277,6 +280,15 @@ public:
             V_BOOL(this) = (lSrc ? VARIANT_TRUE : VARIANT_FALSE);
         } else {
             _com_issue_error(E_INVALIDARG);
+        }
+    }
+    Ztl_variant_t(IUnknown* pSrc, bool fAddRef = true) {
+        V_VT(this) = VT_UNKNOWN;
+        V_UNKNOWN(this) = pSrc;
+        if (fAddRef) {
+            if (V_UNKNOWN(this) != NULL) {
+                V_UNKNOWN(this)->AddRef();
+            }
         }
     }
     Ztl_variant_t(const tagVARIANT& varSrc) {

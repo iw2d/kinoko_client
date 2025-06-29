@@ -38,6 +38,7 @@ void AttachSystemHooks();
 // called in system.cpp -> CreateMutexA_hook
 void AttachClientBypass();
 void AttachClientHelper();
+void AttachClientInlink();
 void AttachStringPoolMod();
 void AttachSystemOptionMod();
 void AttachTemporaryStatMod();
@@ -47,6 +48,7 @@ void AttachExceptionHandler();
 inline void AttachClientHooks() {
     AttachClientBypass();
     AttachClientHelper();
+    AttachClientInlink();
     AttachStringPoolMod();
     AttachSystemOptionMod();
     AttachTemporaryStatMod();

@@ -73,9 +73,9 @@ DECLARE_INTERFACE_IID_(IWzRawCanvas, IUnknown, "312126f0-c399-4111-8eab-0f96a30b
     STDMETHOD(get_width)(THIS_ uint32_t* puWidth) PURE;
     STDMETHOD(get_height)(THIS_ uint32_t* puHeight) PURE;
     STDMETHOD(raw__LockAddress)(THIS_ int32_t* pnPitch, tagVARIANT*) PURE;
-    STDMETHOD(raw__UnlockAddress)(THIS_ tagRECT*) PURE;
+    STDMETHOD(raw__UnlockAddress)(THIS_ RECT*) PURE;
     STDMETHOD(raw_SetTexture)(THIS_ uint32_t*) PURE;
-    STDMETHOD(raw_GetTextureSize)(THIS_ tagRECT*) PURE;
+    STDMETHOD(raw_GetTextureSize)(THIS_ RECT*) PURE;
 
     END_INTERFACE;
 };
@@ -141,8 +141,8 @@ DECLARE_INTERFACE_IID_(IWzCanvas, IWzSerialize, "7600dc6c-9328-4bff-9624-5b0f5c0
     STDMETHOD(put_pixelFormat)(THIS_ CANVAS_PIXFORMAT) PURE;
     STDMETHOD(get_magLevel)(THIS_ int32_t*) PURE;
     STDMETHOD(put_magLevel)(THIS_ int32_t) PURE;
-    STDMETHOD(raw_GetSnapshotU)(THIS_ uint32_t*, uint32_t*, uint32_t*, uint32_t*, CANVAS_PIXFORMAT*, int32_t*) PURE;
-    STDMETHOD(raw_GetSnapshot)(THIS_ int32_t*, int32_t*, int32_t*, int32_t*, CANVAS_PIXFORMAT*, int32_t*) PURE;
+    STDMETHOD(raw_GetSnapshotU)(THIS_ uint32_t*, uint32_t*, uint32_t*, uint32_t*, int32_t*, int32_t*) PURE;
+    STDMETHOD(raw_GetSnapshot)(THIS_ int32_t*, int32_t*, int32_t*, int32_t*, int32_t*, int32_t*) PURE;
     STDMETHOD(get_property)(THIS_ IWzProperty**) PURE;
     STDMETHOD(get_cx)(THIS_ int32_t*) PURE;
     STDMETHOD(put_cx)(THIS_ int32_t) PURE;
