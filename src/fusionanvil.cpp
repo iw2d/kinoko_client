@@ -9,12 +9,15 @@
 #include "common/rtti.h"
 #include "common/dbbasic.h"
 #include "common/iteminfo.h"
+#include "common/packet.h"
 #include "wvs/util.h"
 #include "wvs/dialog.h"
 #include "wvs/ctrlwnd.h"
 #include "wvs/uitooltip.h"
 #include "wvs/layoutman.h"
 #include "wvs/wvscontext.h"
+#include "wvs/wvsapp.h"
+#include "wvs/clientsocket.h"
 #include <windows.h>
 #include <cstdint>
 
@@ -36,6 +39,8 @@ class CUIFusionAnvil : public CUniqueModeless {
 public:
     inline static CRTTI ms_RTTI_CUIFusionAnvil = CRTTI(&CUniqueModeless::ms_RTTI_CUniqueModeless);
 
+    int32_t m_nItemPOS;
+    int32_t m_nItemID;
     ZRef<CCtrlButton> m_pBtOK;
     ZRef<CCtrlButton> m_pBtCancel;
     ZRef<CCtrlButton> m_pBtClose;
@@ -49,7 +54,8 @@ public:
     CUIToolTip m_uiToolTip;
     CLayoutMan m_lm;
 
-    CUIFusionAnvil() {
+    CUIFusionAnvil(int32_t nItemPOS, int32_t nItemID) : m_nItemPOS(nItemPOS),
+                                                        m_nItemID(nItemID) {
         CreateDlgOnCenter(L"UI/UIWindow0.img/Synthesizing/backgrnd");
     }
     virtual ~CUIFusionAnvil() override = default;
@@ -59,6 +65,7 @@ public:
         CCtrlButton::CREATEPARAM paramButton;
         paramButton.bAcceptFocus = 1;
         m_pBtOK = m_lm.AddButton(L"UI/UIWindow0.img/Synthesizing/BtOk", 1, 0, 0, &paramButton);
+        m_pBtOK->SetEnable(0);
         m_pBtCancel = m_lm.AddButton(L"UI/UIWindow0.img/Synthesizing/BtCancel", 2, 0, 0, &paramButton);
         m_pBtClose = m_lm.AddButton(L"UI/UIWindow0.img/Synthesizing/BtExit", 8, 0, 0, &paramButton);
         m_pLayerEffect = m_lm.AddLayer(L"UI/UIWindow0.img/Synthesizing/Effect", 1, 1);
@@ -117,8 +124,10 @@ public:
     virtual void OnButtonClicked(uint32_t nId) override {
         switch (nId) {
         case 1:
-            // TODO
-            SetRet(1);
+            if (!m_apChangeItem[0] || !m_apChangeItem[1]) {
+                return;
+            }
+            SendPacket();
             break;
         case 2:
             SetRet(2);
@@ -180,13 +189,25 @@ public:
                 Notice("The fusion anvil only works on weapons of the same type.");
                 return 0;
             }
+            m_pBtOK->SetEnable(1);
         }
         m_apChangeItem[nIndex] = pItem;
         m_anChangeItemPos[nIndex] = nSlotPosition;
         InvalidateRect(nullptr);
         return 0;
     }
-    int32_t Notice(const char* sMessage) {
+    void SendPacket() {
+        COutPacket oPacket(85);                                 // CP_UserConsumeCashItemUseRequest
+        oPacket.Encode4(CWvsApp::GetInstance()->m_tUpdateTime); // get_update_time();
+        oPacket.Encode2(m_nItemPOS);
+        oPacket.Encode4(m_nItemID);
+        oPacket.Encode2(m_anChangeItemPos[0]);
+        oPacket.Encode2(m_anChangeItemPos[1]);
+        CClientSocket::GetInstance()->SendPacket(oPacket);
+        SetRet(1);
+    }
+
+    static int32_t Notice(const char* sMessage) {
         // CUtilDlg::Notice
         return reinterpret_cast<int32_t(__cdecl*)(ZXString<char>, const wchar_t*, ZRef<CDialog>*, int32_t, int32_t)>(0x00977220)(ZXString<char>(sMessage), nullptr, nullptr, 1, 0);
     }
@@ -205,9 +226,8 @@ void __fastcall CWvsContext__SendConsumeCashItemUseRequest_hook(CWvsContext* pTh
         DEBUG_MESSAGE("Not available");
         return;
     }
-    new CUIFusionAnvil();
+    new CUIFusionAnvil(nPOS, nItemID);
 }
-
 
 static auto CDraggableItem__OnDropped = reinterpret_cast<int32_t(__thiscall*)(CDraggableItem*, IUIMsgHandler*, IUIMsgHandler*, int32_t, int32_t)>(0x00508700);
 static auto CRTTI_ms_pRTTI_CUIItem = reinterpret_cast<CRTTI*>(0x00C616D0);
