@@ -15,6 +15,8 @@ struct FUNCKEY_MAPPED {
 static_assert(sizeof(FUNCKEY_MAPPED) == 0x5);
 
 
+struct GW_CharacterStat;
+
 struct GW_ItemSlotBase : public ZRefCounted {
     uint8_t padding[0x28 - sizeof(ZRefCounted)];
     MEMBER_AT(TSecType<int32_t>, 0xC, nItemID)

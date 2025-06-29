@@ -2,6 +2,7 @@
 #include "hook.h"
 #include "config.h"
 #include "ztl/zalloc.h"
+#include "ztl/zstr.h"
 #include "ztl/zcom.h"
 #include "wzlib/pcom.h"
 #include "wzlib/gr2d.h"
@@ -197,6 +198,7 @@ public:
         return 0;
     }
     void SendPacket() {
+        // TODO exclRequest check and set
         COutPacket oPacket(85);                                 // CP_UserConsumeCashItemUseRequest
         oPacket.Encode4(CWvsApp::GetInstance()->m_tUpdateTime); // get_update_time();
         oPacket.Encode2(m_nItemPOS);
@@ -244,7 +246,53 @@ int32_t __fastcall CDraggableItem__OnDropped_hook(CDraggableItem* pThis, void* _
 }
 
 
+struct GW_ItemSlotEquip : public GW_ItemSlotBase {
+    MEMBER_AT(int32_t, 0x139, nAnvilItemID)
+};
+
+static auto GW_ItemSlotEquip__ctor = reinterpret_cast<void(__thiscall*)(GW_ItemSlotEquip*)>(0x004F5FD0);
+
+void __fastcall GW_ItemSlotEquip__ctor_hook(GW_ItemSlotEquip* pThis, void* _EDX) {
+    GW_ItemSlotEquip__ctor(pThis);
+    pThis->nAnvilItemID = 0;
+}
+
+static auto GW_ItemSlotEquip__RawDecode = reinterpret_cast<void(__thiscall*)(GW_ItemSlotEquip*, CInPacket& iPacket)>(0x004F8360);
+
+void __fastcall GW_ItemSlotEquip__RawDecode_hook(GW_ItemSlotEquip* pThis, void* _EDX, CInPacket& iPacket) {
+    GW_ItemSlotEquip__RawDecode(pThis, iPacket);
+    pThis->nAnvilItemID = reinterpret_cast<uint32_t(__thiscall*)(CInPacket*)>(0x00409870)(&iPacket); // iPacket.Decode4();
+}
+
+
+struct AvatarLook : public ZRefCounted {
+    MEMBER_ARRAY_AT(int32_t, 0x19, anHairEquip, 60)
+};
+
+static auto AvatarLook__Load = reinterpret_cast<void(__thiscall*)(AvatarLook*, const GW_CharacterStat*, const ZRef<GW_ItemSlotBase>*, const ZRef<GW_ItemSlotBase>*)>(0x004F6E70);
+
+void __fastcall AvatarLook__Load_hook(AvatarLook* pThis, void* _EDX, const GW_CharacterStat* cs, const ZRef<GW_ItemSlotBase>* apEquipped, const ZRef<GW_ItemSlotBase>* apEquipped2) {
+    AvatarLook__Load(pThis, cs, apEquipped, apEquipped2);
+    for (auto i = 0; i < 60; ++i) {
+        auto pItem = static_cast<GW_ItemSlotBase*>(apEquipped[i]);
+        if (!pItem) {
+            continue;
+        }
+        int32_t nAnvilItemID = reinterpret_cast<GW_ItemSlotEquip*>(pItem)->nAnvilItemID;
+        if (nAnvilItemID) {
+            pThis->anHairEquip[i] = nAnvilItemID;
+        }
+    }
+}
+
+
 void AttachFusionAnvilMod() {
     ATTACH_HOOK(CWvsContext__SendConsumeCashItemUseRequest, CWvsContext__SendConsumeCashItemUseRequest_hook);
     ATTACH_HOOK(CDraggableItem__OnDropped, CDraggableItem__OnDropped_hook);
+
+    Patch4(0x004F76CD + 1, 0x139 + 4); // GW_ItemSlotBase::CreateItem
+    Patch4(0x005C3B8A + 1, 0x139 + 4); // CItemInfo::GetItemSlot
+    ATTACH_HOOK(GW_ItemSlotEquip__ctor, GW_ItemSlotEquip__ctor_hook);
+    ATTACH_HOOK(GW_ItemSlotEquip__RawDecode, GW_ItemSlotEquip__RawDecode_hook);
+    ATTACH_HOOK(AvatarLook__Load, AvatarLook__Load_hook);
 }
