@@ -235,7 +235,7 @@ static auto CDraggableItem__OnDropped = reinterpret_cast<int32_t(__thiscall*)(CD
 static auto CRTTI_ms_pRTTI_CUIItem = reinterpret_cast<CRTTI*>(0x00C616D0);
 
 int32_t __fastcall CDraggableItem__OnDropped_hook(CDraggableItem* pThis, void* _EDX, IUIMsgHandler* pFrom, IUIMsgHandler* pTo, int32_t rx, int32_t ry) {
-    if (pFrom->IsKindOf(CRTTI_ms_pRTTI_CUIItem) && pTo->IsKindOf(&CUIFusionAnvil::ms_RTTI_CUIFusionAnvil)) {
+    if (pFrom && pFrom->IsKindOf(CRTTI_ms_pRTTI_CUIItem) && pTo && pTo->IsKindOf(&CUIFusionAnvil::ms_RTTI_CUIFusionAnvil)) {
         ZRef<GW_ItemSlotBase> pItem = CWvsContext::GetInstance()->m_pCharacterData->GetItem(pThis->m_nItemTI, pThis->m_nSlotPosition);
         if (!pItem) {
             return 0;
