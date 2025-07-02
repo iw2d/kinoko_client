@@ -1,4 +1,5 @@
 add_library(injector SHARED
+        injector.rc
         injector.cpp
         hook.cpp
         system.cpp
@@ -32,6 +33,8 @@ set_target_properties(injector PROPERTIES
 
 
 add_executable(launcher WIN32
+        launcher.manifest
+        launcher.rc
         launcher.cpp
         debug.cpp
 )
@@ -44,12 +47,13 @@ target_link_libraries(launcher PRIVATE
         Detours
 )
 
+target_link_options(launcher PRIVATE "/MANIFEST:NO")
+
 
 if (CUSTOM_BINARY_DIR)
     add_custom_command(
             TARGET injector POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:injector> ${CUSTOM_BINARY_DIR}
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:injector> ${CUSTOM_BINARY_DIR}
     )
     add_custom_command(
             TARGET launcher POST_BUILD
