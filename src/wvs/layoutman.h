@@ -1,8 +1,7 @@
 #pragma once
 #include "hook.h"
-#include "ztl/zalloc.h"
-#include "ztl/zcoll.h"
-#include "wzlib/gr2d.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include "wvs/wnd.h"
 #include "wvs/ctrlwnd.h"
 #include <cstdint>

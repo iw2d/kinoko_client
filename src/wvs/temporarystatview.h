@@ -1,8 +1,6 @@
 #pragma once
-#include "ztl/zalloc.h"
-#include "ztl/zcoll.h"
-#include "ztl/zstr.h"
-#include "wzlib/gr2d.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include "common/uint128.h"
 #include <cstdint>
 

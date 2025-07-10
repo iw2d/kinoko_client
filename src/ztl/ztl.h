@@ -1,4 +1,11 @@
 #pragma once
+#include "tsingleton.h"
+#include "zlock.h"
+#include "zalloc.h"
+#include "zcoll.h"
+#include "zstr.h"
+#include "zcom.h"
+#include "zsock.h"
 #include <new>
 
 

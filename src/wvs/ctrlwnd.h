@@ -1,10 +1,7 @@
 #pragma once
 #include "hook.h"
-#include "ztl/zalloc.h"
-#include "ztl/zcom.h"
 #include "ztl/ztl.h"
-#include "wzlib/shape2d.h"
-#include "wzlib/property.h"
+#include "wzlib/pcom.h"
 #include "wvs/gobj.h"
 #include "wvs/msghandler.h"
 #include "wvs/wnd.h"

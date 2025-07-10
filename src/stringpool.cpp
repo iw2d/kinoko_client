@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "hook.h"
 #include "config.h"
-#include "ztl/zcoll.h"
+#include "ztl/ztl.h"
 #include <cstdint>
 
 #define REPLACE_STRING(INDEX, NEW_STRING) \

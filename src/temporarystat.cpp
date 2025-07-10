@@ -1,12 +1,7 @@
 #include "pch.h"
 #include "hook.h"
-#include "ztl/zalloc.h"
-#include "ztl/zcoll.h"
-#include "ztl/zcom.h"
+#include "ztl/ztl.h"
 #include "wzlib/pcom.h"
-#include "wzlib/gr2d.h"
-#include "wzlib/canvas.h"
-#include "wzlib/property.h"
 #include "wvs/util.h"
 #include "wvs/wvscontext.h"
 #include "wvs/temporarystatview.h"
@@ -55,9 +50,8 @@ void AdjustPositionWithOffset(CTemporaryStatView* tsv, int32_t nOffset) {
     auto pos = tsv->m_lTemporaryStat.GetHeadPosition();
     while (pos) {
         auto pNext = ZList<ZRef<CTemporaryStatView::TEMPORARY_STAT>>::GetNext(pos);
-        DEBUG_MESSAGE("NEXT 0x%08X", &pNext);
-        CHECK_HR(pNext->pLayer->raw_RelOffset(0, nOffset, vtEmpty, vtEmpty));
-        CHECK_HR(pNext->pLayerShadow->raw_RelOffset(0, nOffset, vtEmpty, vtEmpty));
+        pNext->pLayer->RelOffset(0, nOffset, vtEmpty, vtEmpty);
+        pNext->pLayerShadow->RelOffset(0, nOffset, vtEmpty, vtEmpty);
     }
 }
 
@@ -122,27 +116,24 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
 
     // remove old canvas
     Ztl_variant_t vIndex(-2, VT_I4);
-    IWzCanvasPtr pOldCanvas;
-    CHECK_HR(pThis->pLayerShadow->raw_RemoveCanvas(vIndex, &pOldCanvas));
+    IWzCanvasPtr pOldCanvas = pThis->pLayerShadow->RemoveCanvas(vIndex);
 
 
     // resolve shadow canvas
     wchar_t sShadowProperty[256];
     swprintf_s(sShadowProperty, 256, L"UI/UIWindow.img/Skill/CoolTime/%d", nShadowIndex);
-    Ztl_variant_t vShadowProperty;
-    CHECK_HR(get_rm()->raw_GetObject(sShadowProperty, vtEmpty, vtEmpty, &vShadowProperty));
+    Ztl_variant_t vShadowProperty = get_rm()->GetObjectA(Ztl_bstr_t(sShadowProperty), vtEmpty, vtEmpty);
     IWzCanvasPtr pShadowCanvas = get_unknown(vShadowProperty);
 
     // create copy of shadow canvas
     IWzCanvasPtr pNewCanvas;
     PcCreateObject<IWzCanvasPtr>(L"Canvas", pNewCanvas, nullptr);
-    CHECK_HR(pNewCanvas->raw_Create(32, 32, vtEmpty, vtEmpty));
-    CHECK_HR(pNewCanvas->raw_Copy(0, 0, pShadowCanvas, vtEmpty));
+    pNewCanvas->Create(32, 32, vtEmpty, vtEmpty);
+    pNewCanvas->Copy(0, 0, pShadowCanvas, vtEmpty);
 
     // draw number on canvas
     if (!g_pPropSecond) {
-        Ztl_variant_t vPropSecond;
-        CHECK_HR(get_rm()->raw_GetObject(L"UI/Basic.img/ItemNo", vtEmpty, vtEmpty, &vPropSecond));
+        Ztl_variant_t vPropSecond = get_rm()->GetObjectA(Ztl_bstr_t(L"UI/Basic.img/ItemNo"), vtEmpty, vtEmpty);
         g_pPropSecond = get_unknown(vPropSecond);
     }
     int32_t nOffset = 2;
@@ -162,8 +153,7 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     Ztl_variant_t vDelay(500, VT_I4);
     Ztl_variant_t vAlpha0(210, VT_I4);
     Ztl_variant_t vAlpha1(64, VT_I4);
-    Ztl_variant_t vResult;
-    CHECK_HR(pThis->pLayerShadow->raw_InsertCanvas(pNewCanvas, vDelay, vAlpha0, vAlpha1, vtEmpty, vtEmpty, &vResult));
+    Ztl_variant_t vResult = pThis->pLayerShadow->InsertCanvas(pNewCanvas, vDelay, vAlpha0, vAlpha1, vtEmpty, vtEmpty);
 }
 
 

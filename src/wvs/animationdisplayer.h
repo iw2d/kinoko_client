@@ -1,7 +1,6 @@
 #pragma once
-#include "ztl/tsingleton.h"
-#include "wzlib/shape2d.h"
-#include "wzlib/gr2d.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include <memory>
 
 

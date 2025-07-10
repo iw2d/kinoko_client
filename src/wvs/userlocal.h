@@ -1,8 +1,7 @@
 #pragma once
 #include "hook.h"
-#include "ztl/zalloc.h"
-#include "ztl/tsingleton.h"
-#include "wzlib/shape2d.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include "common/vecctrl.h"
 #include "wvs/gobj.h"
 #include <cstdint>

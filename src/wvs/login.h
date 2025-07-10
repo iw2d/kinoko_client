@@ -1,7 +1,6 @@
 #pragma once
 #include "hook.h"
-#include "ztl/zcoll.h"
-#include "ztl/zstr.h"
+#include "ztl/ztl.h"
 #include "wvs/maploadable.h"
 #include <cstdint>
 

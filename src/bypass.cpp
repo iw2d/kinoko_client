@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "hook.h"
 #include "debug.h"
-#include "ztl/zalloc.h"
-#include "ztl/zcoll.h"
-#include "ztl/zstr.h"
 #include "ztl/ztl.h"
 #include "wvs/util.h"
 #include "wvs/wvsapp.h"
@@ -135,7 +132,7 @@ void __fastcall CWvsApp__SetUp_hook(CWvsApp* pThis, void* _EDX) {
     ShowWindow(pThis->m_hWnd, SW_SHOW);
     UpdateWindow(pThis->m_hWnd);
     SetForegroundWindow(pThis->m_hWnd);
-    CHECK_HR(get_gr()->raw_RenderFrame());
+    get_gr()->RenderFrame();
     // CWvsApp::InitializeSound(this);
     reinterpret_cast<void(__thiscall*)(CWvsApp*)>(0x009CA170)(pThis);
 
@@ -203,10 +200,10 @@ void __fastcall CWvsApp__CallUpdate_hook(CWvsApp* pThis, void* _EDX, int32_t tCu
         reinterpret_cast<void(__cdecl*)()>(0x009B4B00)();
         pThis->m_tUpdateTime += 30;
         if (tCurTime - pThis->m_tUpdateTime > 0) {
-            CHECK_HR(get_gr()->raw_UpdateCurrentTime(pThis->m_tUpdateTime));
+            get_gr()->UpdateCurrentTime(pThis->m_tUpdateTime);
         }
     }
-    CHECK_HR(get_gr()->raw_UpdateCurrentTime(tCurTime));
+    get_gr()->UpdateCurrentTime(tCurTime);
 }
 
 void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTerminate) {
@@ -270,12 +267,11 @@ void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTermina
                 // CWvsApp::ISMsgProc(this, isMsg.message, isMsg.wParam, isMsg.lParam);
                 reinterpret_cast<void(__thiscall*)(CWvsApp*, uint32_t, uint32_t, int32_t)>(0x009C1CE0)(pThis, isMsg.message, isMsg.wParam, isMsg.lParam);
             }
-            int32_t tCurTime;
-            CHECK_HR(get_gr()->get_nextRenderTime(&tCurTime));
+            int32_t tCurTime = get_gr()->nextRenderTime;
             CWvsApp__CallUpdate_hook(pThis, _EDX, tCurTime);
             // CWndMan::RedrawInvalidatedWindows();
             reinterpret_cast<void(__cdecl*)()>(0x009B2340)();
-            CHECK_HR(get_gr()->raw_RenderFrame());
+            get_gr()->RenderFrame();
             Sleep(1);
         }
     } while (!*pbTerminate && msg.message != WM_QUIT);

@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "hook.h"
-#include "ztl/zcom.h"
-#include "wzlib/canvas.h"
-#include "wzlib/archive.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include "wvs/util.h"
 #include <cstdint>
 
@@ -46,8 +45,7 @@ HRESULT __stdcall CWzCanvas__raw_Serialize_hook(IWzCanvas* pThis, IWzArchive* pA
 
 void HandleLinkProperty(IWzCanvasPtr pCanvas) {
     // Check for link property
-    IWzPropertyPtr pProperty;
-    CHECK_HR(pCanvas->get_property(&pProperty));
+    IWzPropertyPtr pProperty = pCanvas->property;
     const wchar_t* asLinkProperty[] = {
             L"_inlink",
             L"_outlink",
@@ -55,35 +53,24 @@ void HandleLinkProperty(IWzCanvasPtr pCanvas) {
     };
     size_t nLinkProperty = sizeof(asLinkProperty) / sizeof(asLinkProperty[0]);
     for (size_t i = 0; i < nLinkProperty; ++i) {
-        Ztl_variant_t vLink;
-        CHECK_HR(pProperty->get_item(const_cast<wchar_t*>(asLinkProperty[i]), &vLink));
+        Ztl_variant_t vLink = pProperty->item[asLinkProperty[i]];
         if (V_VT(&vLink) == VT_BSTR) {
             // Get source canvas
-            Ztl_variant_t vSource;
-            CHECK_HR(get_rm()->raw_GetObject(V_BSTR(&vLink), vtEmpty, vtEmpty, &vSource));
-            IWzCanvasPtr pSourceCanvas = vSource.GetUnknown(false, false);
+            Ztl_variant_t vSourceCanvas = get_rm()->GetObjectA(V_BSTR(&vLink), vtEmpty, vtEmpty);
+            IWzCanvasPtr pSourceCanvas = vSourceCanvas.GetUnknown(false, false);
             int32_t nWidth, nHeight, nFormat, nMagLevel;
-            CHECK_HR(pSourceCanvas->raw_GetSnapshot(&nWidth, &nHeight, nullptr, nullptr, &nFormat, &nMagLevel));
-            IWzRawCanvasPtr pRawCanvas;
-            CHECK_HR(pSourceCanvas->get_rawCanvas(0, 0, &pRawCanvas));
-
-            // Get origin
-            Ztl_variant_t vOrigin;
-            CHECK_HR(pProperty->get_item(L"origin", &vOrigin));
-            IWzVector2DPtr pOrigin = vOrigin.GetUnknown(false, false);
-            int32_t nOriginX, nOriginY;
-            CHECK_HR(pOrigin->get_x(&nOriginX));
-            CHECK_HR(pOrigin->get_y(&nOriginY));
+            pSourceCanvas->raw_GetSnapshot(&nWidth, &nHeight, nullptr, nullptr, (CANVAS_PIXFORMAT*)&nFormat, &nMagLevel);
 
             // Create target canvas
             Ztl_variant_t vMagLevel(nMagLevel, VT_I4);
             Ztl_variant_t vFormat(nFormat, VT_I4);
-            CHECK_HR(pCanvas->raw_Create(nWidth, nHeight, vMagLevel, vFormat));
-            CHECK_HR(pCanvas->raw_AddRawCanvas(0, 0, pRawCanvas));
+            pCanvas->Create(nWidth, nHeight, vMagLevel, vFormat);
+            pCanvas->raw_AddRawCanvas(0, 0, pSourceCanvas->rawCanvas[0][0]);
 
             // Set target origin
-            CHECK_HR(pCanvas->put_cx(nOriginX));
-            CHECK_HR(pCanvas->put_cy(nOriginY));
+            IWzVector2DPtr pOrigin = pProperty->item[L"origin"];
+            pCanvas->cx = pOrigin->x;
+            pCanvas->cy = pOrigin->y;
             break;
         }
     }
@@ -114,7 +101,7 @@ IUnknown* __fastcall Ztl_variant_t__GetUnknown_hook(Ztl_variant_t* pThis, void* 
 
 
 void AttachClientInlink() {
-    LoadLibrary("CANVAS.DLL");
+    LoadLibraryA("CANVAS.DLL");
     ATTACH_HOOK(CWzCanvas__raw_Serialize, CWzCanvas__raw_Serialize_hook);
     ATTACH_HOOK(get_unknown_orig, get_unknown_hook);
     ATTACH_HOOK(Ztl_variant_t__GetUnknown, Ztl_variant_t__GetUnknown_hook); // for cases where nexon uses this instead of get_unknown

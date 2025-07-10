@@ -1,18 +1,21 @@
 #include "pch.h"
 #include "hook.h"
-#include "ztl/zalloc.h"
+#include "config.h"
+#include "ztl/ztl.h"
 #include "wzlib/pcom.h"
-#include "wzlib/sound.h"
 #include "wvs/util.h"
 #include "wvs/config.h"
 #include "wvs/dialog.h"
 #include "wvs/ctrlwnd.h"
 #include "wvs/wvscontext.h"
+#include "wvs/wvsapp.h"
 #include "wvs/wndman.h"
 #include "wvs/soundman.h"
 #include "wvs/field.h"
 
+#include <windows.h>
 #include <strsafe.h>
+#include <intrin.h>
 #include <cstdint>
 
 
@@ -110,12 +113,11 @@ void __fastcall CConfig__ApplySysOpt_hook(CConfig* pThis, void* _EDX, CONFIG_SYS
 #ifdef CONFIG_GLOBAL_FOCUS
     IWzSoundPtr pSound;
     PcCreateObject<IWzSoundPtr>(L"Sound_DX8", pSound, nullptr);
-    int32_t bOldGlobalFocus;
-    CHECK_HR(pSound->get_globalFocus(&bOldGlobalFocus));
+    int32_t bOldGlobalFocus = pSound->globalFocus;
     if (bOldGlobalFocus == g_bGlobalFocus) {
         return;
     }
-    CHECK_HR(pSound->put_globalFocus(g_bGlobalFocus));
+    pSound->globalFocus = g_bGlobalFocus;
     if (!bApplyVideo) {
         return;
     }
@@ -159,7 +161,7 @@ void __fastcall CWvsContext__SetScreenResolution_hook(CWvsContext* pThis, void* 
         }
     }
     if (SUCCEEDED(get_gr()->put_screenResolution(nScreenWidth, nScreenHeight))) {
-        CHECK_HR(get_gr()->raw_AdjustCenter(0, -nAdjustCenterY));
+        get_gr()->AdjustCenter(0, -nAdjustCenterY);
         pThis->m_nScreenWidth = nScreenWidth;
         pThis->m_nScreenHeight = nScreenHeight;
         pThis->m_nAdjustCenterY = nAdjustCenterY;
@@ -207,4 +209,7 @@ void AttachSystemOptionMod() {
 
     // CUISysOpt::OnCreate - hide m_pCBScreen1024
     Patch4(0x0097826E + 1, 65);
+
+    LoadLibraryA("Gr2D_DX9.DLL");
+    PatchRetZero(0x52207230); // disable window repositioning function as it doesn't account for multiple monitors
 }

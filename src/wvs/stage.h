@@ -1,5 +1,5 @@
 #pragma once
-#include "ztl/zalloc.h"
+#include "ztl/ztl.h"
 #include "wvs/gobj.h"
 #include "wvs/msghandler.h"
 

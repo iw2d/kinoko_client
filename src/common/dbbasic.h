@@ -1,5 +1,5 @@
 #pragma once
-#include "ztl/zalloc.h"
+#include "ztl/ztl.h"
 #include "common/secure.h"
 #include <windows.h>
 #include <cstdint>

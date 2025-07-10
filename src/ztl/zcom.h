@@ -26,20 +26,20 @@ inline wchar_t* __cdecl ZComSysAllocString(const wchar_t* s) {
     }
     return ZComSysAllocStringLen(s, wcslen(s));
 }
-inline HRESULT __cdecl ZComVariantClearBstr(tagVARIANT* pvarg) {
+inline HRESULT __cdecl ZComVariantClearBstr(VARIANT* pvarg) {
     V_VT(pvarg) = VT_EMPTY;
     if (V_BSTR(pvarg)) {
         CoTaskMemFree(reinterpret_cast<uint32_t*>(V_BSTR(pvarg)) - 1);
     }
     return NOERROR;
 }
-inline HRESULT __cdecl ZComVariantClear(tagVARIANT* pvarg) {
+inline HRESULT __cdecl ZComVariantClear(VARIANT* pvarg) {
     if (V_VT(pvarg) != VT_BSTR) {
         return VariantClear(pvarg);
     }
     return ZComVariantClearBstr(pvarg);
 }
-inline HRESULT __cdecl ZComVariantCopy(tagVARIANT* pvargDest, tagVARIANT* pvargSrc) {
+inline HRESULT __cdecl ZComVariantCopy(VARIANT* pvargDest, VARIANT* pvargSrc) {
     if (V_VT(pvargSrc) == VT_BSTR) {
         if (pvargDest != pvargSrc) {
             return NOERROR;
@@ -64,7 +64,7 @@ inline HRESULT __cdecl ZComVariantCopy(tagVARIANT* pvargDest, tagVARIANT* pvargS
     }
     return VariantCopy(pvargDest, pvargSrc);
 }
-inline HRESULT __cdecl ZComVarBstrFromVariant(tagVARIANT* pvargDest, tagVARIANT* pvargSrc) {
+inline HRESULT __cdecl ZComVarBstrFromVariant(VARIANT* pvargDest, VARIANT* pvargSrc) {
     if (V_VT(pvargSrc) == VT_BSTR) {
         return ZComVariantCopy(pvargDest, pvargSrc);
     }
@@ -107,16 +107,16 @@ inline HRESULT __cdecl ZComVarBstrFromVariant(tagVARIANT* pvargDest, tagVARIANT*
     V_BSTR(pvargDest) = ZComSysAllocString(buffer);
     return NOERROR;
 }
-inline HRESULT __cdecl ZComVariantChangeType(tagVARIANT* pvargDest, tagVARIANT* pvargSrc, USHORT wFlags, VARTYPE vt) {
+inline HRESULT __cdecl ZComVariantChangeType(VARIANT* pvargDest, VARIANT* pvargSrc, USHORT wFlags, VARTYPE vt) {
     if (vt == VT_BSTR) {
         return ZComVarBstrFromVariant(pvargDest, pvargSrc);
     }
     if (pvargDest == pvargSrc && V_VT(pvargSrc) == VT_BSTR) {
-        tagVARIANT vTemp = {VT_EMPTY};
+        VARIANT vTemp = {VT_EMPTY};
         HRESULT hr = VariantChangeType(&vTemp, pvargSrc, wFlags, vt);
         if (SUCCEEDED(hr)) {
             ZComVariantClear(pvargDest);
-            memcpy(pvargDest, &vTemp, sizeof(tagVARIANT));
+            memcpy(pvargDest, &vTemp, sizeof(VARIANT));
         }
         return hr;
     } else if (V_VT(pvargDest) == VT_BSTR) {
@@ -171,6 +171,16 @@ private:
         }
         Data_t(const char* s) : m_str(nullptr), m_RefCount(1) {
             m_wstr = ZtlConvertStringToBSTR(s);
+        }
+        Data_t(BSTR bstr, bool fCopy) : m_str(nullptr), m_RefCount(1) {
+            if (fCopy && bstr) {
+                m_wstr = ZComAPI::ZComSysAllocString(bstr);
+                if (!m_wstr) {
+                    _com_issue_error(E_OUTOFMEMORY);
+                }
+            } else {
+                m_wstr = bstr;
+            }
         }
         uint32_t AddRef() {
             InterlockedIncrement(reinterpret_cast<long*>(&m_RefCount));
@@ -238,6 +248,11 @@ public:
             _com_issue_error(E_OUTOFMEMORY);
         }
     }
+    Ztl_bstr_t(BSTR bstr, bool fCopy) : m_Data(new Data_t(bstr, fCopy)) {
+        if (!m_Data) {
+            _com_issue_error(E_OUTOFMEMORY);
+        }
+    }
     Ztl_bstr_t() : m_Data(nullptr) {
     }
     operator const wchar_t*() const {
@@ -266,7 +281,7 @@ public:
 static_assert(sizeof(Ztl_bstr_t) == 0x4);
 
 
-class Ztl_variant_t : public tagVARIANT {
+class Ztl_variant_t : public VARIANT {
 public:
     Ztl_variant_t(int32_t lSrc, VARTYPE vtSrc = VT_I4) {
         if (vtSrc == VT_I4) {
@@ -291,19 +306,24 @@ public:
             }
         }
     }
-    Ztl_variant_t(const tagVARIANT& varSrc) {
-        VariantInit(this);
-        _com_util::CheckError(ZComAPI::ZComVariantCopy(this, const_cast<tagVARIANT*>(&varSrc)));
+    Ztl_variant_t(VARIANT& varSrc, bool fCopy = true) {
+        if (fCopy) {
+            VariantInit(this);
+            _com_util::CheckError(ZComAPI::ZComVariantCopy(this, const_cast<VARIANT*>(&varSrc)));
+        } else {
+            _COM_MEMCPY_S(this, sizeof(varSrc), &varSrc, sizeof(varSrc));
+            V_VT(&varSrc) = VT_EMPTY;
+        }
     }
     Ztl_variant_t() {
         VariantInit(this);
     }
-    void ChangeType(VARTYPE vartype, const tagVARIANT* pSrc = nullptr) {
+    void ChangeType(VARTYPE vartype, const VARIANT* pSrc = nullptr) {
         if (!pSrc) {
             pSrc = this;
         }
         if (this != pSrc || vartype != V_VT(this)) {
-            _com_util::CheckError(ZComAPI::ZComVariantChangeType(this, const_cast<tagVARIANT*>(pSrc), 0, vartype));
+            _com_util::CheckError(ZComAPI::ZComVariantChangeType(this, const_cast<VARIANT*>(pSrc), 0, vartype));
         }
     }
     IUnknown* GetUnknown(bool fAddRef = false, bool fTryChangeType = false) {

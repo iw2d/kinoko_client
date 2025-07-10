@@ -1,6 +1,6 @@
 #pragma once
-#include "ztl/zalloc.h"
-#include "wzlib/shape2d.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include "common/rtti.h"
 #include "common/secure.h"
 #include <windows.h>

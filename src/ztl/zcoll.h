@@ -1,8 +1,14 @@
 #pragma once
 #include "zalloc.h"
-#include "ztl.h"
 #include <cstdint>
 #include <memory>
+
+
+template <typename T>
+T* construct(T* p);
+
+template <typename T>
+void destruct(T* p);
 
 
 template <typename T>

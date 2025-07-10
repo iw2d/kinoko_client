@@ -1,8 +1,7 @@
 #pragma once
 #include "hook.h"
-#include "ztl/tsingleton.h"
-#include "wzlib/property.h"
-#include "wzlib/canvas.h"
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include "common/secure.h"
 #include <cstdint>
 #include <memory>

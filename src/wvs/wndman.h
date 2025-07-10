@@ -1,5 +1,5 @@
 #pragma once
-#include "ztl/tsingleton.h"
+#include "ztl/ztl.h"
 
 
 class CWndMan : public TSingleton<CWndMan, 0x00C68AC4> {

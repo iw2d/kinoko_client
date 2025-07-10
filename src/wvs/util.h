@@ -1,16 +1,9 @@
 #pragma once
-#include "ztl/zcom.h"
-#include "wzlib/gr2d.h"
-#include "wzlib/resman.h"
-#include "wzlib/namespace.h"
-#include "wzlib/property.h"
-#include "wzlib/canvas.h"
-#include <comutil.h>
+#include "ztl/ztl.h"
+#include "wzlib/pcom.h"
 #include <cstdint>
 #include <memory>
 
-#define CHECK_HR(_hr) \
-    _com_util::CheckError(_hr)
 
 inline IWzGr2DPtr& get_gr() {
     return *reinterpret_cast<IWzGr2DPtr*>(0x00C6F430);

@@ -2,9 +2,7 @@
 #include "hook.h"
 #include "debug.h"
 #include "config.h"
-#include "wzlib/resman.h"
-#include "wzlib/namespace.h"
-#include "wzlib/package.h"
+#include "wzlib/pcom.h"
 #include "wvs/wvsapp.h"
 #include "wvs/util.h"
 #include <windows.h>
@@ -16,7 +14,7 @@ void CWvsApp::InitializeResMan() {
     try {
         IWzResManPtr& rm = get_rm();
         PcCreateObject<IWzResManPtr>(L"ResMan", rm, nullptr);
-        CHECK_HR(rm->raw_SetResManParam(RESMAN_PARAM::RC_AUTO_REPARSE | RESMAN_PARAM::RC_AUTO_SERIALIZE, -1, -1));
+        rm->SetResManParam(static_cast<RESMAN_PARAM>(RESMAN_PARAM::RC_AUTO_REPARSE | RESMAN_PARAM::RC_AUTO_SERIALIZE), -1, -1);
 
         IWzNameSpacePtr& root = get_root();
         PcCreateObject<IWzNameSpacePtr>(L"NameSpace", root, nullptr);
@@ -30,8 +28,8 @@ void CWvsApp::InitializeResMan() {
         Dir_BackSlashToSlash(sStartPath);
         Dir_upDir(sStartPath);
         strcat_s(sStartPath, MAX_PATH, "/Data");
-        CHECK_HR(fs->raw_Init(static_cast<wchar_t*>(Ztl_bstr_t(sStartPath))));
-        CHECK_HR(root->raw_Mount(L"/", fs, 0));
+        fs->Init(Ztl_bstr_t(sStartPath));
+        root->Mount(L"/", fs, 0);
 #else
         IWzFileSystemPtr fs;
         PcCreateObject<IWzFileSystemPtr>(L"NameSpace#FileSystem", fs, nullptr);
@@ -39,15 +37,14 @@ void CWvsApp::InitializeResMan() {
         GetModuleFileNameA(nullptr, sStartPath, MAX_PATH);
         Dir_BackSlashToSlash(sStartPath);
         Dir_upDir(sStartPath);
-        CHECK_HR(fs->raw_Init(static_cast<wchar_t*>(Ztl_bstr_t(sStartPath))));
+        fs->Init(Ztl_bstr_t(sStartPath));
 
         IWzPackagePtr pPackage;
         PcCreateObject<IWzPackagePtr>(L"NameSpace#Package", pPackage, nullptr);
-        Ztl_variant_t vBaseWz;
-        CHECK_HR(fs->get_item(L"Base.wz", &vBaseWz));
+        Ztl_variant_t vBaseWz = fs->item[L"Base.wz"];
         IWzSeekableArchivePtr pArchive = vBaseWz.GetUnknown(false, false);
-        CHECK_HR(pPackage->raw_Init(L"95", L"", pArchive));
-        CHECK_HR(root->raw_Mount(L"/", pPackage, 0));
+        pPackage->Init(L"95", L"", pArchive);
+        root->Mount(L"/", pPackage, 0);
 
         const wchar_t* asNameOrder[] = {L"Character", L"Mob", L"Skill", L"Reactor", L"Npc", L"UI", L"Quest", L"Item", L"Effect", L"String", L"Etc", L"Morph", L"TamingMob", L"Sound", L"Map"};
         for (size_t i = 0; i < 15; ++i) {
@@ -55,20 +52,17 @@ void CWvsApp::InitializeResMan() {
             sPackageName.Format(L"%s.wz", asNameOrder[i]);
             IWzPackagePtr pSubPackage;
             PcCreateObject<IWzPackagePtr>(L"NameSpace#Package", pSubPackage, nullptr);
-            Ztl_variant_t vPackageWz;
-            CHECK_HR(fs->get_item(sPackageName, &vPackageWz));
+            Ztl_variant_t vPackageWz = fs->item[Ztl_bstr_t(sPackageName)];
 
             IWzSeekableArchivePtr pSubArchive = vPackageWz.GetUnknown(false, false);
-            Ztl_variant_t vSubNameSpace;
-            ZXString<wchar_t> sNameSpace(asNameOrder[i]);
-            CHECK_HR(root->get_item(sNameSpace, &vSubNameSpace));
+            Ztl_variant_t vSubNameSpace = root->item[asNameOrder[i]];
             get_sub(i) = vSubNameSpace.GetUnknown(false, false);
-            CHECK_HR(pSubPackage->raw_Init(L"95", sNameSpace, pSubArchive));
+            pSubPackage->Init(L"95", asNameOrder[i], pSubArchive);
 
             IWzNameSpacePtr pSubNameSpace;
             PcCreateObject<IWzNameSpacePtr>(L"NameSpace", pSubNameSpace, nullptr);
-            CHECK_HR(pSubNameSpace->raw_Mount(L"/", pSubPackage, 0));
-            CHECK_HR(get_sub(i)->raw_Mount(L"/", pSubNameSpace, 1));
+            pSubNameSpace->Mount(L"/", pSubPackage, 0);
+            get_sub(i)->Mount(L"/", pSubNameSpace, 1);
         }
 #endif
     } catch (const _com_error& e) {

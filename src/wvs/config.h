@@ -1,6 +1,6 @@
 #pragma once
 #include "hook.h"
-#include "ztl/tsingleton.h"
+#include "ztl/ztl.h"
 #include <cstdint>
 
 

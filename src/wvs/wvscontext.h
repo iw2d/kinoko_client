@@ -1,7 +1,6 @@
 #pragma once
 #include "hook.h"
-#include "ztl/tsingleton.h"
-#include "ztl/zalloc.h"
+#include "ztl/ztl.h"
 #include "common/dbbasic.h"
 #include "wvs/temporarystatview.h"
 #include <cstdint>

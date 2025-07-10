@@ -1,7 +1,5 @@
 #pragma once
-#include "ztl/zalloc.h"
-#include "ztl/zcoll.h"
-#include "ztl/zstr.h"
+#include "ztl/ztl.h"
 #include <cstdint>
 
 
