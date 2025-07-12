@@ -62,13 +62,12 @@ void HandleLinkProperty(IWzCanvasPtr pCanvas) {
             pSourceCanvas->raw_GetSnapshot(&nWidth, &nHeight, nullptr, nullptr, (CANVAS_PIXFORMAT*)&nFormat, &nMagLevel);
 
             // Create target canvas
-            Ztl_variant_t vMagLevel(nMagLevel, VT_I4);
-            Ztl_variant_t vFormat(nFormat, VT_I4);
-            pCanvas->Create(nWidth, nHeight, vMagLevel, vFormat);
+            pCanvas->Create(nWidth, nHeight, nMagLevel, nFormat);
             pCanvas->raw_AddRawCanvas(0, 0, pSourceCanvas->rawCanvas[0][0]);
 
             // Set target origin
-            IWzVector2DPtr pOrigin = pProperty->item[L"origin"];
+            Ztl_variant_t vOrigin = pProperty->item[L"origin"];
+            IWzVector2DPtr pOrigin = vOrigin.GetUnknown(false, false);
             pCanvas->cx = pOrigin->x;
             pCanvas->cy = pOrigin->y;
             break;

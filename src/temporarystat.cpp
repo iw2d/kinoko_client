@@ -115,8 +115,7 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     }
 
     // remove old canvas
-    Ztl_variant_t vIndex(-2, VT_I4);
-    IWzCanvasPtr pOldCanvas = pThis->pLayerShadow->RemoveCanvas(vIndex);
+    pThis->pLayerShadow->RemoveCanvas(-2);
 
 
     // resolve shadow canvas
@@ -150,10 +149,7 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     draw_number_by_image(pNewCanvas, nOffset, 19, nSeconds, g_pPropSecond, 0);
 
     // insert canvas
-    Ztl_variant_t vDelay(500, VT_I4);
-    Ztl_variant_t vAlpha0(210, VT_I4);
-    Ztl_variant_t vAlpha1(64, VT_I4);
-    Ztl_variant_t vResult = pThis->pLayerShadow->InsertCanvas(pNewCanvas, vDelay, vAlpha0, vAlpha1, vtEmpty, vtEmpty);
+    pThis->pLayerShadow->InsertCanvas(pNewCanvas, 500, 210, 64, vtEmpty, vtEmpty);
 }
 
 
