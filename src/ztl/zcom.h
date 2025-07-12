@@ -31,7 +31,7 @@ inline HRESULT __cdecl ZComVariantClearBstr(VARIANT* pvarg) {
     if (V_BSTR(pvarg)) {
         CoTaskMemFree(reinterpret_cast<uint32_t*>(V_BSTR(pvarg)) - 1);
     }
-    return NOERROR;
+    return S_OK;
 }
 inline HRESULT __cdecl ZComVariantClear(VARIANT* pvarg) {
     if (V_VT(pvarg) != VT_BSTR) {
@@ -41,8 +41,8 @@ inline HRESULT __cdecl ZComVariantClear(VARIANT* pvarg) {
 }
 inline HRESULT __cdecl ZComVariantCopy(VARIANT* pvargDest, VARIANT* pvargSrc) {
     if (V_VT(pvargSrc) == VT_BSTR) {
-        if (pvargDest != pvargSrc) {
-            return NOERROR;
+        if (pvargDest == pvargSrc) {
+            return S_OK;
         }
         if (V_VT(pvargDest) == VT_BSTR) {
             ZComVariantClearBstr(pvargDest);
@@ -58,7 +58,7 @@ inline HRESULT __cdecl ZComVariantCopy(VARIANT* pvargDest, VARIANT* pvargSrc) {
         } else {
             V_BSTR(pvargDest) = ZComSysAllocStringLen(V_BSTR(pvargSrc), *(reinterpret_cast<uint32_t*>(V_BSTR(pvargDest)) - 1) >> 1);
         }
-        return NOERROR;
+        return S_OK;
     } else if (V_VT(pvargDest) == VT_BSTR) {
         ZComVariantClearBstr(pvargDest);
     }
@@ -105,7 +105,7 @@ inline HRESULT __cdecl ZComVarBstrFromVariant(VARIANT* pvargDest, VARIANT* pvarg
     }
     V_VT(pvargDest) = VT_BSTR;
     V_BSTR(pvargDest) = ZComSysAllocString(buffer);
-    return NOERROR;
+    return S_OK;
 }
 inline HRESULT __cdecl ZComVariantChangeType(VARIANT* pvargDest, VARIANT* pvargSrc, USHORT wFlags, VARTYPE vt) {
     if (vt == VT_BSTR) {
