@@ -1,8 +1,7 @@
 #pragma once
 #pragma pack(push, 8)
 
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("a0b5164f-f89b-41b8-8264-15371fd02b4c"))
 /* interface */ IWzNameSpaceProperty;

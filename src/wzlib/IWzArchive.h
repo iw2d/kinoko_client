@@ -1,8 +1,7 @@
 #pragma once
 #pragma pack(push, 8)
 
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("3c39b9aa-18cc-408c-8716-c4fb2117266e"))
 /* interface */ IWzArchive;

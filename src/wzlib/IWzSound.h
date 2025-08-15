@@ -2,8 +2,7 @@
 #pragma pack(push, 8)
 
 #include "IWzSerialize.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("1c923939-1338-4f8b-92cf-38935cee1fef"))
 /* interface */ IWzSound;

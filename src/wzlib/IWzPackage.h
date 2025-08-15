@@ -3,8 +3,7 @@
 
 #include "IWzSeekableArchive.h"
 #include "IWzNameSpace.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("e610818b-038d-4522-9232-30fcd5f4737c"))
 /* interface */ IWzPackage;

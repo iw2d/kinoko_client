@@ -2,8 +2,7 @@
 #pragma pack(push, 8)
 
 #include "IWzArchive.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("01110bc6-d843-4ff1-918c-9cf64632fb15"))
 /* interface */ IWzSerialize;

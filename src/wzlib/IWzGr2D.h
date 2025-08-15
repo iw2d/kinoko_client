@@ -2,8 +2,7 @@
 #pragma pack(push, 8)
 
 #include "IWzGr2DLayer.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("e576ea33-d465-4f08-aab1-e78df73ee6d9"))
 /* interface */ IWzGr2D;
@@ -21,8 +20,6 @@ IWzGr2D : IUnknown
     unsigned int width;
     __declspec(property(get=Getheight))
     unsigned int height;
-    __declspec(property(put=PutscreenResolution))
-    unsigned int screenResolution[];
     __declspec(property(get=Getbpp))
     unsigned int bpp;
     __declspec(property(get=GetrefreshRate))
@@ -60,9 +57,9 @@ IWzGr2D : IUnknown
     HRESULT DisableFpsPanel ( );
     unsigned int Getwidth ( );
     unsigned int Getheight ( );
-    void PutscreenResolution (
+    HRESULT screenResolution (
         unsigned int uWidth,
-        unsigned int _arg2 );
+        unsigned int uHeight );
     unsigned int Getbpp ( );
     unsigned int GetrefreshRate ( );
     unsigned int Getfps100 ( );
@@ -130,7 +127,7 @@ IWzGr2D : IUnknown
         /*[out,retval]*/ unsigned int * puHeight ) = 0;
     virtual HRESULT __stdcall put_screenResolution (
         /*[in]*/ unsigned int uWidth,
-        /*[in]*/ unsigned int _arg2 ) = 0;
+        /*[in]*/ unsigned int uHeight ) = 0;
     virtual HRESULT __stdcall get_bpp (
         /*[out,retval]*/ unsigned int * puBPP ) = 0;
     virtual HRESULT __stdcall get_refreshRate (
@@ -253,9 +250,10 @@ inline unsigned int IWzGr2D::Getheight ( ) {
     return _result;
 }
 
-inline void IWzGr2D::PutscreenResolution ( unsigned int uWidth, unsigned int _arg2 ) {
-    HRESULT _hr = put_screenResolution(uWidth, _arg2);
+inline HRESULT IWzGr2D::screenResolution ( unsigned int uWidth, unsigned int uHeight ) {
+    HRESULT _hr = put_screenResolution(uWidth, uHeight);
     if (FAILED(_hr)) _com_issue_errorex(_hr, this, __uuidof(this));
+    return _hr;
 }
 
 inline unsigned int IWzGr2D::Getbpp ( ) {

@@ -3,8 +3,7 @@
 
 #include "IWzSerialize.h"
 #include "IWzProperty.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 enum CANVAS_ALPHATYPE : int;
 enum CANVAS_LEVELMAP : int;
@@ -351,7 +350,7 @@ IWzCanvas : IWzSerialize
         /*[in]*/ unsigned int uColor,
         /*[in]*/ VARIANT nWidth = vtEmpty ) = 0;
     virtual HRESULT __stdcall raw_DrawPolygon ( ) = 0;
-    virtual HRESULT __stdcall raw_DrawTextA (
+    virtual HRESULT __stdcall raw_DrawText (
         /*[in]*/ int nLeft,
         /*[in]*/ int nTop,
         /*[in]*/ BSTR sText,
@@ -463,7 +462,7 @@ IWzFont : IUnknown
         /*[in]*/ int nWidth,
         /*[in]*/ VARIANT vTabOrg,
         /*[out,retval]*/ int * pnLineCount ) = 0;
-    virtual HRESULT __stdcall raw_DrawTextA (
+    virtual HRESULT __stdcall raw_DrawText (
         /*[in]*/ int nLeft,
         /*[in]*/ int nTop,
         /*[in]*/ BSTR sText,
@@ -736,7 +735,7 @@ inline HRESULT IWzCanvas::DrawPolygon ( ) {
 
 inline unsigned int IWzCanvas::DrawTextA ( int nLeft, int nTop, Ztl_bstr_t sText, struct IWzFont * pFont, const Ztl_variant_t & vAlpha, const Ztl_variant_t & vTabOrg ) {
     unsigned int _result = 0;
-    HRESULT _hr = raw_DrawTextA(nLeft, nTop, sText, pFont, vAlpha, vTabOrg, &_result);
+    HRESULT _hr = raw_DrawText(nLeft, nTop, sText, pFont, vAlpha, vTabOrg, &_result);
     if (FAILED(_hr)) _com_issue_errorex(_hr, this, __uuidof(this));
     return _result;
 }
@@ -817,7 +816,7 @@ inline int IWzFont::CalcLineCountForGlobal ( Ztl_bstr_t sText, int nWidth, const
 
 inline unsigned int IWzFont::DrawTextA ( int nLeft, int nTop, Ztl_bstr_t sText, struct IWzCanvas * pCanvas, const Ztl_variant_t & vAlpha, const Ztl_variant_t & vTabOrg ) {
     unsigned int _result = 0;
-    HRESULT _hr = raw_DrawTextA(nLeft, nTop, sText, pCanvas, vAlpha, vTabOrg, &_result);
+    HRESULT _hr = raw_DrawText(nLeft, nTop, sText, pCanvas, vAlpha, vTabOrg, &_result);
     if (FAILED(_hr)) _com_issue_errorex(_hr, this, __uuidof(this));
     return _result;
 }

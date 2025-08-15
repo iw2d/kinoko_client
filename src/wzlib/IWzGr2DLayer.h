@@ -3,8 +3,7 @@
 
 #include "IWzCanvas.h"
 #include "IWzVector2D.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 enum LAYER_BLENDTYPE : int;
 enum GR2D_ANITYPE : int;
@@ -57,6 +56,8 @@ IWzGr2DLayer : IWzVector2D
     enum LAYER_BLENDTYPE blend;
     __declspec(property(get=Getoverlay,put=Putoverlay))
     Ztl_variant_t overlay;
+    __declspec(property(get=Getcanvas))
+    IWzCanvasPtr canvas[];
     __declspec(property(get=GetanimationState))
     int animationState;
     __declspec(property(get=Getvisible,put=Putvisible))
@@ -93,7 +94,7 @@ IWzGr2DLayer : IWzVector2D
     Ztl_variant_t Getoverlay ( );
     void Putoverlay (
         const Ztl_variant_t & pvLayer );
-    IWzCanvasPtr canvas (
+    IWzCanvasPtr Getcanvas (
         const Ztl_variant_t & vIndex = vtEmpty );
     Ztl_variant_t InsertCanvas (
         struct IWzCanvas * pCanvas,
@@ -158,7 +159,7 @@ IWzGr2DLayer : IWzVector2D
         /*[out,retval]*/ VARIANT * pvLayer ) = 0;
     virtual HRESULT __stdcall put_overlay (
         /*[in]*/ VARIANT pvLayer ) = 0;
-    virtual HRESULT __stdcall raw_canvas (
+    virtual HRESULT __stdcall get_canvas (
         /*[in]*/ VARIANT vIndex,
         /*[out,retval]*/ struct IWzCanvas * * ppCanvas ) = 0;
     virtual HRESULT __stdcall raw_InsertCanvas (
@@ -313,9 +314,9 @@ inline void IWzGr2DLayer::Putoverlay ( const Ztl_variant_t & pvLayer ) {
     if (FAILED(_hr)) _com_issue_errorex(_hr, this, __uuidof(this));
 }
 
-inline IWzCanvasPtr IWzGr2DLayer::canvas ( const Ztl_variant_t & vIndex ) {
+inline IWzCanvasPtr IWzGr2DLayer::Getcanvas ( const Ztl_variant_t & vIndex ) {
     struct IWzCanvas * _result = 0;
-    HRESULT _hr = raw_canvas(vIndex, &_result);
+    HRESULT _hr = get_canvas(vIndex, &_result);
     if (FAILED(_hr)) _com_issue_errorex(_hr, this, __uuidof(this));
     return IWzCanvasPtr(_result, false);
 }

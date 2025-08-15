@@ -2,8 +2,7 @@
 #pragma pack(push, 8)
 
 #include "IWzArchive.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 enum RESMAN_PARAM : int;
 struct __declspec(uuid("57dfe40b-3e20-4dbc-97e8-805a50f381bf"))
@@ -63,7 +62,7 @@ IWzResMan : IUnknown
     virtual HRESULT __stdcall raw_CreateObject (
         /*[in]*/ BSTR sUOL,
         /*[out,retval]*/ IUnknown * * ppObj ) = 0;
-    virtual HRESULT __stdcall raw_GetObjectA (
+    virtual HRESULT __stdcall raw_GetObject (
         /*[in]*/ BSTR sUOL,
         /*[in]*/ VARIANT vParam,
         /*[in]*/ VARIANT vAux,
@@ -108,7 +107,7 @@ inline IUnknownPtr IWzResMan::CreateObject ( Ztl_bstr_t sUOL ) {
 inline Ztl_variant_t IWzResMan::GetObjectA ( Ztl_bstr_t sUOL, const Ztl_variant_t & vParam, const Ztl_variant_t & vAux ) {
     VARIANT _result;
     VariantInit(&_result);
-    HRESULT _hr = raw_GetObjectA(sUOL, vParam, vAux, &_result);
+    HRESULT _hr = raw_GetObject(sUOL, vParam, vAux, &_result);
     if (FAILED(_hr)) _com_issue_errorex(_hr, this, __uuidof(this));
     return Ztl_variant_t(_result, false);
 }

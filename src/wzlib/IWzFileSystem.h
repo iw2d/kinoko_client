@@ -2,8 +2,7 @@
 #pragma pack(push, 8)
 
 #include "IWzWritableNameSpace.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("352d8655-51e4-4668-8ce4-0866e2b6a5b5"))
 /* interface */ IWzFileSystem;

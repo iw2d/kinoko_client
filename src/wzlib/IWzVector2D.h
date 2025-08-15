@@ -2,8 +2,7 @@
 #pragma pack(push, 8)
 
 #include "IWzShape2D.h"
-#include "ztl/ztl.h"
-#include <comdef.h>
+#include "ztl/zcom.h"
 
 struct __declspec(uuid("4cfb57c7-eae3-40b3-ac98-4b2750e3642a"))
 /* interface */ IWzVector2D;

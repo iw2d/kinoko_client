@@ -160,7 +160,7 @@ void __fastcall CWvsContext__SetScreenResolution_hook(CWvsContext* pThis, void* 
             break;
         }
     }
-    if (SUCCEEDED(get_gr()->put_screenResolution(nScreenWidth, nScreenHeight))) {
+    if (SUCCEEDED(get_gr()->screenResolution(nScreenWidth, nScreenHeight))) {
         get_gr()->AdjustCenter(0, -nAdjustCenterY);
         pThis->m_nScreenWidth = nScreenWidth;
         pThis->m_nScreenHeight = nScreenHeight;
