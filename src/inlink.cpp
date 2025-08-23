@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "hook.h"
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 #include "wvs/util.h"
 #include <cstdint>
 
@@ -13,31 +12,12 @@ HRESULT __stdcall CWzCanvas__raw_Serialize_hook(IWzCanvas* pThis, IWzArchive* pA
     if (FAILED(hr)) {
         return hr;
     }
-    IWzPropertyPtr pProperty;
-    hr = pThis->get_property(&pProperty);
-    if (FAILED(hr)) {
-        return hr;
-    }
-    Ztl_variant_t vInlink;
-    hr = pProperty->get_item(L"_inlink", &vInlink);
-    if (FAILED(hr)) {
-        return hr;
-    }
+    Ztl_variant_t vInlink = pThis->property->item["_inlink"];
     if (V_VT(&vInlink) == VT_BSTR) {
-        wchar_t* sUOL;
-        hr = pArchive->get_absoluteUOL(&sUOL);
-        if (FAILED(hr)) {
-            return hr;
-        }
-        Ztl_variant_t vFilePath;
-        V_VT(&vFilePath) = VT_BSTR;
-        V_BSTR(&vFilePath) = ZComAPI::ZComSysAllocStringLen(sUOL, wcslen(sUOL) + wcslen(V_BSTR(&vInlink)) + 1);
-        wchar_t* p = wcsstr(V_BSTR(&vFilePath), L".img");
-        if (p) {
-            *(p + 4) = '/';
-            memcpy(p + 5, V_BSTR(&vInlink), sizeof(wchar_t) * (wcslen(V_BSTR(&vInlink)) + 1));
-        }
-        hr = pProperty->put_item(L"_inlink", vFilePath);
+        ZXString<wchar_t> sFilePath(pArchive->absoluteUOL);
+        sFilePath.ReleaseBuffer(sFilePath.Find(L".img") + 5);
+        sFilePath.Cat(V_BSTR(&vInlink));
+        pThis->property->item["_inlink"] = static_cast<const wchar_t*>(sFilePath);
     }
     return hr;
 }
@@ -45,7 +25,6 @@ HRESULT __stdcall CWzCanvas__raw_Serialize_hook(IWzCanvas* pThis, IWzArchive* pA
 
 void HandleLinkProperty(IWzCanvasPtr pCanvas) {
     // Check for link property
-    IWzPropertyPtr pProperty = pCanvas->property;
     const wchar_t* asLinkProperty[] = {
             L"_inlink",
             L"_outlink",
@@ -53,21 +32,19 @@ void HandleLinkProperty(IWzCanvasPtr pCanvas) {
     };
     size_t nLinkProperty = sizeof(asLinkProperty) / sizeof(asLinkProperty[0]);
     for (size_t i = 0; i < nLinkProperty; ++i) {
-        Ztl_variant_t vLink = pProperty->item[asLinkProperty[i]];
+        Ztl_variant_t vLink = pCanvas->property->item[asLinkProperty[i]];
         if (V_VT(&vLink) == VT_BSTR) {
             // Get source canvas
-            Ztl_variant_t vSourceCanvas = get_rm()->GetObjectA(V_BSTR(&vLink), vtEmpty, vtEmpty);
-            IWzCanvasPtr pSourceCanvas = vSourceCanvas.GetUnknown(false, false);
+            IWzCanvasPtr pSourceCanvas = get_rm()->GetObjectA(V_BSTR(&vLink)).GetUnknown();
             int32_t nWidth, nHeight, nFormat, nMagLevel;
-            pSourceCanvas->raw_GetSnapshot(&nWidth, &nHeight, nullptr, nullptr, (CANVAS_PIXFORMAT*)&nFormat, &nMagLevel);
+            pSourceCanvas->GetSnapshot(&nWidth, &nHeight, nullptr, nullptr, (CANVAS_PIXFORMAT*)&nFormat, &nMagLevel);
 
             // Create target canvas
             pCanvas->Create(nWidth, nHeight, nMagLevel, nFormat);
-            pCanvas->raw_AddRawCanvas(0, 0, pSourceCanvas->rawCanvas[0][0]);
+            pCanvas->AddRawCanvas(0, 0, pSourceCanvas->rawCanvas[0][0]);
 
             // Set target origin
-            Ztl_variant_t vOrigin = pProperty->item[L"origin"];
-            IWzVector2DPtr pOrigin = vOrigin.GetUnknown(false, false);
+            IWzVector2DPtr pOrigin = pCanvas->property->item[L"origin"].GetUnknown();;
             pCanvas->cx = pOrigin->x;
             pCanvas->cy = pOrigin->y;
             break;

@@ -5,32 +5,50 @@
 #include <string>
 
 
+namespace ZStrUtil {
+
 template <typename T>
-size_t length(const T* s);
+size_t Len(const T* s);
 
 template <>
-inline size_t length<char>(const char* s) {
+inline size_t Len<char>(const char* s) {
     return strlen(s);
 }
 
 template <>
-inline size_t length<wchar_t>(const wchar_t* s) {
+inline size_t Len<wchar_t>(const wchar_t* s) {
     return wcslen(s);
 }
 
 
 template <typename T>
-int format(T* sBuffer, size_t uSize, const T* sFormat, va_list argList);
+const T* Str(const T* sSource, const T* sPattern);
 
 template <>
-inline int format<char>(char* sBuffer, size_t uSize, const char* sFormat, va_list argList) {
+inline const char* Str<char>(const char* sSource, const char* sPattern) {
+    return strstr(sSource, sPattern);
+}
+
+template <>
+inline const wchar_t* Str<wchar_t>(const wchar_t* sSource, const wchar_t* sPattern) {
+    return wcsstr(sSource, sPattern);
+}
+
+
+template <typename T>
+int Format(T* sBuffer, size_t uSize, const T* sFormat, va_list argList);
+
+template <>
+inline int ZStrUtil::Format<char>(char* sBuffer, size_t uSize, const char* sFormat, va_list argList) {
     return _vsnprintf_s(sBuffer, uSize, _TRUNCATE, sFormat, argList);
 }
 
 template <>
-inline int format<wchar_t>(wchar_t* sBuffer, size_t uSize, const wchar_t* sFormat, va_list argList) {
+inline int ZStrUtil::Format<wchar_t>(wchar_t* sBuffer, size_t uSize, const wchar_t* sFormat, va_list argList) {
     return _vsnwprintf_s(sBuffer, uSize, _TRUNCATE, sFormat, argList);
 }
+
+} // namespace ZStrUtil
 
 
 template <typename T>
@@ -85,13 +103,13 @@ public:
         return *this;
     }
     ZXString<T>& operator=(const T* s) {
-        Assign(s, length<T>(s));
+        Assign(s, ZStrUtil::Len<T>(s));
         return *this;
     }
 
     void Assign(const T* s, int32_t n = -1) {
         if (s) {
-            int32_t nLength = n == -1 ? length<T>(s) : n;
+            int32_t nLength = n == -1 ? ZStrUtil::Len<T>(s) : n;
             T* pBuffer = GetBuffer(nLength, 0);
             memcpy(pBuffer, s, nLength * sizeof(T));
             ReleaseBuffer(nLength);
@@ -142,7 +160,7 @@ public:
         auto pData = _GetData();
         pData->nRef = 1;
         if (nLength == -1) {
-            pData->nByteLen = length<T>(pData->pStr()) * sizeof(T);
+            pData->nByteLen = ZStrUtil::Len<T>(pData->pStr()) * sizeof(T);
         } else {
             _m_pStr[nLength] = 0;
             pData->nByteLen = nLength * sizeof(T);
@@ -180,7 +198,23 @@ public:
         }
     }
     ZXString<T>& Cat(const T* s) {
-        return _Cat(s, length<T>(s));
+        return _Cat(s, ZStrUtil::Len<T>(s));
+    }
+    int32_t Find(const T* s, int32_t nStart = 0) {
+        if (!_m_pStr) {
+            if (!s || !*s) {
+                return 0;
+            }
+            return -1;
+        }
+        if (s && *s) {
+            auto p = ZStrUtil::Str(&_m_pStr[nStart], s);
+            if (p) {
+                return p - _m_pStr;
+            }
+            return -1;
+        }
+        return GetLength();
     }
 
 protected:
@@ -198,7 +232,7 @@ protected:
                 break;
             }
             T* sBuffer = s.GetBuffer(i, 0);
-            result = format<T>(sBuffer, i, sFormat, argList);
+            result = ZStrUtil::Format<T>(sBuffer, i, sFormat, argList);
             s.ReleaseBuffer(result < 0 ? 0 : result);
         }
         *this = s;

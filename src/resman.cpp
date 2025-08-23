@@ -2,7 +2,6 @@
 #include "hook.h"
 #include "debug.h"
 #include "config.h"
-#include "wzlib/pcom.h"
 #include "wvs/wvsapp.h"
 #include "wvs/util.h"
 #include <windows.h>
@@ -41,8 +40,7 @@ void CWvsApp::InitializeResMan() {
 
         IWzPackagePtr pPackage;
         PcCreateObject<IWzPackagePtr>(L"NameSpace#Package", pPackage, nullptr);
-        Ztl_variant_t vBaseWz = fs->item[L"Base.wz"];
-        IWzSeekableArchivePtr pArchive = vBaseWz.GetUnknown(false, false);
+        IWzSeekableArchivePtr pArchive = fs->item[L"Base.wz"].GetUnknown();
         pPackage->Init(L"95", L"", pArchive);
         root->Mount(L"/", pPackage, 0);
 
@@ -52,11 +50,8 @@ void CWvsApp::InitializeResMan() {
             sPackageName.Format(L"%s.wz", asNameOrder[i]);
             IWzPackagePtr pSubPackage;
             PcCreateObject<IWzPackagePtr>(L"NameSpace#Package", pSubPackage, nullptr);
-            Ztl_variant_t vPackageWz = fs->item[Ztl_bstr_t(sPackageName)];
-
-            IWzSeekableArchivePtr pSubArchive = vPackageWz.GetUnknown(false, false);
-            Ztl_variant_t vSubNameSpace = root->item[asNameOrder[i]];
-            get_sub(i) = vSubNameSpace.GetUnknown(false, false);
+            IWzSeekableArchivePtr pSubArchive = fs->item[Ztl_bstr_t(sPackageName)].GetUnknown();
+            get_sub(i) = root->item[asNameOrder[i]].GetUnknown();
             pSubPackage->Init(L"95", asNameOrder[i], pSubArchive);
 
             IWzNameSpacePtr pSubNameSpace;

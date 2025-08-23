@@ -1,6 +1,5 @@
 #pragma once
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 #include "common/rtti.h"
 #include "common/secure.h"
 #include <windows.h>

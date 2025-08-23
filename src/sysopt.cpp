@@ -2,7 +2,6 @@
 #include "hook.h"
 #include "config.h"
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 #include "wvs/util.h"
 #include "wvs/config.h"
 #include "wvs/dialog.h"

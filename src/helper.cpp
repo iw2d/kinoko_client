@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "hook.h"
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 #include "common/vecctrl.h"
 #include "common/iteminfo.h"
 #include "common/skillinfo.h"
@@ -134,14 +133,9 @@ ZXString<char>* __cdecl get_weapon_attack_speed_hook(ZXString<char>* result, int
         // get_equip_data_path(&sUOL, nItemID)
         reinterpret_cast<ZXString<wchar_t>*(__cdecl*)(ZXString<wchar_t>*, int32_t)>(0x005A6060)(&sUOL, nItemID);
         if (!sUOL.IsEmpty()) {
-            Ztl_variant_t vEquip = get_rm()->GetObjectA(Ztl_bstr_t(sUOL), vtEmpty, vtEmpty);
-            IWzPropertyPtr pEquip = vEquip.GetUnknown(false, false);
-
-            Ztl_variant_t vInfo = pEquip->item[L"info"];
-            IWzPropertyPtr pInfo = vInfo.GetUnknown(false, false);
-            Ztl_variant_t vAttackSpeed = pInfo->item[L"attackSpeed"];
-
-            uint32_t nAttackSpeed = get_int32(vAttackSpeed, 6);
+            IWzPropertyPtr pEquip = get_rm()->GetObjectA(Ztl_bstr_t(sUOL)).GetUnknown();
+            IWzPropertyPtr pInfo = pEquip->item[L"info"].GetUnknown();
+            uint32_t nAttackSpeed = get_int32(pInfo->item[L"attackSpeed"], 6);
             result->Format("%s (%d)", get_attack_speed_string(nAttackSpeed), nAttackSpeed);
         }
     }
@@ -154,7 +148,7 @@ static uintptr_t CUIQuestInfoDetail__Draw_ret = 0x00824C04;
 void __stdcall CUIQuestInfoDetail__Draw_helper(IWzCanvas* pCanvas, IWzFont* pFont, uint16_t usQuestID) {
     wchar_t sQuestID[256];
     swprintf_s(sQuestID, 256, L"Quest ID : %d", usQuestID);
-    pCanvas->DrawTextA(35, 56, sQuestID, pFont, vtEmpty, vtEmpty);
+    pCanvas->DrawTextA(35, 56, sQuestID, pFont);
 }
 
 void __declspec(naked) CUIQuestInfoDetail__Draw_hook() {

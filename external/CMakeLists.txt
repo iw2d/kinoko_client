@@ -14,3 +14,6 @@ target_include_directories(Detours PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Detours/sr
 set(StackWalker_DISABLE_TESTS ON CACHE BOOL "Disable StackWalker tests")
 add_subdirectory(StackWalker)
 target_include_directories(StackWalker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/StackWalker/Main/StackWalker)
+
+# Build WzLib
+add_subdirectory(WzLib)

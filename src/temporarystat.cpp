@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "hook.h"
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 #include "wvs/util.h"
 #include "wvs/wvscontext.h"
 #include "wvs/temporarystatview.h"
@@ -50,8 +49,8 @@ void AdjustPositionWithOffset(CTemporaryStatView* tsv, int32_t nOffset) {
     auto pos = tsv->m_lTemporaryStat.GetHeadPosition();
     while (pos) {
         auto pNext = ZList<ZRef<CTemporaryStatView::TEMPORARY_STAT>>::GetNext(pos);
-        pNext->pLayer->RelOffset(0, nOffset, vtEmpty, vtEmpty);
-        pNext->pLayerShadow->RelOffset(0, nOffset, vtEmpty, vtEmpty);
+        pNext->pLayer->RelOffset(0, nOffset);
+        pNext->pLayerShadow->RelOffset(0, nOffset);
     }
 }
 
@@ -121,19 +120,17 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     // resolve shadow canvas
     wchar_t sShadowProperty[256];
     swprintf_s(sShadowProperty, 256, L"UI/UIWindow.img/Skill/CoolTime/%d", nShadowIndex);
-    Ztl_variant_t vShadowProperty = get_rm()->GetObjectA(Ztl_bstr_t(sShadowProperty), vtEmpty, vtEmpty);
-    IWzCanvasPtr pShadowCanvas = get_unknown(vShadowProperty);
+    IWzCanvasPtr pShadowCanvas = get_unknown(get_rm()->GetObjectA(Ztl_bstr_t(sShadowProperty)));
 
     // create copy of shadow canvas
     IWzCanvasPtr pNewCanvas;
     PcCreateObject<IWzCanvasPtr>(L"Canvas", pNewCanvas, nullptr);
-    pNewCanvas->Create(32, 32, vtEmpty, vtEmpty);
-    pNewCanvas->Copy(0, 0, pShadowCanvas, vtEmpty);
+    pNewCanvas->Create(32, 32);
+    pNewCanvas->Copy(0, 0, pShadowCanvas);
 
     // draw number on canvas
     if (!g_pPropSecond) {
-        Ztl_variant_t vPropSecond = get_rm()->GetObjectA(Ztl_bstr_t(L"UI/Basic.img/ItemNo"), vtEmpty, vtEmpty);
-        g_pPropSecond = get_unknown(vPropSecond);
+        g_pPropSecond = get_unknown(get_rm()->GetObjectA(Ztl_bstr_t(L"UI/Basic.img/ItemNo")));
     }
     int32_t nOffset = 2;
     if (nSeconds >= 60) {
@@ -149,7 +146,7 @@ void __fastcall TEMPORARY_STAT__UpdateShadowIndex_hook(CTemporaryStatView::TEMPO
     draw_number_by_image(pNewCanvas, nOffset, 19, nSeconds, g_pPropSecond, 0);
 
     // insert canvas
-    pThis->pLayerShadow->InsertCanvas(pNewCanvas, 500, 210, 64, vtEmpty, vtEmpty);
+    pThis->pLayerShadow->InsertCanvas(pNewCanvas, 500, 210, 64);
 }
 
 

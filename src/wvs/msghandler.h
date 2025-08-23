@@ -1,6 +1,5 @@
 #pragma once
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 #include "common/rtti.h"
 #include "common/dbbasic.h"
 #include "common/packet.h"

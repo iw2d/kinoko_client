@@ -1,7 +1,6 @@
 #pragma once
 #include "hook.h"
 #include "ztl/ztl.h"
-#include "wzlib/pcom.h"
 
 #include <windows.h>
 #include <cstdint>

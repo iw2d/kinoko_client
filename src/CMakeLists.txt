@@ -25,6 +25,7 @@ target_link_libraries(injector PRIVATE
         Pathcch.lib
         StackWalker
         Detours
+        WzLib
 )
 
 set_target_properties(injector PROPERTIES

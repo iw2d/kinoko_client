@@ -4,3 +4,6 @@
 [submodule "external/StackWalker"]
 	path = external/StackWalker
 	url = https://github.com/JochenKalmbach/StackWalker
+[submodule "external/WzLib"]
+	path = external/WzLib
+	url = https://github.com/iw2d/WzLib.git
