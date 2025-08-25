@@ -302,8 +302,8 @@ void __fastcall CClientSocket__Connect_hook(CClientSocket* pThis, void* _EDX, CC
     // CClientSocket::SetTimeout(this);
     reinterpret_cast<void(__thiscall*)(CClientSocket*)>(0x004ACBA0)(pThis);
     if (WSAAsyncSelect(pThis->m_sock, pThis->m_hWnd, 0x401, 0x33) == -1 ||
-        connect(pThis->m_sock, next, 16) != -1 ||
-        WSAGetLastError() != WSAEWOULDBLOCK) {
+            connect(pThis->m_sock, next, 16) != -1 ||
+            WSAGetLastError() != WSAEWOULDBLOCK) {
         // CClientSocket::OnConnect(this, 0);
         reinterpret_cast<void(__thiscall*)(CClientSocket*, int)>(0x004AEF10)(pThis, 0);
     }

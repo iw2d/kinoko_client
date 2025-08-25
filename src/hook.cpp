@@ -2,6 +2,7 @@
 #include "hook.h"
 #include "debug.h"
 #include <detours.h>
+#include <psapi.h>
 
 
 bool AttachHook(void** ppTarget, void* pDetour) {
@@ -28,12 +29,14 @@ bool AttachHook(void** ppTarget, void* pDetour) {
     return true;
 }
 
+
 void* VMTHook(void* pInstance, void* pDetour, size_t uIndex) {
     void** vtable = *static_cast<void***>(pInstance);
     void* pTarget = vtable[uIndex];
     AttachHook(&pTarget, pDetour);
     return pTarget;
 }
+
 
 void* GetAddress(const char* sModuleName, const char* sProcName) {
     HMODULE hModule = GetModuleHandleA(sModuleName);
@@ -45,6 +48,78 @@ void* GetAddress(const char* sModuleName, const char* sProcName) {
         DEBUG_MESSAGE("Could not resolve address for %s in module %s", sProcName, sModuleName);
     }
     return reinterpret_cast<void*>(result);
+}
+
+
+bool HexCharToByte(char c, uint8_t* b) {
+    if ('0' <= c && c <= '9')
+        *b = c - '0';
+    else if ('A' <= c && c <= 'F')
+        *b = 10 + (c - 'A');
+    else if ('a' <= c && c <= 'f')
+        *b = 10 + (c - 'a');
+    else
+        return false;
+    return true;
+}
+
+size_t ParsePattern(const char* sPattern, uint8_t* abPattern, uint8_t* abMask) {
+    size_t i = 0;
+    while (*sPattern) {
+        if (*sPattern == ' ') {
+            sPattern++;
+            continue;
+        }
+        if (sPattern[0] == '?' && sPattern[1] == '?') {
+            abMask[i] = 0x00;
+        } else {
+            uint8_t high, low;
+            if (!HexCharToByte(sPattern[0], &high) || !HexCharToByte(sPattern[1], &low)) {
+                return 0;
+            }
+            abPattern[i] = (high << 4) | low;
+            abMask[i] = 0xFF;
+        }
+        sPattern += 2;
+        i += 1;
+    }
+    return i;
+}
+
+void* GetAddressByPattern(const char* sModuleName, const char* sPattern) {
+    HMODULE hModule = GetModuleHandleA(sModuleName);
+    if (!hModule) {
+        hModule = LoadLibraryA(sModuleName);
+    }
+    MODULEINFO mi;
+    if (!GetModuleInformation(GetCurrentProcess(), hModule, &mi, sizeof(mi))) {
+        DEBUG_MESSAGE("Could not get module information for : %s", sModuleName);
+        return nullptr;
+    }
+    uint8_t* pModuleBase = static_cast<uint8_t*>(mi.lpBaseOfDll);
+    size_t uModuleSize = mi.SizeOfImage;
+
+    uint8_t abPattern[1024];
+    uint8_t abMask[1024];
+    size_t uPatternSize = ParsePattern(sPattern, abPattern, abMask);
+    if (uPatternSize == 0) {
+        DEBUG_MESSAGE("Could not parse pattern : %s", sPattern);
+        return nullptr;
+    }
+
+    for (size_t i = 0; i <= uModuleSize - uPatternSize; ++i) {
+        size_t j;
+        for (j = 0; j < uPatternSize; ++j) {
+            if ((pModuleBase[i + j] & abMask[j]) != (abPattern[j] & abMask[j])) {
+                break;
+            }
+        }
+        if (j == uPatternSize) {
+            return &pModuleBase[i];
+        }
+    }
+    DEBUG_MESSAGE("Could not resolve address for pattern \"%s\" in module %s", sPattern, sModuleName);
+    return nullptr;
 }
 
 

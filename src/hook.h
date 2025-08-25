@@ -73,6 +73,8 @@ void* VMTHook(void* pInstance, void* pDetour, size_t uIndex);
 
 void* GetAddress(const char* sModuleName, const char* sProcName);
 
+void* GetAddressByPattern(const char* sModuleName, const char* sPattern);
+
 void Patch1(uintptr_t pAddress, uint8_t uValue);
 
 void Patch4(uintptr_t pAddress, uint32_t uValue);

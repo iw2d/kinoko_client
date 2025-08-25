@@ -5,7 +5,8 @@
 #include <cstdint>
 
 
-static auto CWzCanvas__raw_Serialize = reinterpret_cast<HRESULT(__stdcall*)(IWzCanvas*, IWzArchive*)>(0x500216D0);
+typedef HRESULT(__stdcall* IWzCanvas__raw_Serialize_t)(IWzCanvas*, IWzArchive*);
+static IWzCanvas__raw_Serialize_t CWzCanvas__raw_Serialize;
 
 HRESULT __stdcall CWzCanvas__raw_Serialize_hook(IWzCanvas* pThis, IWzArchive* pArchive) {
     HRESULT hr = CWzCanvas__raw_Serialize(pThis, pArchive);
@@ -44,7 +45,8 @@ void HandleLinkProperty(IWzCanvasPtr pCanvas) {
             pCanvas->AddRawCanvas(0, 0, pSourceCanvas->rawCanvas[0][0]);
 
             // Set target origin
-            IWzVector2DPtr pOrigin = pCanvas->property->item[L"origin"].GetUnknown();;
+            IWzVector2DPtr pOrigin = pCanvas->property->item[L"origin"].GetUnknown();
+            ;
             pCanvas->cx = pOrigin->x;
             pCanvas->cy = pOrigin->y;
             break;
@@ -77,7 +79,7 @@ IUnknown* __fastcall Ztl_variant_t__GetUnknown_hook(Ztl_variant_t* pThis, void* 
 
 
 void AttachClientInlink() {
-    LoadLibraryA("CANVAS.DLL");
+    CWzCanvas__raw_Serialize = reinterpret_cast<IWzCanvas__raw_Serialize_t>(GetAddressByPattern("CANVAS.DLL", "55 8B EC 6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 83 EC 74"));
     ATTACH_HOOK(CWzCanvas__raw_Serialize, CWzCanvas__raw_Serialize_hook);
     ATTACH_HOOK(get_unknown_orig, get_unknown_hook);
     ATTACH_HOOK(Ztl_variant_t__GetUnknown, Ztl_variant_t__GetUnknown_hook); // for cases where nexon uses this instead of get_unknown

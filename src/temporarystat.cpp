@@ -60,7 +60,6 @@ void __fastcall CTemporaryStatView__AdjustPosition_hook(CTemporaryStatView* pThi
 }
 
 
-typedef void(__thiscall* CWvsContext__SetSkillCooltimeOver_t)(CWvsContext*, int, int);
 static auto CWvsContext__SetSkillCooltimeOver = reinterpret_cast<void(__thiscall*)(CWvsContext*, int32_t, int32_t)>(0x009DB0D0);
 
 void __fastcall CWvsContext__SetSkillCooltimeOver_hook(CWvsContext* pThis, void* _EDX, int32_t nSkillID, int32_t tTimeOver) {

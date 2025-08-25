@@ -209,6 +209,6 @@ void AttachSystemOptionMod() {
     // CUISysOpt::OnCreate - hide m_pCBScreen1024
     Patch4(0x0097826E + 1, 65);
 
-    LoadLibraryA("Gr2D_DX9.DLL");
-    PatchRetZero(0x52207230); // disable window repositioning function as it doesn't account for multiple monitors
+    // Gr2D_DX9.dll - disable window repositioning function as it doesn't account for multiple monitors
+    PatchRetZero(reinterpret_cast<uintptr_t>(GetAddressByPattern("GR2D_DX9.DLL", "56 8B F1 8B 86 A8 00 00 00")));
 }
