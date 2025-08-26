@@ -46,7 +46,6 @@ void HandleLinkProperty(IWzCanvasPtr pCanvas) {
 
             // Set target origin
             IWzVector2DPtr pOrigin = pCanvas->property->item[L"origin"].GetUnknown();
-            ;
             pCanvas->cx = pOrigin->x;
             pCanvas->cy = pOrigin->y;
             break;
