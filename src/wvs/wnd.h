@@ -80,7 +80,7 @@ public:
     virtual void Draw(const RECT* pRect) {
         reinterpret_cast<void(__thiscall*)(CWnd*, const RECT*)>(0x009AE5C0)(this, pRect);
     }
-    virtual int32_t IsAMyAddon(CWnd* pWnd) {
+    virtual int32_t IsMyAddon(CWnd* pWnd) {
         return 0;
     }
 

@@ -162,7 +162,6 @@ void __declspec(naked) CUIQuestInfoDetail__Draw_hook() {
         call    CUIQuestInfoDetail__Draw_helper
         jmp     [ CUIQuestInfoDetail__Draw_ret ]
     }
-    ;
 }
 
 

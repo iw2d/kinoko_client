@@ -58,7 +58,7 @@ inline void AttachClientHooks() {
 
 
 template <typename T>
-__forceinline auto CastHook(T fn) -> void* {
+constexpr auto CastHook(T fn) -> void* {
     union {
         T fn;
         void* p;
