@@ -4,6 +4,10 @@
 #include "common/vecctrl.h"
 #include "common/iteminfo.h"
 #include "common/skillinfo.h"
+#include "wvs/wvscontext.h"
+#include "wvs/wvsapp.h"
+#include "wvs/dialog.h"
+#include "wvs/uitooltip.h"
 #include "wvs/util.h"
 #include "wvs/userlocal.h"
 #include "wvs/inputsystem.h"
@@ -165,7 +169,75 @@ void __declspec(naked) CUIQuestInfoDetail__Draw_hook() {
 }
 
 
+class CUIUnreleaseDlg : public CUniqueModeless {
+public:
+    MEMBER_AT(int, 0x98, m_nEItemPos)
+
+    inline static CRTTI& ms_RTTI_CUIUnreleaseDlg = *reinterpret_cast<CRTTI*>(0x00C618C4);
+    inline static ZRef<CUIToolTip> s_uiToolTip;
+    inline static RECT s_rcItem = {73, 96, 73 + 32, 96 + 32};
+    inline static int s_tLastUnreleaseKey = 0;
+};
+
+void __fastcall CUIUnreleaseDlg__OnCreate(CUIUnreleaseDlg* pThis, void* _EDX, void* pData) {
+    reinterpret_cast<void(__thiscall*)(CUIUnreleaseDlg*, void*)>(0x008A9640)(pThis, pData);
+    CUIUnreleaseDlg::s_uiToolTip = new CUIToolTip();
+}
+
+void __fastcall CUIUnreleaseDlg__OnDestroy(CUIUnreleaseDlg* pThis, void* _EDX) {
+    reinterpret_cast<void(__thiscall*)(CDialog*)>(0x0042B910)(pThis);
+    CUIUnreleaseDlg::s_uiToolTip = nullptr;
+}
+
+void __fastcall CUIUnreleaseDlg__OnKey(void* _ECX, void* _EDX, uint32_t wParam, uint32_t lParam) {
+    CUIUnreleaseDlg* pThis = reinterpret_cast<CUIUnreleaseDlg*>(reinterpret_cast<uintptr_t>(_ECX) - 4);
+    if (wParam == VK_SPACE && CWvsApp::GetInstance()->m_tUpdateTime - CUIUnreleaseDlg::s_tLastUnreleaseKey > 500) {
+        CUIUnreleaseDlg::s_tLastUnreleaseKey = CWvsApp::GetInstance()->m_tUpdateTime;
+        int nResult = reinterpret_cast<int(__thiscall*)(CUIUnreleaseDlg*)>(0x008AA1A0)(pThis);
+        if (nResult) {
+            CUIUnreleaseDlg::s_uiToolTip->ClearToolTip();
+            pThis->InvalidateRect(nullptr);
+        }
+    }
+}
+
+int32_t __fastcall CUIUnreleaseDlg__OnMouseMove(void* _ECX, void* _EDX, int32_t rx, int32_t ry) {
+    CUIUnreleaseDlg* pThis = reinterpret_cast<CUIUnreleaseDlg*>(reinterpret_cast<uintptr_t>(_ECX) - 4);
+    POINT pt = {rx, ry};
+    if (PtInRect(&CUIUnreleaseDlg::s_rcItem, pt)) {
+        auto pItem = CWvsContext::GetInstance()->m_pCharacterData->GetItem(1, pThis->m_nEItemPos); // IT_EQUIP
+        if (pItem) {
+            CUIUnreleaseDlg::s_uiToolTip->ShowItemToolTip(rx + pThis->GetAbsLeft(), ry + pThis->GetAbsTop(), pItem, nullptr, nullptr, 0, 0, 0);
+            return 0;
+        }
+    }
+    CUIUnreleaseDlg::s_uiToolTip->ClearToolTip();
+    return 0;
+}
+
+void __fastcall CUser__ShowItemUnreleaseEffect_hook(void* pAnimationDisplayer, void* _EDX, int bFlip, IWzVector2DPtr pOrigin, IWzGr2DLayerPtr pOverlay) {
+    // patched CAnimationDisplayer::Effect_ItemUnrelease call
+    reinterpret_cast<void(__thiscall*)(void*, int, IWzVector2DPtr, IWzGr2DLayerPtr)>(0x00456360)(pAnimationDisplayer, bFlip, pOrigin, pOverlay);
+    // check for unrelease dialog, show tooltip
+    if (CUniqueModeless::IsInstantiated() && CUniqueModeless::GetInstance()->IsKindOf(&CUIUnreleaseDlg::ms_RTTI_CUIUnreleaseDlg)) {
+        POINT pt;
+        GetCursorPos(&pt);
+        ScreenToClient(CWvsApp::GetInstance()->m_hWnd, &pt);
+        auto pDlg = static_cast<CUIUnreleaseDlg*>(CUniqueModeless::GetInstance());
+        pDlg->OnMouseMove(pt.x - pDlg->GetAbsLeft(), pt.y - pDlg->GetAbsTop());
+    }
+}
+
+
 void AttachClientHelper() {
+    Patch4(0x00BA5DA8, reinterpret_cast<uintptr_t>(&CUIUnreleaseDlg__OnCreate));
+    Patch4(0x00BA5DAC, reinterpret_cast<uintptr_t>(&CUIUnreleaseDlg__OnDestroy));
+    Patch4(0x00BA5D50, reinterpret_cast<uintptr_t>(&CUIUnreleaseDlg__OnKey));
+    Patch4(0x00BA5D5C, reinterpret_cast<uintptr_t>(&CUIUnreleaseDlg__OnMouseMove));
+    Patch1(0x008AA6B3, 0xEB); // skip SetRet after CUIUnreleaseDlg::UnreleaseEquipItem
+
+    PatchCall(0x008E57C0, reinterpret_cast<uintptr_t>(&CUser__ShowItemUnreleaseEffect_hook)); // patch CAnimationDisplayer::Effect_ItemUnrelease
+
     // CChatHelper::TryChat
     Patch1(0x004AA7EF, 0xEB); // bypass chat cooldown
     Patch1(0x004AA74A, 0xEB); // bypass chat repeat
