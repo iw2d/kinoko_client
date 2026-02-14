@@ -128,9 +128,21 @@ int WINAPI WSPStartup_hook(WORD wVersionRequested, LPWSPDATA lpWSPData, LPWSAPRO
 }
 
 
+typedef decltype(&FileTimeToSystemTime) FileTimeToSystemTime_t;
+static FileTimeToSystemTime_t FileTimeToSystemTime_orig = reinterpret_cast<FileTimeToSystemTime_t>(GetAddress("KERNEL32", "FileTimeToSystemTime"));
+
+BOOL WINAPI FileTimeToSystemTime_hook(const FILETIME* lpFileTime, LPSYSTEMTIME lpSystemTime) {
+    if (!FileTimeToSystemTime_orig(lpFileTime, lpSystemTime)) {
+        return FALSE;
+    }
+    return SystemTimeToTzSpecificLocalTime(nullptr, lpSystemTime, lpSystemTime);
+}
+
+
 void AttachSystemHooks() {
     ATTACH_HOOK(CreateMutexA_orig, CreateMutexA_hook);
     ATTACH_HOOK(CreateWindowExA_orig, CreateWindowExA_hook);
     ATTACH_HOOK(RegCreateKeyExA_orig, RegCreateKeyExA_hook);
     ATTACH_HOOK(WSPStartup_orig, WSPStartup_hook);
+    ATTACH_HOOK(FileTimeToSystemTime_orig, FileTimeToSystemTime_hook);
 }

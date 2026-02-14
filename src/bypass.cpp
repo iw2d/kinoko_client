@@ -6,6 +6,7 @@
 #include "wvs/wvsapp.h"
 #include "wvs/wvscontext.h"
 #include "wvs/inputsystem.h"
+#include "wvs/actionman.h"
 #include "wvs/config.h"
 #include "wvs/stage.h"
 #include "wvs/login.h"
@@ -204,6 +205,8 @@ void __fastcall CWvsApp__CallUpdate_hook(CWvsApp* pThis, void* _EDX, int32_t tCu
         }
     }
     get_gr()->UpdateCurrentTime(tCurTime);
+    // CActionMan::SweepCache(TSingleton<CActionMan>::GetInstance());
+    reinterpret_cast<void(__thiscall*)(CActionMan*)>(0x00415F60)(CActionMan::GetInstance());
 }
 
 void __fastcall CWvsApp__Run_hook(CWvsApp* pThis, void* _EDX, int32_t* pbTerminate) {
