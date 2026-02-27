@@ -49,7 +49,6 @@ inline void AttachClientHooks() {
     AttachClientBypass();
     AttachClientHelper();
     AttachClientInlink();
-    AttachStringPoolMod();
     AttachSystemOptionMod();
     AttachTemporaryStatMod();
     AttachElementalDamageMod();
