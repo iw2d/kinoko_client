@@ -59,7 +59,7 @@ public:
     virtual void OnCreate(void* pData) {
         ;
     }
-    virtual void OnDestroy(void* pData) {
+    virtual void OnDestroy() {
         ;
     }
     virtual int32_t HitTest(uint32_t rx, uint32_t ry) {
